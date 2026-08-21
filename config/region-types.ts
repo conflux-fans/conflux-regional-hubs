@@ -108,6 +108,15 @@ export type RegionConfig = {
       socialEyebrow: string;
       socialHeading: string;
       closingLine: string;
+      managerSignInTitle: string;
+      managerSignInIntroduction: string;
+      managerEmailLabel: string;
+      managerPasswordLabel: string;
+      managerInvalidCredentials: string;
+      managerMissingConfiguration: string;
+      managerSignInAction: string;
+      managerSignOutAction: string;
+      managerBackLink: string;
     };
   };
 };

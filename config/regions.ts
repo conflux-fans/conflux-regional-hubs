@@ -2,6 +2,18 @@ import type { RegionConfig } from "./region-types";
 
 export type { HomeSectionId, ModuleState, RegionConfig, SocialProvider } from "./region-types";
 
+const englishManagerCopy = {
+  managerSignInTitle: "Manager sign in",
+  managerSignInIntroduction: "Use your administrator email and password.",
+  managerEmailLabel: "Administrator email",
+  managerPasswordLabel: "Password",
+  managerInvalidCredentials: "The email or password is incorrect.",
+  managerMissingConfiguration: "Manager login is not configured.",
+  managerSignInAction: "Sign in",
+  managerSignOutAction: "Sign out",
+  managerBackLink: "← Back to public site",
+} as const;
+
 export const regions: Record<string, RegionConfig> = {
   china: {
     slug: "china",
@@ -81,6 +93,7 @@ export const regions: Record<string, RegionConfig> = {
         socialEyebrow: "CONNECTED CHANNELS",
         socialHeading: "Follow the signal.",
         closingLine: "上海 · CHINA · CONFLUX",
+        ...englishManagerCopy,
       },
     },
   },
@@ -158,6 +171,7 @@ export const regions: Record<string, RegionConfig> = {
         socialEyebrow: "COMMUNITY CHANNELS",
         socialHeading: "Across the network.",
         closingLine: "AFRICA · BUILD · CONNECT · GROW",
+        ...englishManagerCopy,
       },
     },
   },

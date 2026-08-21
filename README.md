@@ -44,6 +44,12 @@ Set `NEXT_PUBLIC_REGION_SLUG=china` or `africa` in `.env.local`. Every
 production regional target sets its own slug, canonical URL, database and
 secrets while building the same repository commit.
 
+Manager access uses an application-owned email and password session. Set
+`MANAGER_CREDENTIALS` to a JSON object that maps each administrator email to a
+different long password, and generate `MANAGER_SESSION_SECRET` with a
+cryptographically secure random generator. Configure the same values in the
+production provider's secret store; never commit them.
+
 ## Add a regional hub
 
 1. Send the leader the [Regional Website Creator questionnaire](https://conflux-community-hub.christian-oertel.chatgpt.site).

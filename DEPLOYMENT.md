@@ -15,6 +15,8 @@ Shanghai Crypto and Kudi Hub are review examples, not parent templates.
 3. Set `NEXT_PUBLIC_REGION_SLUG` to a registered key in `config/regions.ts`.
 4. Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin.
 5. Add the remaining values from `.env.example` to the provider secret store.
+   `MANAGER_CREDENTIALS` and `MANAGER_SESSION_SECRET` are required for Manager
+   sign-in. Give every administrator email its own unique password.
 6. Apply `drizzle/0000_regional_content.sql` to that region's D1 database.
 7. Build with `npm run build` and deploy the resulting Worker.
 8. Attach the regional domain and verify canonical redirects/metadata.
@@ -27,7 +29,7 @@ database and test boundaries and replace only the hosting adapter.
 
 ## Production connections
 
-- host-provided sign-in and optional `MANAGER_ALLOWED_EMAILS`;
+- manager email allowlist, password and session secret;
 - D1 and the shared migration;
 - object storage for regional logos, portraits and Journal media;
 - Instagram access token/user ID;

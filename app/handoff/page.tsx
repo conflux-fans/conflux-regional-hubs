@@ -36,7 +36,7 @@ const onboarding = [
 const productionConnections = [
   "Final regional domain and NEXT_PUBLIC_SITE_URL",
   "Regional D1 database and shared migration",
-  "Manager allowlist and production authentication policy",
+  "Manager email credentials and session secret",
   "Storage for logos, portraits and Journal media",
   "Instagram token/user ID, X bearer/user ID, YouTube key/channel ID",
   "Approved Conflux network, wallet provider and staking contracts",
