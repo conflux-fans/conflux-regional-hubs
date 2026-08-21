@@ -1,0 +1,1 @@
+import{NextResponse}from"next/server";import{getPost}from"../../../../lib/posts.server";export async function GET(_request:Request,{params}:{params:Promise<{slug:string}>}){const{slug}=await params,post=await getPost(slug);return post?NextResponse.json({post}):NextResponse.json({error:"Post not found."},{status:404})}

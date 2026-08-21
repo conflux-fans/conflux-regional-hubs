@@ -1,0 +1,1 @@
+export function shareUrls(url:string,title:string){const encodedUrl=encodeURIComponent(url),encodedTitle=encodeURIComponent(title);return{x:`https://x.com/intent/post?url=${encodedUrl}&text=${encodedTitle}`,telegram:`https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,discord:"https://discord.com/channels/@me"}}
