@@ -105,7 +105,10 @@ type TransactionGateway = {
 type ConfluxClientLike = {
   Contract(options: { abi: object[]; address: string }): unknown;
   getBalance(address: string, epochNumber?: string): Promise<unknown>;
-  getEpochNumber(epochNumber?: string): Promise<unknown>;
+  getBlockByEpochNumber(
+    epochNumber: string,
+    includeTransactions?: boolean,
+  ): Promise<{ blockNumber?: unknown } | null>;
   getTransactionReceipt(transactionHash: string): Promise<{ outcomeStatus?: string | number | bigint } | null>;
   getStatus(): Promise<{ chainId?: number; networkId?: number }>;
   getCode(address: string, epochNumber?: string): Promise<string>;
@@ -129,6 +132,16 @@ function toBigInt(value: unknown): bigint {
     return BigInt(String(value));
   }
   throw new Error("Contract returned an invalid integer");
+}
+
+export async function getCurrentCoreBlockNumber(
+  client: Pick<ConfluxClientLike, "getBlockByEpochNumber">,
+): Promise<bigint> {
+  const block = await client.getBlockByEpochNumber("latest_state", false);
+  if (!block || block.blockNumber === undefined) {
+    throw new Error("Core RPC returned no block number");
+  }
+  return toBigInt(block.blockNumber);
 }
 
 export function normalizePoolSummary(value: unknown): PoolSummary {
@@ -253,7 +266,7 @@ export class PosPoolClient {
         contract._poolRegisted(),
         contract._poolLockPeriod(),
         contract._poolUnlockPeriod(),
-        this.conflux!.getEpochNumber("latest_state"),
+        getCurrentCoreBlockNumber(this.conflux!),
         contract.VERSION(),
         this.conflux!.getStatus(),
         this.conflux!.getCode(STAKING_CONTRACT_ADDRESS, "latest_state"),
@@ -295,7 +308,7 @@ export class PosPoolClient {
       contract.userInterest(account),
       contract.userInQueue(account),
       contract.userOutQueue(account),
-      this.conflux!.getEpochNumber("latest_state"),
+      getCurrentCoreBlockNumber(this.conflux!),
     ]);
     return {
       balanceDrip: toBigInt(balance),

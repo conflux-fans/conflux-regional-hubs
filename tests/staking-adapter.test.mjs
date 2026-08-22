@@ -15,6 +15,7 @@ import {
   verifyPoolDeployment,
   EXPECTED_IMPLEMENTATION_STORAGE,
   EXPECTED_POOL_VERSION,
+  getCurrentCoreBlockNumber,
 } from "../lib/staking/pos-pool.ts";
 
 test("the adapter produces an allowlisted Fluent transaction with estimation margin", async () => {
@@ -116,4 +117,17 @@ test("pool deployment verification fails closed on every attested invariant", ()
   assert.equal(verifyPoolDeployment({ ...valid, code: "0x" }).length, 1);
   assert.equal(verifyPoolDeployment({ ...valid, implementationStorage: "0x0" }).length, 1);
   assert.equal(verifyPoolDeployment({ ...valid, version: "1.9.0" }).length, 1);
+});
+
+test("queue timing uses the Core block number rather than the epoch number", async () => {
+  const calls = [];
+  const blockNumber = await getCurrentCoreBlockNumber({
+    async getBlockByEpochNumber(epoch, includeTransactions) {
+      calls.push([epoch, includeTransactions]);
+      return { blockNumber: "0x12c" };
+    },
+  });
+
+  assert.equal(blockNumber, 300n);
+  assert.deepEqual(calls, [["latest_state", false]]);
 });
