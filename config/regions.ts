@@ -1,4 +1,5 @@
 import type { RegionConfig } from "./region-types";
+import { englishStakeCopy } from "./stake-copy.ts";
 
 export type { HomeSectionId, ModuleState, RegionConfig, SocialProvider } from "./region-types";
 
@@ -68,6 +69,7 @@ export const regions: Record<string, RegionConfig> = {
       headline: "Stake CFX.",
       homeHeading: "Stake into what’s next.",
       introduction: "Put your CFX to work through a clear, secure staking flow.",
+      copy: englishStakeCopy,
     },
     socials: {
       instagram: { label: "Instagram", profileUrl: "https://www.instagram.com/confluxnetwork/", handle: "@confluxnetwork" },
@@ -146,6 +148,7 @@ export const regions: Record<string, RegionConfig> = {
       headline: "Stake CFX.",
       homeHeading: "Secure participation. Shared momentum.",
       introduction: "One secure staking experience shared across every regional site.",
+      copy: englishStakeCopy,
     },
     socials: {
       instagram: { label: "Instagram", profileUrl: "", handle: "" },

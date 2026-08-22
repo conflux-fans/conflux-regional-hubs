@@ -1,4 +1,5 @@
 import type { RegionConfig } from "./region-types";
+import { englishStakeCopy } from "./stake-copy.ts";
 
 /**
  * Neutral schema example for a questionnaire-generated region.
@@ -31,7 +32,7 @@ export const newRegionTemplate: RegionConfig = {
   identity: { eyebrow: "CONFLUX COMMUNITY / REGION", localMark: "RG", symbol: "monogram", coordinateLeft: "0° N", coordinateRight: "0° E" },
   hero: { headline: "Regional headline", introduction: "Regional introduction", strip: ["LOCAL", "OPEN", "CONNECTED"] },
   journal: { name: "Journal", heading: "Regional stories.", pageHeading: "Latest stories.", introduction: "Journal introduction", emptyMessage: "Published stories will appear here.", stories: [] },
-  stake: { name: "Stake CFX", eyebrow: "CONFLUX POS", headline: "Stake CFX.", homeHeading: "Participate in the network.", introduction: "Shared staking introduction" },
+  stake: { name: "Stake CFX", eyebrow: "CONFLUX POS", headline: "Stake CFX.", homeHeading: "Participate in the network.", introduction: "Shared staking introduction", copy: englishStakeCopy },
   socials: { instagram: { label: "Instagram", profileUrl: "", handle: "" }, x: { label: "X", profileUrl: "", handle: "" }, youtube: { label: "YouTube", profileUrl: "", handle: "" } },
   contributors: [],
   modules: { journal: "use-now", stake: "use-now", contributors: "setup-later", instagram: "setup-later", twitter: "setup-later", youtube: "setup-later", events: "not-needed", newsletter: "not-needed", communityLinks: "setup-later" },

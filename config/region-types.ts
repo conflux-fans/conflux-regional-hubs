@@ -1,3 +1,5 @@
+import type { StakeCopy } from "./stake-copy.ts";
+
 export type ModuleState = "use-now" | "setup-later" | "not-needed";
 export type SocialProvider = "instagram" | "x" | "youtube";
 export type HomeSectionId = "journal" | "stake" | "contributors" | "social";
@@ -55,6 +57,7 @@ export type RegionConfig = {
     headline: string;
     homeHeading: string;
     introduction: string;
+    copy: StakeCopy;
   };
   socials: Record<SocialProvider, { label: string; profileUrl: string; handle: string }>;
   contributors: Array<{

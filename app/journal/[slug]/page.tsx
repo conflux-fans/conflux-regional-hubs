@@ -26,11 +26,13 @@ export async function generateMetadata({
       description: post.excerpt,
       url: url || undefined,
       type: "article",
+      images: [],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
+      images: [],
     },
   };
 }
