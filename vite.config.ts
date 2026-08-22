@@ -44,6 +44,12 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    optimizeDeps: {
+      // Its Node entry contains package-root CommonJS requires that Rolldown
+      // cannot prebundle; the browser build is selected when the client chunk
+      // is compiled.
+      exclude: ["js-conflux-sdk"],
+    },
     server: {
       host: "0.0.0.0",
       allowedHosts: ["terminal.local"],
