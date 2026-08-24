@@ -45,6 +45,19 @@ test("every registered region has readable semantic color pairs", () => {
   }
 });
 
+test("manager controls use light-surface colors independently of the regional page theme", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.manager-page\{[^}]*color:var\(--paper-ink\)/);
+  assert.match(css, /\.manager-nav button\{[^}]*color:var\(--paper-ink\)/);
+  assert.match(css, /\.manager-page \.muted\{[^}]*color:var\(--paper-muted\)/);
+  assert.match(css, /\.manager-login-card \.muted\{[^}]*color:var\(--paper-muted\)/);
+  assert.match(css, /\.manager-content>\.story-meta\{[^}]*color:var\(--paper-ink\)/);
+  assert.doesNotMatch(css, /\.manager-page \.story-meta\{/);
+  assert.match(css, /\.manager-page \.button\.quiet\{[^}]*color:var\(--paper-ink\)/);
+  assert.match(css, /\.editor-preview\{[^}]*color:var\(--ink\)/);
+});
+
 test("regional presentations own their composition and do not duplicate sections", () => {
   for (const region of Object.values(regions)) {
     const sections = region.presentation.home.sectionOrder;
