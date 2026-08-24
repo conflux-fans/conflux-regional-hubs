@@ -99,7 +99,6 @@ export function HomeSections() {
       <section className="closing">
         <Brand large />
         <p>{region.presentation.copy.closingLine}</p>
-        <Link href="/handoff">Developer handoff →</Link>
       </section>
       {selected && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setSelected(null)}>

@@ -32,6 +32,37 @@ test("renders site-specific social metadata without development markers", async 
   assert.match(html, /\/og\.png/i);
 });
 
+test("keeps the developer handoff page out of public navigation", async () => {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("handoff-navigation-test", `${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+  const environment = {
+    ASSETS: {
+      fetch: async () => new Response("Not found", { status: 404 }),
+    },
+  };
+  const context = {
+    waitUntil() {},
+    passThroughOnException() {},
+  };
+
+  const homeResponse = await worker.fetch(
+    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    environment,
+    context,
+  );
+  assert.equal(homeResponse.status, 200);
+  assert.doesNotMatch(await homeResponse.text(), /href="\/handoff"/i);
+
+  const handoffResponse = await worker.fetch(
+    new Request("http://localhost/handoff", { headers: { accept: "text/html" } }),
+    environment,
+    context,
+  );
+  assert.equal(handoffResponse.status, 200);
+  assert.match(await handoffResponse.text(), /DEVELOPER HANDOFF/);
+});
+
 test("manager signs in with an approved email and password session", async (testContext) => {
   process.env.MANAGER_CREDENTIALS = JSON.stringify({
     "admin@example.com": "test-manager-password",
