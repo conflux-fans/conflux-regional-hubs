@@ -17,4 +17,8 @@ test("stake page explains the pool and offers Fluent connection before a wallet 
   assert.match(html, /Core Space mainnet/);
   assert.match(html, /about 13 days/);
   assert.match(html, /Rewards are not fixed/);
+  assert.match(
+    html,
+    /<a href="https:\/\/confluxscan\.org\/address\/cfx:acdj1y1r00mzvuw9s831rj1t5amst2405jv582syu0" target="_blank" rel="noreferrer" title="cfx:acdj1y1r00mzvuw9s831rj1t5amst2405jv582syu0">/,
+  );
 });

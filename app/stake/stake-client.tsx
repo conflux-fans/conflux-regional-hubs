@@ -29,6 +29,7 @@ import {
   type FluentProvider,
 } from "../../lib/staking/fluent";
 import {
+  CORE_SCAN_URL,
   CORE_MAINNET_CHAIN_ID,
   PosPoolClient,
   STAKING_CONTRACT_ADDRESS,
@@ -425,7 +426,14 @@ export function StakeClient() {
       <div className="stake-risk">
         <strong>{COPY.networkName}</strong>
         <p>{COPY.risk}</p>
-        <span title={STAKING_CONTRACT_ADDRESS}>{shortAddress(STAKING_CONTRACT_ADDRESS)}</span>
+        <a
+          href={`${CORE_SCAN_URL}/address/${STAKING_CONTRACT_ADDRESS}`}
+          target="_blank"
+          rel="noreferrer"
+          title={STAKING_CONTRACT_ADDRESS}
+        >
+          {shortAddress(STAKING_CONTRACT_ADDRESS)}
+        </a>
       </div>
 
       <div className="stake-section-heading">
