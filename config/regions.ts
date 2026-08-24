@@ -66,7 +66,7 @@ export const regions: Record<string, RegionConfig> = {
     stake: {
       name: "Stake CFX",
       eyebrow: "CONFLUX POS / 上海",
-      headline: "Stake CFX.",
+      headline: "Stake CFX",
       homeHeading: "Stake into what’s next.",
       introduction: "Put your CFX to work through a clear, secure staking flow.",
       copy: englishStakeCopy,
@@ -145,7 +145,7 @@ export const regions: Record<string, RegionConfig> = {
     stake: {
       name: "Stake CFX",
       eyebrow: "CONFLUX POS / AF",
-      headline: "Stake CFX.",
+      headline: "Stake CFX",
       homeHeading: "Secure participation. Shared momentum.",
       introduction: "One secure staking experience shared across every regional site.",
       copy: englishStakeCopy,

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { newRegionTemplate } from "../config/region-template.ts";
 import { regions } from "../config/regions.ts";
 
 function channel(value) {
@@ -52,6 +53,13 @@ test("regional presentations own their composition and do not duplicate sections
   }
   assert.notDeepEqual(regions.china.presentation.home, regions.africa.presentation.home);
   assert.notEqual(regions.china.presentation.hero.visual, regions.africa.presentation.hero.visual);
+});
+
+test("stake page headings omit trailing punctuation", () => {
+  for (const region of Object.values(regions)) {
+    assert.equal(region.stake.headline, "Stake CFX");
+  }
+  assert.equal(newRegionTemplate.stake.headline, "Stake CFX");
 });
 
 test("shared homepage renderers contain no example-locality copy", async () => {
