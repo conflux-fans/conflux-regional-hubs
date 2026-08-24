@@ -31,11 +31,11 @@ export const STAKING_ENABLED = stakingConfigurationIsValid({
   rpcUrl: CORE_MAINNET_RPC_URL,
 });
 export const CORE_SCAN_URL = "https://confluxscan.org";
-export const EXPECTED_POOL_VERSION = "1.8.0";
+export const EXPECTED_POOL_VERSION = "1.9.0";
 export const EIP1967_IMPLEMENTATION_SLOT =
   "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 export const EXPECTED_IMPLEMENTATION_STORAGE =
-  "0x0000000000000000000000008af148cf664bcb63e0c2ab07ab589c9a5f435a88";
+  "0x000000000000000000000000870287bafef59161ddf9dd2e6ae845dde40713e7";
 
 export type WalletTransactionRequest = {
   from: string;
@@ -114,6 +114,40 @@ type ConfluxClientLike = {
   getCode(address: string, epochNumber?: string): Promise<string>;
   getStorageAt(address: string, position: string, epochNumber?: string): Promise<string | null>;
 };
+
+type ConfluxConstructor = new (options: {
+  url: string;
+  networkId: number;
+}) => ConfluxClientLike;
+
+function objectRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null
+    ? value as Record<string, unknown>
+    : null;
+}
+
+export function resolveConfluxConstructor(
+  sdkModule: unknown,
+  runtimeGlobal: unknown = globalThis,
+): ConfluxConstructor {
+  const moduleRecord = objectRecord(sdkModule);
+  const defaultExport = moduleRecord?.default;
+  const defaultRecord = objectRecord(defaultExport);
+  const globalRecord = objectRecord(runtimeGlobal);
+  // The package's browser UMD entry has no ESM exports and writes here instead.
+  const treeGraph = objectRecord(globalRecord?.TreeGraph);
+  const candidate = [
+    moduleRecord?.Conflux,
+    defaultRecord?.Conflux,
+    defaultExport,
+    treeGraph?.Conflux,
+  ].find((value) => typeof value === "function");
+
+  if (!candidate) {
+    throw new Error("js-conflux-sdk does not expose a Conflux constructor");
+  }
+  return candidate as ConfluxConstructor;
+}
 
 function toHex(value: bigint): string {
   return `0x${value.toString(16)}`;
@@ -240,11 +274,12 @@ export class PosPoolClient {
   private async ready() {
     if (this.conflux && this.contract) return;
     if (!this.initializing) {
-      this.initializing = import("js-conflux-sdk").then(({ Conflux }) => {
+      this.initializing = import("js-conflux-sdk").then((sdkModule) => {
+        const Conflux = resolveConfluxConstructor(sdkModule);
         this.conflux = new Conflux({
           url: this.rpcUrl,
           networkId: CORE_MAINNET_CHAIN_ID,
-        }) as unknown as ConfluxClientLike;
+        });
         this.contract = this.conflux.Contract({
           abi: POS_POOL_ABI,
           address: STAKING_CONTRACT_ADDRESS,

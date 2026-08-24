@@ -11,12 +11,29 @@ import {
   normalizeUserSummary,
   isCoreMainnetChain,
   receiptSucceeded,
+  resolveConfluxConstructor,
   stakingConfigurationIsValid,
   verifyPoolDeployment,
-  EXPECTED_IMPLEMENTATION_STORAGE,
-  EXPECTED_POOL_VERSION,
   getCurrentCoreBlockNumber,
 } from "../lib/staking/pos-pool.ts";
+
+test("the adapter resolves Conflux from ESM and browser UMD exports", () => {
+  class EsmConflux {}
+  class BrowserConflux {}
+
+  assert.equal(
+    resolveConfluxConstructor({ Conflux: EsmConflux }, {}),
+    EsmConflux,
+  );
+  assert.equal(
+    resolveConfluxConstructor({}, { TreeGraph: { Conflux: BrowserConflux } }),
+    BrowserConflux,
+  );
+  assert.throws(
+    () => resolveConfluxConstructor({}, {}),
+    /does not expose a Conflux constructor/,
+  );
+});
 
 test("the adapter produces an allowlisted Fluent transaction with estimation margin", async () => {
   const account = "cfx:type.user:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6f0vrcsw";
@@ -109,14 +126,14 @@ test("pool deployment verification fails closed on every attested invariant", ()
     chainId: 1029,
     networkId: 1029,
     code: "0x6000",
-    implementationStorage: EXPECTED_IMPLEMENTATION_STORAGE,
-    version: EXPECTED_POOL_VERSION,
+    implementationStorage: "0x000000000000000000000000870287bafef59161ddf9dd2e6ae845dde40713e7",
+    version: "1.9.0",
   };
   assert.deepEqual(verifyPoolDeployment(valid), []);
   assert.equal(verifyPoolDeployment({ ...valid, chainId: 1 }).length, 1);
   assert.equal(verifyPoolDeployment({ ...valid, code: "0x" }).length, 1);
   assert.equal(verifyPoolDeployment({ ...valid, implementationStorage: "0x0" }).length, 1);
-  assert.equal(verifyPoolDeployment({ ...valid, version: "1.9.0" }).length, 1);
+  assert.equal(verifyPoolDeployment({ ...valid, version: "1.10.0" }).length, 1);
 });
 
 test("queue timing uses the Core block number rather than the epoch number", async () => {
