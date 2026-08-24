@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { markdownToHtml, safeExternalUrl, slugify, suggestedSlug } from "../lib/markdown.ts";
 import { shareUrls } from "../lib/share.ts";
@@ -52,6 +53,29 @@ test("share URLs contain the exact encoded article URL and title", () => {
   assert.equal(new URL(links.telegram).searchParams.get("url"), "https://hub.example/journal/story?a=1");
   assert.equal(new URL(links.telegram).searchParams.get("text"), "A title & more");
   assert.equal(links.discord, "https://discord.com/channels/@me");
+});
+
+test("article share controls stay in one horizontal row", async () => {
+  const [css, component] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/journal/[slug]/share-buttons.tsx", import.meta.url), "utf8"),
+  ]);
+  const row = css.match(/\.share-row\{([^}]*)\}/)?.[1] ?? "";
+  const items = css.match(/\.share-row>\*\{([^}]*)\}/)?.[1] ?? "";
+  const controls = css.match(/\.share-row a,\.share-row button\{([^}]*)\}/)?.[1] ?? "";
+
+  assert.match(row, /align-items:center/);
+  assert.match(row, /flex-wrap:nowrap/);
+  assert.match(row, /overflow-x:auto/);
+  assert.match(items, /flex:0 0 auto/);
+  assert.match(items, /white-space:nowrap/);
+  assert.match(controls, /min-height:44px/);
+  assert.doesNotMatch(controls, /outline:(?:0|none)/);
+  assert.match(component, /className="share-row"/);
+  for (const label of ["Share", "X ↗", "Telegram ↗", "Discord ↗", "Copy link"]) {
+    assert.match(component, new RegExp(label));
+  }
+  assert.match(component, /Link copied — open Discord ↗/);
 });
 
 test("Instagram, X and YouTube payloads normalize into clickable cards", () => {
