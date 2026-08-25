@@ -68,5 +68,5 @@
 - [ ] Copy link works; Discord opens only after copying the article URL.
 - [ ] Social profiles open and configured feeds report `Feed live`.
 - [ ] Desktop/mobile contrast, typography, keyboard and touch checks pass.
-- [ ] The deployment has its own slug, canonical URL, D1 binding and secrets.
+- [ ] The deployment has its own slug, canonical URL, persistent SQLite path and secrets.
 - [ ] `npm test` passes before merge and release.

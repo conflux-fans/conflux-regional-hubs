@@ -1,15 +1,23 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { startNextTestServer } from "./next-test-server.mjs";
 
-test("stake page explains the pool and offers Fluent connection before a wallet is connected", async () => {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("stake-page-test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-  const response = await worker.fetch(
-    new Request("http://localhost/stake", { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} },
-  );
+test("stake page explains the pool and offers Fluent connection before a wallet is connected", async (testContext) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "regional-hubs-stake-test-"));
+  const server = await startNextTestServer({
+    DATABASE_PATH: path.join(directory, "content.sqlite"),
+    NEXT_PUBLIC_REGION_SLUG: "africa",
+  });
+  testContext.after(async () => {
+    await server.stop();
+    await rm(directory, { recursive: true, force: true });
+  });
+  const response = await fetch(`${server.origin}/stake`, {
+    headers: { accept: "text/html" },
+  });
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Pool overview/);

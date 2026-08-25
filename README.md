@@ -44,6 +44,10 @@ Set `NEXT_PUBLIC_REGION_SLUG=china` or `africa` in `.env.local`. Every
 production regional target sets its own slug, canonical URL, database and
 secrets while building the same repository commit.
 
+Journal content and manager connection settings are stored in a direct SQLite
+database. The default local file is `.data/regional-hubs.sqlite`. Set
+`DATABASE_PATH` to an absolute path on a persistent volume in production.
+
 Manager access uses an application-owned email and password session. Set
 `MANAGER_CREDENTIALS` to a JSON object that maps each administrator email to a
 different long password, and generate `MANAGER_SESSION_SECRET` with a
@@ -65,12 +69,14 @@ production provider's secret store; never commit them.
 ```bash
 npm run dev
 npm run build
+npm run db:init
+npm run db:import -- /path/to/source.sqlite-or-export.sql
 npm test
 npm run lint
 npm run package:source
 ```
 
-The build produces a Cloudflare Worker-compatible application in `dist/`.
+The build produces a standard Next.js Node application in `.next/`.
 
 ## Repository map
 
@@ -82,7 +88,7 @@ The build produces a Cloudflare Worker-compatible application in `dist/`.
 - `config/regions.ts` — registered reference and production regions
 - `config/region-template.ts` — neutral schema example
 - `public/brand/` — approved assets, organized by region for production additions
-- `drizzle/` — shared database migrations
+- `lib/database.server.ts` — SQLite connection and schema initialization
 - `tests/` — publishing, sharing, provider, rendering and architecture checks
 - `DEPLOYMENT.md` — production target and release instructions
 
@@ -90,6 +96,6 @@ The build produces a Cloudflare Worker-compatible application in `dist/`.
 
 Secrets, domains and production contract addresses are not committed. The
 developer must add the values documented in `.env.example`: manager access,
-D1, Instagram, X, YouTube, canonical domain, wallet provider and approved
+SQLite path, Instagram, X, YouTube, canonical domain, wallet provider and approved
 staking contract. Social profile links work without API credentials; live feed
 posts require provider credentials.

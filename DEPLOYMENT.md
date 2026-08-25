@@ -17,20 +17,25 @@ Shanghai Crypto and Kudi Hub are review examples, not parent templates.
 5. Add the remaining values from `.env.example` to the provider secret store.
    `MANAGER_CREDENTIALS` and `MANAGER_SESSION_SECRET` are required for Manager
    sign-in. Give every administrator email its own unique password.
-6. Apply `drizzle/0000_regional_content.sql` to that region's D1 database.
-7. Build with `npm run build` and deploy the resulting Worker.
-8. Attach the regional domain and verify canonical redirects/metadata.
-9. Test `/`, `/journal`, a published article, `/stake`, `/manager` and `/handoff` on desktop and mobile.
-10. In Manager → Connections, verify every enabled provider reports `Feed live`.
+6. Mount a persistent disk and set `DATABASE_PATH` to an absolute path on it.
+7. Back up an existing content database before cutover. Import a legacy SQLite
+   file or SQL export with `npm run db:import -- /path/to/backup.sqlite-or.sql`.
+   The import runs in a transaction and can be repeated safely. Skip this step
+   only for a new region with no manager-authored content.
+8. Run `npm run db:init`, then build with `npm run build`.
+9. Start the Node server with `npm run start`. Run only one application instance
+   per SQLite file unless the platform provides shared filesystem locking.
+10. Attach the regional domain and verify canonical redirects/metadata.
+11. Test `/`, `/journal`, a published article, `/stake`, `/manager` and `/handoff` on desktop and mobile.
+12. In Manager → Connections, verify every enabled provider reports `Feed live`.
 
-The included adapter targets Cloudflare Workers through Vinext. On another
-Next-compatible provider, preserve the shared `app/`, `config/`, `lib/`,
-database and test boundaries and replace only the hosting adapter.
+The application targets a Node.js 22+ host with a persistent filesystem. Do not
+deploy the SQLite file to an ephemeral Worker or serverless filesystem.
 
 ## Production connections
 
 - manager email allowlist, password and session secret;
-- D1 and the shared migration;
+- a backed-up persistent volume for the SQLite database;
 - object storage for regional logos, portraits and Journal media;
 - Instagram access token/user ID;
 - X bearer token/user ID;
@@ -54,6 +59,8 @@ social link; provider credentials are required for automatic live feed posts.
 - [ ] Enabled social feeds report `Feed live`.
 - [ ] Staking network and contracts are approved and allowlisted.
 - [ ] Secrets are stored only in the hosting provider.
-- [ ] The D1 migration is applied before manager writes are enabled.
+- [ ] `DATABASE_PATH` points to a backed-up persistent volume.
+- [ ] Existing content is backed up, imported and checked before cutover.
+- [ ] `npm run db:init` succeeds before manager writes are enabled.
 - [ ] `NEXT_PUBLIC_SITE_URL` matches the final domain.
 - [ ] Rollback is tested on one regional target before a broad release.

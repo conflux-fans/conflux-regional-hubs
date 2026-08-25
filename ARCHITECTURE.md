@@ -65,7 +65,7 @@ its canonical URL, database, credentials and rollback history.
 | Git repository and application code | Shared |
 | `NEXT_PUBLIC_REGION_SLUG` | Per region |
 | `NEXT_PUBLIC_SITE_URL` and domain | Per region |
-| D1 database | Per region recommended |
+| SQLite database file | Per region recommended |
 | Social API credentials | Per region |
 | Staking network/contracts | Per region or centrally allowlisted |
 

@@ -27,8 +27,7 @@ async function readJson(url: string, headers?: HeadersInit) {
 }
 
 export async function GET() {
-  const { env } = await import("cloudflare:workers");
-  const runtime = env as unknown as RuntimeEnv;
+  const runtime = process.env as RuntimeEnv;
   const items: SocialItem[] = [];
   const connected: Record<SocialProvider, boolean> = {
     instagram: false,

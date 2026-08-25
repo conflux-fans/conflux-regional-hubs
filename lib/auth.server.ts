@@ -62,12 +62,5 @@ export async function canManage(): Promise<boolean> {
 }
 
 async function runtimeValue(name: keyof NodeJS.ProcessEnv): Promise<string> {
-  try {
-    const { env } = await import("cloudflare:workers");
-    const value = (env as unknown as Record<string, string | undefined>)[name];
-    if (value !== undefined) return value;
-  } catch {
-    // Node-based tooling does not expose the Cloudflare runtime module.
-  }
   return process.env[name] ?? "";
 }
