@@ -16,7 +16,7 @@ test("public questionnaire is separate from the protected manager", async () => 
   const studio = await readFile(new URL("../app/studio/page.tsx", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
   assert.match(questionnaire, /setupOnly/);
-  assert.doesNotMatch(questionnaire, /requireChatGPTUser/);
-  assert.match(studio, /requireChatGPTUser/);
+  assert.doesNotMatch(questionnaire, /getAuthorizedEditor/);
+  assert.match(studio, /getAuthorizedEditor/);
   assert.match(shell, /\/questionnaire\?region=/);
 });

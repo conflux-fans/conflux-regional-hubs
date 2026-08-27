@@ -1,4 +1,5 @@
-import { regions, type RegionKey, type RegionalConfig } from "../regional";
+import { getDatabase } from "../../db/index.ts";
+import { regions, type RegionKey, type RegionalConfig } from "../regional.ts";
 
 type SettingRow = {
   wordmark: string;
@@ -51,8 +52,7 @@ export type RegionalContributor = {
 type RegionalContributorRow = Omit<RegionalContributor, "isVisible"> & { isVisible: number };
 
 async function database() {
-  const { env } = await import("cloudflare:workers");
-  return env.DB;
+  return getDatabase();
 }
 
 function defaultContent(key: RegionKey): EditableRegionalContent {
@@ -330,7 +330,7 @@ DELIVERABLE
 3. Keep visible copy, contributor profiles, Journal posts, social profile links, and curated social cards manager-editable.
 4. Preserve the shared Markdown editor, stable published URLs, canonical/Open Graph metadata, X and Telegram share URLs, Discord copy handoff, and Instagram/X/YouTube feed adapters.
 5. Run npm test and review the exact region at desktop and mobile widths.
-6. Deploy a separate target from the same repository with NEXT_PUBLIC_REGION_SLUG set to the new slug. Give the target its own NEXT_PUBLIC_SITE_URL, D1 database, domain, and secrets.
+6. Deploy a separate persistent Node.js target from the same repository with NEXT_PUBLIC_REGION_SLUG set to the new slug. Give the target its own NEXT_PUBLIC_SITE_URL, SQLite file/volume, domain, and secrets.
 7. Record every missing production connection: authentication allowlist, database/storage, provider API credentials, final domain, wallet provider, network, and staking contracts.
 
 ACCEPTANCE CHECKLIST
