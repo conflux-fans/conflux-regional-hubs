@@ -10,7 +10,7 @@ This is the single shared repository for Kudi Hub and future Conflux regional we
 - `/login` — application-owned manager email/password login.
 - `/studio` — protected post-deployment manager using a signed server session and SQLite.
 - `/insights` and `/journal/[slug]` — published Journal
-- `/stake` — staking UX and production integration boundary
+- `/stake` — feature-flagged Conflux eSpace PoS pool reads and wallet transactions
 - `/handoff` — public developer handoff and deploy-ready ZIP
 
 The public demo is deliberately simulated. Production managers use `/studio` with the server-side administrator credentials configured for that regional deployment.
@@ -23,6 +23,7 @@ Requirements: Node.js 22.13+ and npm.
 npm ci
 npm run db:migrate
 npm run auth:setup
+npm run staking:verify
 npm run dev
 npm run lint
 npm run build
@@ -33,6 +34,8 @@ Copy `.env.example` to `.env.local` first. `SQLITE_PATH` selects the database fi
 `npm run auth:setup` prompts for one or more administrator email/password pairs, then prints an `ADMIN_CREDENTIALS_JSON` list containing independent PBKDF2 password hashes and a random `AUTH_SESSION_SECRET`. Add them to `.env.local` for development and to the hosting platform's secret manager for production. Up to 20 unique administrator accounts are supported. Never store plaintext passwords in an environment file.
 
 Production requires a persistent Node.js server and a persistent disk for `SQLITE_PATH`. Do not deploy the SQLite build to an ephemeral/serverless filesystem or share one database file between multiple machines.
+
+Staking ships with `NEXT_PUBLIC_STAKING_ENABLED=false`. Before enabling it, configure the five staking variables in `.env.example`, run `npm run staking:verify`, compare the proxy implementation with the reviewed record, then complete a manual small-value wallet test. The verification command is read-only and never sends a transaction.
 
 ## Regional customization
 
@@ -46,4 +49,4 @@ Start with [docs/DEVELOPER-HANDOFF.md](docs/DEVELOPER-HANDOFF.md), then use [doc
 
 ## Safety boundary
 
-No production wallet transaction is signed by the template. Contract addresses, network configuration, transaction simulation, error handling, and audited staking calls must be supplied and reviewed by the development team before launch.
+The staking module never receives a private key or seed phrase: an EIP-1193 wallet displays and signs every transaction. The approved chain, proxy address, implementation address, minimal ABI, gas estimate, receipt handling, and feature flag are code-controlled. Keep writes disabled until `npm run staking:verify`, security review, and a manual small-value wallet test all pass for the release.

@@ -5,10 +5,14 @@ Date: 2026-08-27
 ## Automated evidence
 
 - `npm run lint` — passed with zero errors and zero warnings.
-- TypeScript/Node test suite — passed 17/17 tests.
+- TypeScript/Node test suite — passed 31/31 tests.
 - Next.js production build — passed, including TypeScript validation and native `sqlite3` bundling.
 - Production server smoke test — `/`, `/login`, and the unauthenticated `/studio` login screen returned HTTP 200.
 - SQLite migration command — passed against SQLite 3.52.0; repeated runs retain one applied migration.
+- Default-off and explicitly enabled staking production builds — passed.
+- Next.js was upgraded to the 16.3.3 security release; `npm audit --omit=dev` reports zero vulnerabilities.
+- `npm run staking:verify` — passed read-only mainnet checks for chain 1030, proxy code, approved EIP-1967 implementation, bridge readiness, periods, pool/user reads, and paginated queues.
+- Enabled `/stake` HTTP smoke test — returned 200 with pool metrics, network disclosure, wallet fallback, and risk content. A connected browser instance was unavailable, so screenshot-based desktop/mobile QA remains manual.
 
 ## Tested contracts
 
@@ -23,7 +27,12 @@ Date: 2026-08-27
 9. Multiple configured administrators authenticate only with their own PBKDF2 password hashes.
 10. SQLite migrations create the expected tables and indexes in a temporary database file.
 11. Regional content and article drafts persist and can be read back from SQLite.
+12. CFX/Drip/votePower conversion remains exact at large `bigint` values and rejects invalid or overflowing input.
+13. User assets derive redeemable principal from `locked`, current stake from `available`, and withdrawable principal from both unlocked votes and pool liquidity.
+14. The adapter sends native value only with `increaseStake` and blocks writes on unexpected chain, proxy target, implementation, or bridge state.
+15. Wallet account/network/disconnect events clear stale state; transaction states retain hashes through confirmation timeouts.
+16. Queues paginate in groups of 50, sort by end block, and determine maturity from the current block.
 
 ## Production-only tests remaining
 
-These require credentials or infrastructure the package cannot safely invent: production administrator credentials and login rate limits, live Instagram/X provider tokens and rate limits, persistent media storage, final DNS/Open Graph crawler validation, scheduled SQLite backup/restore validation, real wallets, audited staking contracts, and onchain transaction/security testing.
+These require credentials or infrastructure the package cannot safely invent: production administrator credentials and login rate limits, live Instagram/X provider tokens and rate limits, persistent media storage, final DNS/Open Graph crawler validation, scheduled SQLite backup/restore validation, connected-browser screenshot QA, security approval, real-wallet small-value staking transactions, and onchain rollback testing.

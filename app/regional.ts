@@ -71,7 +71,7 @@ export const regions: Record<RegionKey, RegionalConfig> = {
     stakeLabel: "Stake CFX",
     stakeEyebrow: "COMMUNITY-LED POS",
     stakeHeading: "Stake safely. Move together.",
-    stakeIntro: "A clear path to CFX staking, protected by reviewed integration boundaries and maintained for the whole community.",
+    stakeIntro: "A clear path to CFX staking with wallet confirmation, visible lock periods, and chain-verified transaction status.",
     footerText: "African voices, useful blockchain perspectives, and a safer path to participation.",
     communityLabel: "Community",
     localModuleEyebrow: "ONE NETWORK / MANY HORIZONS",

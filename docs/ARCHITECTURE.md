@@ -23,5 +23,6 @@ The repository contains one shared application core and multiple typed regional 
 - Journal drafts and publications use the same article record and slug; publishing does not replace the URL.
 - Social adapters fetch only on the server, cache provider responses, and fall back to the configured public profile link if credentials or a provider are unavailable.
 - Authentication is checked server-side before any manager mutation.
+- Staking copy and presentation remain regional, while chain ID, proxy/implementation allowlists, units, minimal ABI, transaction state, and wallet calls stay in the shared `app/lib/staking/` core. The feature flag fails closed before any wallet write request.
 
 The `sqlite3` adapter opens the file configured by `SQLITE_PATH`, enables foreign keys and WAL journaling, and automatically applies the ordered SQL files in `db/migrations/`. Database work is serialized inside the Node.js process. Each file is owned by one application instance; horizontal scaling requires moving to a client/server database.

@@ -9,6 +9,7 @@ This package is the deploy-ready shared Conflux Regional Hubs application. Kudi 
 ```bash
 npm ci
 npm run db:migrate
+npm run staking:verify
 npm test
 ```
 
@@ -23,12 +24,12 @@ For local development, run `npm run dev`. The important routes are `/`, `/insigh
 5. Run `npm run auth:setup`, add every manager when prompted, and store the generated `ADMIN_CREDENTIALS_JSON` and `AUTH_SESSION_SECRET` in the deployment secret manager.
 6. Add the social credentials listed in `.env.example` if automatic Instagram/X feeds are required. The supplied account links remain functional before credentials are connected.
 7. Add storage before enabling image uploads.
-8. Do not enable staking writes until the blockchain team supplies audited contracts and completes security review.
+8. Keep staking disabled until `npm run staking:verify`, the release security review, and a manual small-value wallet test pass against the approved eSpace proxy implementation.
 9. Attach DNS, confirm HTTPS, and validate canonical/Open Graph URLs using the final domain.
 
 ## Turn the next questionnaire prompt into a site
 
-1. Keep the shared routes, database schema, manager, Markdown publisher, social adapters, accessibility behavior, and staking boundary unchanged.
+1. Keep the shared routes, database schema, manager, Markdown publisher, social adapters, accessibility behavior, and code-controlled staking integration unchanged.
 2. Add the region to `config/regions.ts` and its complete presentation/content entry to `app/regional.ts`.
 3. Add code-owned regional assets under `public/brand/<slug>` and any presentation-specific CSS/components.
 4. Add default contributors and module states. Visible data can later be changed by a manager.
@@ -42,7 +43,7 @@ For local development, run `npm run dev`. The important routes are `/`, `/insigh
 - YouTube: hidden by default. It becomes a public automatic feed when enabled with a valid `/channel/UC…` URL.
 - Journal: Markdown headings, bold, italic, links, lists, quotes and code are supported; drafts can be saved/reopened; publishing produces a stable URL.
 - Sharing: every published article has canonical/Open Graph metadata plus clickable X, Telegram, Discord handoff, and copy-link actions.
-- Staking: the reviewed UI and integration boundary are present. Production contract calls are intentionally not included.
+- Staking: eSpace pool reads, injected-wallet lifecycle, stake/unstake/withdraw/claim transactions, queues, receipt recovery, and error states are implemented behind a default-off feature flag.
 
 ## Do not do these things
 

@@ -17,7 +17,7 @@ const connections = [
   ["Storage", "Add persistent media storage before enabling article-cover or portrait uploads."],
   ["Social APIs", "Add INSTAGRAM_ACCESS_TOKEN and X_BEARER_TOKEN. YouTube RSS needs a channel ID but no token."],
   ["Domain", "Set NEXT_PUBLIC_SITE_URL, attach the regional domain, verify DNS/HTTPS and social cards."],
-  ["Staking", "Supply the audited CFX contract, RPC/network, wallet provider, simulations, limits, and security approval."],
+  ["Staking", "Keep the feature disabled until the read-only proxy/ABI verification, security approval, and manual small-value wallet test pass."],
 ];
 
 export default function HandoffPage() {

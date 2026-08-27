@@ -1320,3 +1320,154 @@ button, input { font: inherit; }
   .handoff-connections > div:last-child { grid-template-columns: 1fr; }
   .handoff-connections article { border-right: 0; }
 }
+
+/* Conflux eSpace PoS pool */
+.stake-app { min-height: 100vh; padding-bottom: 120px; background: var(--paper); color: var(--ink); }
+.stake-heading { min-height: 560px; padding-block: 85px; display: grid; grid-template-columns: minmax(0,1.3fr) minmax(320px,.7fr); align-items: center; gap: 9vw; }
+.stake-heading h1 { max-width: 850px; margin: 0; font-size: clamp(72px,9vw,132px); line-height: .84; letter-spacing: -.08em; }
+.stake-heading > div > p:not(.v2-kicker) { max-width: 650px; margin: 34px 0; color: #515b5c; font-size: 18px; line-height: 1.7; }
+.stake-heading > div > a { display: inline-block; padding-bottom: 5px; color: #2444c8; border-bottom: 1px solid; font-weight: 750; }
+.stake-heading aside { padding: 30px; display: grid; gap: 13px; background: var(--ink); color: #fff; border: 1px solid var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
+.stake-heading aside b { font-size: 22px; }
+.stake-heading aside span { color: var(--region-secondary); font: 700 10px var(--font-mono); letter-spacing: .08em; }
+.stake-heading aside p { margin: 20px 0 0; color: #cbd1d1; font-size: 14px; line-height: 1.7; }
+.stake-disabled { min-height: 320px; padding: 60px; background: #fff; border: 1px solid var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
+.stake-disabled > span,
+.stake-pool > div:first-child > span,
+.stake-section-heading > span,
+.stake-risks > span { color: #2444c8; font: 750 10px var(--font-mono); letter-spacing: .13em; }
+.stake-disabled h2 { margin: 18px 0; font-size: clamp(42px,5vw,68px); letter-spacing: -.055em; }
+.stake-disabled p { max-width: 680px; color: #596263; font-size: 16px; line-height: 1.7; }
+.stake-dashboard { display: grid; gap: 24px; }
+.stake-pool { padding: 42px; display: grid; grid-template-columns: minmax(230px,.75fr) minmax(0,1.25fr); gap: 55px; background: #fff; border: 1px solid var(--ink); }
+.stake-pool h2,
+.stake-section-heading h2,
+.stake-risks h2 { margin: 14px 0 10px; font-size: clamp(38px,4vw,58px); line-height: .95; letter-spacing: -.055em; }
+.stake-pool > div:first-child p,
+.stake-section-heading p { margin: 12px 0 0; color: #596263; font-size: 14px; line-height: 1.6; }
+.stake-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border: 1px solid var(--ink); }
+.stake-metrics article { min-width: 0; padding: 24px 18px; display: grid; align-content: space-between; gap: 20px; border-right: 1px solid var(--ink); }
+.stake-metrics article:last-child { border-right: 0; }
+.stake-metrics span,
+.stake-assets span,
+.stake-actions article > span { color: #596263; font: 700 9px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.stake-metrics b { overflow-wrap: anywhere; font-size: clamp(20px,2.2vw,32px); line-height: 1; letter-spacing: -.045em; }
+.stake-metrics small,
+.stake-assets small { color: #596263; font-size: 11px; line-height: 1.5; }
+.stake-global-error { grid-column: 1 / -1; padding: 16px 18px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; font-size: 13px; line-height: 1.5; }
+.stake-wallet-bar { min-height: 76px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; background: var(--region-secondary); border: 1px solid var(--ink); }
+.stake-wallet-bar > div { min-width: 0; margin-right: auto; display: grid; gap: 4px; }
+.stake-wallet-bar b { overflow-wrap: anywhere; font-size: 14px; }
+.stake-wallet-bar span { color: #48504f; font-size: 12px; }
+.stake-wallet-bar label { margin-right: auto; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; }
+.stake-wallet-bar select,
+.stake-wallet-bar button { min-height: 44px; padding: 0 14px; border: 1px solid var(--ink); background: #fff; color: var(--ink); font: 700 12px var(--font-sans); }
+.stake-wallet-bar button { cursor: pointer; }
+.stake-wallet-bar output { width: 100%; color: #742116; font-size: 12px; }
+.stake-network-warning { padding: 24px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; }
+.stake-network-warning b { font-size: 18px; }
+.stake-network-warning p { margin: 7px 0 0; font-size: 13px; line-height: 1.55; }
+.stake-user { padding: 52px 42px; background: #fff; border: 1px solid var(--ink); }
+.stake-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 25px; flex-wrap: wrap; }
+.stake-section-heading > span { width: 100%; }
+.stake-section-heading h2 { margin-bottom: 0; }
+.stake-empty { margin: 35px 0 0; padding: 35px; background: var(--paper); border: 1px dashed #7b8282; color: #596263; font-size: 14px; text-align: center; }
+.stake-assets { margin-top: 38px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border: 1px solid var(--ink); }
+.stake-assets article { min-width: 0; min-height: 145px; padding: 22px; display: grid; align-content: space-between; gap: 20px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.stake-assets article:nth-child(3n) { border-right: 0; }
+.stake-assets article:nth-last-child(-n+3) { border-bottom: 0; }
+.stake-assets b { overflow-wrap: anywhere; font-size: clamp(22px,2.4vw,34px); line-height: 1; letter-spacing: -.045em; }
+.stake-actions { margin-top: 24px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); border: 1px solid var(--ink); }
+.stake-actions > article { min-width: 0; padding: 30px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.stake-actions > article:nth-child(even) { border-right: 0; }
+.stake-actions > article:nth-last-child(-n+2) { border-bottom: 0; }
+.stake-actions h3 { margin: 12px 0; font-size: 32px; letter-spacing: -.045em; }
+.stake-actions article > p { min-height: 66px; margin: 0 0 25px; color: #596263; font-size: 13px; line-height: 1.65; }
+.stake-actions label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 8px; font-size: 12px; font-weight: 700; }
+.stake-actions label small { color: #596263; font-weight: 500; }
+.stake-actions input { width: 100%; min-height: 52px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 0; background: var(--paper); color: var(--ink); font-size: 18px; }
+.stake-actions article > button { width: 100%; min-height: 52px; margin-top: 10px; padding: 0 15px; border: 1px solid var(--ink); background: var(--region-accent); color: var(--region-on-accent); font-size: 13px; font-weight: 750; cursor: pointer; }
+.stake-actions article > button.stake-secondary-button { background: var(--ink); color: #fff; }
+.stake-actions button:disabled { cursor: not-allowed; opacity: .45; }
+.stake-liquidity-note { display: block; margin-top: 10px; color: #8a3a21; font-size: 12px; }
+.stake-transaction { margin-top: 12px; padding: 13px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border: 1px solid; font-size: 12px; line-height: 1.5; }
+.stake-transaction.pending { background: #f7f2dc; color: #665519; }
+.stake-transaction.success { background: #e8f7eb; color: #165e2c; }
+.stake-transaction.error { background: #fff0ed; color: #742116; }
+.stake-transaction > b { margin-right: auto; }
+.stake-transaction a,
+.stake-transaction button { min-height: 44px; display: inline-flex; align-items: center; padding: 0 10px; border: 1px solid currentColor; background: transparent; color: inherit; font-weight: 700; }
+.stake-transaction details { width: 100%; }
+.stake-transaction code { display: block; margin-top: 8px; overflow-wrap: anywhere; font-size: 10px; }
+.stake-queues { margin-top: 24px; display: grid; gap: 12px; }
+.stake-queue { border: 1px solid var(--ink); }
+.stake-queue > button { width: 100%; min-height: 76px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border: 0; background: var(--paper); color: var(--ink); text-align: left; cursor: pointer; }
+.stake-queue > button span { display: grid; gap: 5px; }
+.stake-queue > button b { font-size: 16px; }
+.stake-queue > button small { color: #596263; font-size: 12px; }
+.stake-queue > button i { font-style: normal; font-size: 12px; font-weight: 750; }
+.stake-queue-list { border-top: 1px solid var(--ink); }
+.stake-queue-list article { min-height: 74px; padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 20px; border-bottom: 1px solid var(--line); }
+.stake-queue-list article:last-child { border-bottom: 0; }
+.stake-queue-list article > span { display: grid; gap: 4px; }
+.stake-queue-list article > span:last-child { text-align: right; }
+.stake-queue-list b { font-size: 14px; }
+.stake-queue-list small { color: #596263; font-size: 11px; }
+.stake-queue .stake-empty { margin: 0; border: 0; border-top: 1px solid var(--ink); }
+.stake-risks { padding: 45px; background: var(--ink); color: #fff; border: 1px solid var(--ink); }
+.stake-risks > span { color: var(--region-secondary); }
+.stake-risks > div { display: grid; grid-template-columns: 1fr 1fr; gap: 45px; }
+.stake-risks p { color: #cbd1d1; font-size: 14px; line-height: 1.75; }
+.stake-risks code { display: block; margin-top: 25px; overflow-wrap: anywhere; color: var(--region-secondary); font-size: 12px; }
+.stake-app button:focus-visible,
+.stake-app input:focus-visible,
+.stake-app select:focus-visible,
+.stake-app a:focus-visible { outline: 3px solid #2444c8; outline-offset: 3px; }
+
+@media (max-width: 960px) {
+  .stake-heading { grid-template-columns: 1fr; }
+  .stake-heading aside { max-width: 620px; }
+  .stake-pool { grid-template-columns: 1fr; }
+  .stake-assets { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .stake-assets article,
+  .stake-assets article:nth-child(3n) { border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .stake-assets article:nth-child(even) { border-right: 0; }
+  .stake-assets article:nth-last-child(-n+2) { border-bottom: 0; }
+}
+
+@media (max-width: 640px) {
+  .stake-app { padding-bottom: 75px; }
+  .stake-heading { min-height: auto; padding-block: 65px; gap: 50px; }
+  .stake-heading h1 { font-size: 66px; }
+  .stake-heading aside { padding: 24px; box-shadow: 8px 8px 0 var(--region-secondary); }
+  .stake-disabled { padding: 35px 24px; box-shadow: 7px 7px 0 var(--region-secondary); }
+  .stake-dashboard { gap: 14px; }
+  .stake-pool,
+  .stake-user,
+  .stake-risks { padding: 30px 20px; }
+  .stake-metrics,
+  .stake-assets,
+  .stake-actions { grid-template-columns: 1fr; }
+  .stake-metrics article,
+  .stake-metrics article:last-child,
+  .stake-assets article,
+  .stake-assets article:nth-child(3n),
+  .stake-assets article:nth-child(even),
+  .stake-actions > article,
+  .stake-actions > article:nth-child(even) { border-right: 0; border-bottom: 1px solid var(--ink); }
+  .stake-metrics article:last-child,
+  .stake-assets article:last-child,
+  .stake-actions > article:last-child { border-bottom: 0; }
+  .stake-wallet-bar { align-items: stretch; flex-direction: column; padding: 16px; }
+  .stake-wallet-bar > div,
+  .stake-wallet-bar label { width: 100%; margin: 0; }
+  .stake-wallet-bar label { align-items: stretch; flex-direction: column; }
+  .stake-wallet-bar select,
+  .stake-wallet-bar button { width: 100%; }
+  .stake-actions > article { padding: 25px 18px; }
+  .stake-actions article > p { min-height: 0; }
+  .stake-queue > button { min-height: 84px; align-items: flex-start; }
+  .stake-queue-list article { grid-template-columns: 1fr; }
+  .stake-queue-list article > span:last-child { text-align: left; }
+  .stake-risks > div { grid-template-columns: 1fr; gap: 5px; }
+}
