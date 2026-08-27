@@ -1,0 +1,30 @@
+CREATE TABLE `regional_briefs` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`region` text NOT NULL,
+	`project_name` text NOT NULL,
+	`domain` text NOT NULL,
+	`primary_language` text NOT NULL,
+	`secondary_languages` text NOT NULL,
+	`logo_direction` text NOT NULL,
+	`asset_links` text NOT NULL,
+	`primary_color` text NOT NULL,
+	`secondary_color` text NOT NULL,
+	`colors_to_avoid` text NOT NULL,
+	`personality` text NOT NULL,
+	`background_concept` text NOT NULL,
+	`local_symbols` text NOT NULL,
+	`reference_sites` text NOT NULL,
+	`audience` text NOT NULL,
+	`homepage_priority` text NOT NULL,
+	`journal_name` text NOT NULL,
+	`staking_name` text NOT NULL,
+	`local_sections` text NOT NULL,
+	`mobile_notes` text NOT NULL,
+	`final_notes` text NOT NULL,
+	`generated_prompt` text NOT NULL,
+	`status` text DEFAULT 'submitted' NOT NULL,
+	`created_by` text NOT NULL,
+	`created_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX `regional_briefs_region_created_idx` ON `regional_briefs` (`region`,`created_at`);

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 80" role="img" aria-labelledby="title desc">
+  <title id="title">Kudi Hub</title>
+  <desc id="desc">Kudi Hub horizontal logo for light backgrounds.</desc>
+  <g transform="translate(8 8)">
+    <path fill="#3558ff" d="M8 25V16a8 8 0 0 1 8-8h12v9H18a1 1 0 0 0-1 1v7H8Zm28-17h12a8 8 0 0 1 8 8v9h-9v-7a1 1 0 0 0-1-1H36V8ZM8 39h9v7a1 1 0 0 0 1 1h10v9H16a8 8 0 0 1-8-8v-9Zm39 0h9v9a8 8 0 0 1-8 8H36v-9h10a1 1 0 0 0 1-1v-7Z"/>
+    <path fill="#c9ff63" d="M22 22h12v8h8v12H30v-8h-8V22Z"/>
+    <rect width="8" height="8" x="38" y="22" fill="#ff684f" rx="2"/>
+  </g>
+  <text x="90" y="52" fill="#111617" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" letter-spacing="-1.5">Kudi Hub</text>
+</svg>

@@ -1,0 +1,1 @@
+ALTER TABLE `region_settings` ADD `logo_style` text NOT NULL;
