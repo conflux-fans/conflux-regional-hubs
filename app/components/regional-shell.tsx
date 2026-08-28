@@ -27,8 +27,6 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
             <Link href={`/insights${suffix}`}>{region.journalLabel}</Link>
             <Link href={`/stake${suffix}`}>{region.stakeLabel}</Link>
             {region.communityLinks.length > 0 && <a href="#community">{region.communityLabel}</a>}
-            <Link href={`/questionnaire?region=${region.key}`}>Website Creator</Link>
-            <Link href="/demo">Manager demo</Link>
           </nav>
           <Link className="demo-login-pill" href="/demo">Try login <span>→</span></Link>
         </div>

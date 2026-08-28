@@ -20,3 +20,9 @@ test("public questionnaire is separate from the protected manager", async () => 
   assert.match(studio, /getAuthorizedEditor/);
   assert.match(shell, /\/questionnaire\?region=/);
 });
+
+test("main navigation omits creator and manager demo links", async () => {
+  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
+  const mainNavigation = shell.match(/<nav aria-label="Main navigation">([\s\S]*?)<\/nav>/)?.[1] ?? "";
+  assert.doesNotMatch(mainNavigation, /Website Creator|Manager demo/);
+});
