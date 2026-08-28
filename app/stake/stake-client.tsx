@@ -448,7 +448,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
       <section className="stake-wallet-bar">
         {!wallets.length ? <div><b>No compatible wallet detected</b><span>Install MetaMask or another EIP-1193 browser wallet.</span></div>
-          : !account ? <>{wallets.length > 1 && <label>Select wallet<select value={selectedWallet} onChange={(event) => setSelectedWallet(event.target.value)}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></label>}<button type="button" onClick={connect} disabled={connecting}>{connecting ? "Waiting for wallet..." : "Connect wallet"}</button></>
+          : !account ? <><label>Select wallet<select value={selectedWallet} onChange={(event) => setSelectedWallet(event.target.value)}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></label><button type="button" onClick={connect} disabled={connecting}>{connecting ? "Waiting for wallet..." : "Connect wallet"}</button></>
             : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
         {walletMessage && <output role="alert">{walletMessage}</output>}
       </section>

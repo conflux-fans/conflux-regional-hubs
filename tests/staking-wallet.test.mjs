@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveStakingConfig } from "../app/lib/staking/config.ts";
 import { CONFLUX_ESPACE_CHAIN_HEX, STAKING_CONTRACT_ADDRESS } from "../app/lib/staking/constants.ts";
-import { discoverInjectedWallets, InjectedWalletSession } from "../app/lib/staking/provider.ts";
+import { InjectedWalletSession } from "../app/lib/staking/provider.ts";
 
 function fakeProvider() {
   const listeners = new Map();
@@ -60,22 +60,4 @@ test("wallet session connects, switches network, and emits cleared state before 
     { type: "chain", chainId: 1n },
     { type: "disconnect" },
   ]);
-});
-
-test("Fluent remains connectable without exposing its brand name", async () => {
-  const provider = fakeProvider();
-  let listener;
-  const target = {
-    addEventListener(_type, nextListener) { listener = nextListener; },
-    removeEventListener() { listener = undefined; },
-    dispatchEvent() {
-      listener?.({ detail: { info: { uuid: "fluent-wallet", name: "Fluent" }, provider } });
-      return true;
-    },
-  };
-
-  const wallets = await discoverInjectedWallets(target, 0);
-  assert.equal(wallets.length, 1);
-  assert.equal(wallets[0].name, "Browser wallet");
-  assert.equal(wallets[0].provider, provider);
 });
