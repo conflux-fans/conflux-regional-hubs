@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getAddress } from "ethers";
+import { getAddress, type Eip1193Provider } from "ethers";
+import { useConnect, useConnection, useConnectionEffect, useConnectors, useDisconnect, useSwitchChain, type Connector } from "wagmi";
 import { formatApy, formatCfx, formatDripAsCfx, parseStakeAmount } from "../lib/staking/amounts";
 import { CONFLUX_ESPACE_CHAIN_ID, transactionExplorerUrl } from "../lib/staking/constants";
 import { stakingErrorDetail, stakingErrorMessage } from "../lib/staking/errors";
 import { queueNodeView, type QueueNode } from "../lib/staking/models";
 import { createReadPoolAdapter, createWalletPoolAdapter, type PosPoolAdapter } from "../lib/staking/pos-pool";
-import { discoverInjectedWallets, InjectedWalletSession, type DiscoveredWallet, type InjectedProvider } from "../lib/staking/provider";
 import { WalletContextGuard, type WalletContext } from "../lib/staking/wallet-context";
+import { WalletModal } from "./wallet-modal";
 import {
   canManuallyCheckReceipt,
   classifyReceiptStatus,
@@ -104,21 +105,23 @@ function TransactionNotice({ state, onCheck }: { state: TransactionState; onChec
 export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpcUrl: string; contractAddress: string; poolFallbackName: string }) {
   const [pool, setPool] = useState<PoolOverview | null>(null);
   const [poolError, setPoolError] = useState("");
-  const [wallets, setWallets] = useState<DiscoveredWallet[]>([]);
-  const [selectedWallet, setSelectedWallet] = useState("");
   const [walletMessage, setWalletMessage] = useState("");
-  const [connecting, setConnecting] = useState(false);
-  const [account, setAccount] = useState<string | null>(null);
-  const [chainId, setChainId] = useState<bigint | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [pendingConnectorUid, setPendingConnectorUid] = useState<string>();
   const [user, setUser] = useState<UserSnapshot | null>(null);
   const [userLoading, setUserLoading] = useState(false);
   const [stakeInput, setStakeInput] = useState("");
   const [unstakeInput, setUnstakeInput] = useState("");
   const [transactions, setTransactions] = useState(initialTransactions);
+  const connection = useConnection();
+  const connectors = useConnectors();
+  const connectMutation = useConnect();
+  const disconnectMutation = useDisconnect();
+  const switchChainMutation = useSwitchChain();
+  const account = connection.address ?? null;
+  const chainId = connection.chainId === undefined ? null : BigInt(connection.chainId);
   const readAdapter = useMemo(() => createReadPoolAdapter(rpcUrl), [rpcUrl]);
-  const walletProvider = useRef<InjectedProvider | null>(null);
   const walletAdapter = useRef<PosPoolAdapter | null>(null);
-  const unsubscribe = useRef<(() => void) | null>(null);
   const userRequest = useRef(0);
   const receiptQueries = useRef(new Set<string>());
   const walletContext = useRef(new WalletContextGuard());
@@ -158,6 +161,14 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     setUserLoading(false);
   }, []);
 
+  const handleWalletDisconnect = useCallback(() => {
+    walletContext.current.clear();
+    walletAdapter.current = null;
+    clearUser();
+  }, [clearUser]);
+
+  useConnectionEffect({ onDisconnect: handleWalletDisconnect });
+
   const refreshUser = useCallback(async (nextAccount?: string | null) => {
     const adapter = walletAdapter.current;
     const context = walletContext.current.current();
@@ -180,11 +191,9 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
   const isCurrentWallet = useCallback((context: WalletContext) => walletContext.current.matches(context), []);
 
-  const prepareWalletAdapter = useCallback(async (provider: InjectedProvider, nextAccount: string, nextChainId: bigint) => {
+  const prepareWalletAdapter = useCallback(async (provider: Eip1193Provider, nextAccount: string, nextChainId: bigint) => {
     const context = walletContext.current.replace(nextAccount, nextChainId);
     clearUser();
-    setAccount(nextAccount);
-    setChainId(nextChainId);
     restorePendingTransactions(nextAccount);
     walletAdapter.current = null;
     if (nextChainId !== CONFLUX_ESPACE_CHAIN_ID) return;
@@ -221,65 +230,44 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   }, [refreshPool, refreshUser]);
 
   useEffect(() => {
-    void discoverInjectedWallets(window as typeof window & { ethereum?: InjectedProvider }).then((found) => {
-      setWallets(found);
-      if (found.length === 1) setSelectedWallet(found[0].id);
-    });
-    return () => unsubscribe.current?.();
-  }, []);
+    let cancelled = false;
+    const connector = connection.connector;
+    if (!connector || !account || chainId === null) {
+      walletContext.current.clear();
+      walletAdapter.current = null;
+      return;
+    }
 
-  async function connect() {
-    const wallet = wallets.find((item) => item.id === selectedWallet) ?? wallets[0];
-    if (!wallet) { setWalletMessage("No compatible browser wallet detected"); return; }
-    setConnecting(true);
+    void connector.getProvider().then((provider) => {
+      if (cancelled) return;
+      if (!provider || typeof provider !== "object" || !("request" in provider)) throw new Error("Wallet provider is unavailable");
+      return prepareWalletAdapter(provider as Eip1193Provider, account, chainId);
+    }).catch((error) => {
+      if (!cancelled) setWalletMessage(stakingErrorMessage(error));
+    });
+    return () => { cancelled = true; };
+  }, [account, chainId, connection.connector, prepareWalletAdapter]);
+
+  async function connect(connector: Connector) {
+    setPendingConnectorUid(connector.uid);
     setWalletMessage("");
     try {
-      const session = new InjectedWalletSession(wallet.provider);
-      const connected = await session.connect();
-      walletProvider.current = wallet.provider;
-      unsubscribe.current?.();
-      unsubscribe.current = session.subscribe((change) => {
-        if (change.type === "disconnect" || (change.type === "accounts" && !change.account)) {
-          walletContext.current.clear();
-          clearUser();
-          setAccount(null);
-          setChainId(null);
-          walletAdapter.current = null;
-          return;
-        }
-        if (change.type === "chain") {
-          const currentAccount = walletContext.current.current().account;
-          if (currentAccount && walletProvider.current) void prepareWalletAdapter(walletProvider.current, currentAccount, change.chainId);
-          return;
-        }
-        if (change.type === "accounts" && change.account && walletProvider.current) {
-          void prepareWalletAdapter(walletProvider.current, change.account, walletContext.current.current().chainId ?? connected.chainId);
-        }
-      });
-      await prepareWalletAdapter(wallet.provider, connected.account, connected.chainId);
+      await connectMutation.mutateAsync({ connector });
+      setWalletModalOpen(false);
     } catch (error) {
       setWalletMessage(stakingErrorMessage(error));
     } finally {
-      setConnecting(false);
+      setPendingConnectorUid(undefined);
     }
   }
 
   function disconnect() {
-    walletContext.current.clear();
-    unsubscribe.current?.();
-    unsubscribe.current = null;
-    walletProvider.current = null;
-    walletAdapter.current = null;
-    setAccount(null);
-    setChainId(null);
-    clearUser();
+    disconnectMutation.mutate();
   }
 
   async function switchNetwork() {
-    const provider = walletProvider.current;
-    if (!provider) return;
     try {
-      await new InjectedWalletSession(provider).switchToConflux();
+      await switchChainMutation.mutateAsync({ chainId: Number(CONFLUX_ESPACE_CHAIN_ID) });
     } catch (error) {
       setWalletMessage(stakingErrorMessage(error));
     }
@@ -447,11 +435,11 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       </section>
 
       <section className="stake-wallet-bar">
-        {!wallets.length ? <div><b>No compatible wallet detected</b><span>Install MetaMask or another EIP-1193 browser wallet.</span></div>
-          : !account ? <><label>Select wallet<select value={selectedWallet} onChange={(event) => setSelectedWallet(event.target.value)}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></label><button type="button" onClick={connect} disabled={connecting}>{connecting ? "Waiting for wallet..." : "Connect wallet"}</button></>
-            : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
+        {!account ? <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
+          : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
         {walletMessage && <output role="alert">{walletMessage}</output>}
       </section>
+      {walletModalOpen && <WalletModal connectors={connectors} errorMessage={walletMessage} pendingConnectorUid={pendingConnectorUid} onClose={() => setWalletModalOpen(false)} onSelect={(connector) => void connect(connector)} />}
 
       {account && !correctNetwork && <section className="stake-network-warning" role="alert"><b>Switch to Conflux eSpace Mainnet</b><p>All staking transactions are disabled on the wrong network. The required chain ID is 1030 (0x406).</p></section>}
 

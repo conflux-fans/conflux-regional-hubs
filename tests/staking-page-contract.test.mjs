@@ -15,3 +15,13 @@ test("staking layout keeps a narrow-screen responsive breakpoint", async () => {
   assert.match(css, /@media\s*\(max-width:\s*640px\)/);
   assert.match(css, /\.stake-actions\s*\{[^}]*grid-template-columns:\s*1fr/s);
 });
+
+test("wallet connection opens a connector modal instead of rendering a select", async () => {
+  const client = await readFile(new URL("../app/stake/stake-client.tsx", import.meta.url), "utf8");
+  const modal = await readFile(new URL("../app/stake/wallet-modal.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(client, /<select/);
+  assert.match(client, /useConnect\(/);
+  assert.match(client, /<WalletModal/);
+  assert.match(modal, /<dialog/);
+  assert.match(modal, /connectors\.map/);
+});

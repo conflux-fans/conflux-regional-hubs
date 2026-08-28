@@ -1359,11 +1359,32 @@ button, input { font: inherit; }
 .stake-wallet-bar > div { min-width: 0; margin-right: auto; display: grid; gap: 4px; }
 .stake-wallet-bar b { overflow-wrap: anywhere; font-size: 14px; }
 .stake-wallet-bar span { color: #48504f; font-size: 12px; }
-.stake-wallet-bar label { margin-right: auto; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; }
-.stake-wallet-bar select,
 .stake-wallet-bar button { min-height: 44px; padding: 0 14px; border: 1px solid var(--ink); background: #fff; color: var(--ink); font: 700 12px var(--font-sans); }
 .stake-wallet-bar button { cursor: pointer; }
+.stake-wallet-bar .stake-connect-button { min-width: 160px; margin-left: auto; background: var(--ink); color: #fff; }
 .stake-wallet-bar output { width: 100%; color: #742116; font-size: 12px; }
+.wallet-modal { width: min(100% - 32px, 520px); max-height: min(720px, calc(100dvh - 32px)); padding: 0; overflow: auto; background: #fff; border: 1px solid var(--ink); border-radius: 0; color: var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
+.wallet-modal::backdrop { background: rgba(8, 14, 14, .74); }
+.wallet-modal > header { padding: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--ink); }
+.wallet-modal > header span { color: #2444c8; font: 750 10px var(--font-mono); letter-spacing: .13em; }
+.wallet-modal h2 { margin: 9px 0 0; font-size: 34px; line-height: 1; }
+.wallet-modal > header > button { width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-size: 27px; line-height: 1; cursor: pointer; }
+.wallet-modal > header > button:disabled { cursor: not-allowed; opacity: .45; }
+.wallet-modal > p { margin: 0; padding: 20px 24px; color: #596263; font-size: 13px; line-height: 1.6; }
+.wallet-options { padding: 0 24px 24px; display: grid; gap: 10px; }
+.wallet-options > button { width: 100%; min-height: 72px; padding: 13px 15px; display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 14px; background: var(--paper); border: 1px solid var(--ink); color: var(--ink); text-align: left; cursor: pointer; }
+.wallet-options > button:hover { background: var(--region-secondary); }
+.wallet-options > button:disabled { cursor: wait; opacity: .62; }
+.wallet-options img,
+.wallet-options > button > span { width: 42px; height: 42px; border: 1px solid var(--ink); border-radius: 8px; object-fit: cover; }
+.wallet-options > button > span { display: grid; place-items: center; background: #fff; font-size: 17px; font-weight: 800; }
+.wallet-options b { min-width: 0; overflow-wrap: anywhere; font-size: 15px; }
+.wallet-options small { color: #596263; font-size: 11px; }
+.wallet-modal-empty { margin: 0 24px 24px; padding: 24px; background: var(--paper); border: 1px dashed #7b8282; }
+.wallet-modal-empty b { font-size: 15px; }
+.wallet-modal-empty p { margin: 7px 0 0; color: #596263; font-size: 12px; line-height: 1.55; }
+.wallet-modal-error { display: block; margin: 0 24px 24px; padding: 13px 15px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; font-size: 12px; line-height: 1.5; }
+.wallet-modal button:focus-visible { outline: 3px solid #2444c8; outline-offset: 3px; }
 .stake-network-warning { padding: 24px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; }
 .stake-network-warning b { font-size: 18px; }
 .stake-network-warning p { margin: 7px 0 0; font-size: 13px; line-height: 1.55; }
@@ -1460,11 +1481,18 @@ button, input { font: inherit; }
   .stake-assets article:last-child,
   .stake-actions > article:last-child { border-bottom: 0; }
   .stake-wallet-bar { align-items: stretch; flex-direction: column; padding: 16px; }
-  .stake-wallet-bar > div,
-  .stake-wallet-bar label { width: 100%; margin: 0; }
-  .stake-wallet-bar label { align-items: stretch; flex-direction: column; }
-  .stake-wallet-bar select,
+  .stake-wallet-bar > div { width: 100%; margin: 0; }
   .stake-wallet-bar button { width: 100%; }
+  .stake-wallet-bar .stake-connect-button { margin-left: 0; }
+  .wallet-modal { width: calc(100% - 24px); max-height: calc(100dvh - 24px); box-shadow: 7px 7px 0 var(--region-secondary); }
+  .wallet-modal > header { padding: 20px; }
+  .wallet-modal h2 { font-size: 29px; }
+  .wallet-modal > p { padding: 18px 20px; }
+  .wallet-options { padding: 0 20px 20px; }
+  .wallet-options > button { grid-template-columns: 42px minmax(0,1fr); }
+  .wallet-options small { grid-column: 2; }
+  .wallet-modal-empty,
+  .wallet-modal-error { margin-inline: 20px; margin-bottom: 20px; }
   .stake-actions > article { padding: 25px 18px; }
   .stake-actions article > p { min-height: 0; }
   .stake-queue > button { min-height: 84px; align-items: flex-start; }
