@@ -9,7 +9,7 @@ import { stakingErrorDetail, stakingErrorMessage } from "../lib/staking/errors";
 import { queueNodeView, type QueueNode } from "../lib/staking/models";
 import { createReadPoolAdapter, createWalletPoolAdapter, type PosPoolAdapter } from "../lib/staking/pos-pool";
 import { WalletContextGuard, type WalletContext } from "../lib/staking/wallet-context";
-import { withoutExperimentalPermissionRevocation } from "../lib/staking/wallet-connector";
+import { readyWalletConnection, withoutExperimentalPermissionRevocation } from "../lib/staking/wallet-connector";
 import { WalletModal } from "./wallet-modal";
 import {
   canManuallyCheckReceipt,
@@ -119,8 +119,10 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   const connectMutation = useConnect();
   const disconnectMutation = useDisconnect();
   const switchChainMutation = useSwitchChain();
-  const account = connection.address ?? null;
-  const chainId = connection.chainId === undefined ? null : BigInt(connection.chainId);
+  const readyConnection = readyWalletConnection(connection);
+  const account = readyConnection?.account ?? null;
+  const chainId = readyConnection?.chainId ?? null;
+  const activeConnector = readyConnection?.connector;
   const readAdapter = useMemo(() => createReadPoolAdapter(rpcUrl), [rpcUrl]);
   const walletAdapter = useRef<PosPoolAdapter | null>(null);
   const userRequest = useRef(0);
@@ -232,7 +234,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
   useEffect(() => {
     let cancelled = false;
-    const connector = connection.connector;
+    const connector = activeConnector;
     if (!connector || !account || chainId === null) {
       walletContext.current.clear();
       walletAdapter.current = null;
@@ -247,7 +249,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (!cancelled) setWalletMessage(stakingErrorMessage(error));
     });
     return () => { cancelled = true; };
-  }, [account, chainId, connection.connector, prepareWalletAdapter]);
+  }, [account, activeConnector, chainId, prepareWalletAdapter]);
 
   async function connect(connector: Connector) {
     setPendingConnectorUid(connector.uid);
@@ -263,7 +265,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   }
 
   async function disconnect() {
-    const connector = connection.connector;
+    const connector = activeConnector;
     if (!connector) return;
     setWalletMessage("");
     try {
@@ -443,7 +445,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       </section>
 
       <section className="stake-wallet-bar">
-        {!account ? <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
+        {!account ? connection.status === "reconnecting" ? <button type="button" className="stake-connect-button" disabled>Restoring wallet...</button> : <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
           : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" disabled={disconnectMutation.isPending} onClick={() => void disconnect()}>{disconnectMutation.isPending ? "Disconnecting..." : "Disconnect"}</button></>}
         {walletMessage && !walletModalOpen && <output role="alert">{walletMessage}</output>}
       </section>
