@@ -6,19 +6,10 @@ import {
   editorSessionCookie,
 } from "../../../lib/editor-auth";
 import { safeReturnTo } from "../../../lib/auth-crypto";
-
-function sameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return request.headers.get("sec-fetch-site") !== "cross-site";
-  try {
-    return new URL(origin).origin === new URL(request.url).origin;
-  } catch {
-    return false;
-  }
-}
+import { isSameOriginRequest } from "../../../lib/request-origin";
 
 export async function POST(request: Request) {
-  if (!sameOrigin(request)) {
+  if (!isSameOriginRequest(request)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   }
 

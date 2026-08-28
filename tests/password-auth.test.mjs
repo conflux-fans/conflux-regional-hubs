@@ -7,6 +7,7 @@ import {
   verifyPassword,
   verifySessionToken,
 } from "../app/lib/auth-crypto.ts";
+import { isSameOriginRequest } from "../app/lib/request-origin.ts";
 
 test("passwords are PBKDF2-hashed and verified without storing plaintext", async () => {
   const hash = await hashPassword("correct horse battery staple");
@@ -33,4 +34,41 @@ test("login redirects stay on the current site", () => {
   assert.equal(safeReturnTo("https://attacker.example"), "/studio");
   assert.equal(safeReturnTo("//attacker.example"), "/studio");
   assert.equal(safeReturnTo("/api/auth/logout"), "/studio");
+});
+
+test("authentication accepts the public HTTPS origin forwarded by the reverse proxy", () => {
+  const request = new Request("https://127.0.0.1:3000/api/auth/login", {
+    method: "POST",
+    headers: {
+      origin: "https://hub.example.com",
+      "x-forwarded-host": "hub.example.com",
+      "x-forwarded-proto": "https",
+    },
+  });
+
+  assert.equal(isSameOriginRequest(request), true);
+});
+
+test("authentication rejects malformed and cross-site origins behind the reverse proxy", () => {
+  const headers = {
+    "x-forwarded-host": "hub.example.com",
+    "x-forwarded-proto": "https",
+  };
+
+  assert.equal(isSameOriginRequest(new Request("https://127.0.0.1:3000/api/auth/login", {
+    method: "POST",
+    headers: { ...headers, origin: "not a URL" },
+  })), false);
+  assert.equal(isSameOriginRequest(new Request("https://127.0.0.1:3000/api/auth/login", {
+    method: "POST",
+    headers: { ...headers, origin: "https://attacker.example" },
+  })), false);
+  assert.equal(isSameOriginRequest(new Request("https://127.0.0.1:3000/api/auth/login", {
+    method: "POST",
+    headers: { ...headers, origin: "https://hub.example.com/path" },
+  })), false);
+  assert.equal(isSameOriginRequest(new Request("https://127.0.0.1:3000/api/auth/login", {
+    method: "POST",
+    headers: { ...headers, origin: "https://user@hub.example.com" },
+  })), false);
 });
