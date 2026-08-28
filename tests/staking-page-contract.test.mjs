@@ -25,3 +25,8 @@ test("wallet connection opens a connector modal instead of rendering a select", 
   assert.match(modal, /<dialog/);
   assert.match(modal, /connectors\.map/);
 });
+
+test("wallet connection errors have only one active announcement", async () => {
+  const client = await readFile(new URL("../app/stake/stake-client.tsx", import.meta.url), "utf8");
+  assert.match(client, /walletMessage && !walletModalOpen && <output role="alert">/);
+});

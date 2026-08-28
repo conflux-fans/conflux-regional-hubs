@@ -437,7 +437,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       <section className="stake-wallet-bar">
         {!account ? <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
           : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
-        {walletMessage && <output role="alert">{walletMessage}</output>}
+        {walletMessage && !walletModalOpen && <output role="alert">{walletMessage}</output>}
       </section>
       {walletModalOpen && <WalletModal connectors={connectors} errorMessage={walletMessage} pendingConnectorUid={pendingConnectorUid} onClose={() => setWalletModalOpen(false)} onSelect={(connector) => void connect(connector)} />}
 

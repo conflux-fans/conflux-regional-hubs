@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppProviders } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://conflux-community-hub.christian-oertel.chatgpt.site"),
@@ -13,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><AppProviders>{children}</AppProviders></body></html>;
+  return <html lang="en"><body>{children}</body></html>;
 }
