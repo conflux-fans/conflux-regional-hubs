@@ -1346,7 +1346,7 @@ button, input { font: inherit; }
 .stake-pool > div:first-child p,
 .stake-section-heading p { margin: 12px 0 0; color: #596263; font-size: 14px; line-height: 1.6; }
 .stake-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border: 1px solid var(--ink); }
-.stake-metrics article { min-width: 0; padding: 24px 18px; display: grid; align-content: space-between; gap: 20px; border-right: 1px solid var(--ink); }
+.stake-metrics article { min-width: 0; padding: 24px 18px; display: grid; grid-template-rows: auto auto 1fr; align-content: start; gap: 20px; border-right: 1px solid var(--ink); }
 .stake-metrics article:last-child { border-right: 0; }
 .stake-metrics span,
 .stake-assets span,
@@ -1354,6 +1354,7 @@ button, input { font: inherit; }
 .stake-metrics b { overflow-wrap: anywhere; font-size: clamp(20px,2.2vw,32px); line-height: 1; letter-spacing: -.045em; }
 .stake-metrics small,
 .stake-assets small { color: #596263; font-size: 11px; line-height: 1.5; }
+.stake-metrics small { align-self: end; }
 .stake-global-error { grid-column: 1 / -1; padding: 16px 18px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; font-size: 13px; line-height: 1.5; }
 .stake-wallet-bar { min-height: 76px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; background: var(--region-secondary); border: 1px solid var(--ink); }
 .stake-wallet-bar > div { min-width: 0; margin-right: auto; display: grid; gap: 4px; }

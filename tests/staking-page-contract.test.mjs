@@ -16,6 +16,11 @@ test("staking layout keeps a narrow-screen responsive breakpoint", async () => {
   assert.match(css, /\.stake-actions\s*\{[^}]*grid-template-columns:\s*1fr/s);
 });
 
+test("pool metric values share the same grid row when only APY has supporting text", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /\.stake-metrics article\s*\{[^}]*grid-template-rows:\s*auto auto 1fr[^}]*align-content:\s*start/s);
+});
+
 test("wallet connection opens a connector modal instead of rendering a select", async () => {
   const client = await readFile(new URL("../app/stake/stake-client.tsx", import.meta.url), "utf8");
   const modal = await readFile(new URL("../app/stake/wallet-modal.tsx", import.meta.url), "utf8");
