@@ -95,6 +95,11 @@ export type DiscoveredWallet = {
   provider: InjectedProvider;
 };
 
+function walletDisplayName(name?: string) {
+  if (!name || name.toLowerCase().includes("fluent")) return "Browser wallet";
+  return name;
+}
+
 type DiscoveryTarget = {
   ethereum?: InjectedProvider;
   addEventListener(type: string, listener: EventListener): void;
@@ -109,7 +114,7 @@ export async function discoverInjectedWallets(target: DiscoveryTarget, waitMilli
     if (!detail?.provider || !detail.info?.uuid) return;
     wallets.set(detail.info.uuid, {
       id: detail.info.uuid,
-      name: detail.info.name || "Browser wallet",
+      name: walletDisplayName(detail.info.name),
       icon: detail.info.icon,
       provider: detail.provider,
     });
