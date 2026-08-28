@@ -467,7 +467,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
           <div className="stake-actions">
             <article>
               <span>01 / STAKE</span><h3>Stake CFX</h3><p>Minimum 1,000 CFX in whole multiples of 1,000. Once confirmed, funds enter a lock period of about 13 days.</p>
-              <label htmlFor="stake-amount">Stake amount <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="3000" />
+              <label htmlFor="stake-amount">Stake amount <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="1000" />
               <small id="stake-amount-error" className="stake-input-error" role="alert">{stakeInputError}</small>
               <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>Stake</button>
               <TransactionNotice state={transactions.stake} onCheck={() => void checkReceipt("stake")} />

@@ -5,6 +5,7 @@ import test from "node:test";
 test("staking amount fields expose accessible validation relationships", async () => {
   const source = await readFile(new URL("../app/stake/stake-client.tsx", import.meta.url), "utf8");
   assert.match(source, /id="stake-amount"[^>]+aria-describedby="stake-amount-error"[^>]+aria-invalid=/);
+  assert.match(source, /id="stake-amount".*placeholder="1000"/);
   assert.match(source, /id="unstake-amount"[^>]+aria-describedby="unstake-amount-error"[^>]+aria-invalid=/);
   assert.match(source, /id="stake-amount-error"[^>]+role="alert"/);
   assert.match(source, /id="unstake-amount-error"[^>]+role="alert"/);
