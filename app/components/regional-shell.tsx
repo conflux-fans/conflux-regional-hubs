@@ -16,7 +16,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
 
   return (
     <div className={`regional-site region-${region.key} layout-${region.layout}`} style={style}>
-      <div className="regional-demo-bar"><div className="v2-wrap"><span>KUDI HUB / AFRICA REGIONAL WEBSITE</span><b>{region.domain}</b><Link href={`/questionnaire?region=${region.key}`}>Open Regional Website Creator ↗</Link></div></div>
+      <div className="regional-demo-bar"><div className="v2-wrap"><span>KUDI HUB / AFRICA REGIONAL WEBSITE</span><b>{region.domain}</b></div></div>
       <header className="v2-header">
         <div className="v2-wrap v2-header-inner">
           <Link href={`/${suffix}`} className="v2-brand" aria-label={`${region.wordmark} home`}>
@@ -28,7 +28,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
             <Link href={`/stake${suffix}`}>{region.stakeLabel}</Link>
             {region.communityLinks.length > 0 && <a href="#community">{region.communityLabel}</a>}
           </nav>
-          <Link className="demo-login-pill" href="/demo">Try login <span>→</span></Link>
+          <Link className="demo-login-pill" href="/login?return_to=/studio">Manager login <span>→</span></Link>
         </div>
       </header>
       {children}

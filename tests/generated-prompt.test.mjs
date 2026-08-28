@@ -14,15 +14,24 @@ test("generated developer prompt enforces the shared repo and acceptance tests",
 test("public questionnaire is separate from the protected manager", async () => {
   const questionnaire = await readFile(new URL("../app/questionnaire/page.tsx", import.meta.url), "utf8");
   const studio = await readFile(new URL("../app/studio/page.tsx", import.meta.url), "utf8");
-  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
   assert.match(questionnaire, /setupOnly/);
   assert.doesNotMatch(questionnaire, /getAuthorizedEditor/);
   assert.match(studio, /getAuthorizedEditor/);
-  assert.match(shell, /\/questionnaire\?region=/);
 });
 
 test("main navigation omits creator and manager demo links", async () => {
   const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
   const mainNavigation = shell.match(/<nav aria-label="Main navigation">([\s\S]*?)<\/nav>/)?.[1] ?? "";
   assert.doesNotMatch(mainNavigation, /Website Creator|Manager demo/);
+});
+
+test("top status bar omits the regional website creator link", async () => {
+  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(shell, /Open Regional Website Creator/);
+});
+
+test("public manager entry uses email and password login instead of the demo", async () => {
+  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
+  assert.match(shell, /href="\/login\?return_to=\/studio">Manager login/);
+  assert.doesNotMatch(shell, /href="\/demo">Try login/);
 });
