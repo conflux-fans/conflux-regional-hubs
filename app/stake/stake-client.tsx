@@ -9,6 +9,7 @@ import { stakingErrorDetail, stakingErrorMessage } from "../lib/staking/errors";
 import { queueNodeView, type QueueNode } from "../lib/staking/models";
 import { createReadPoolAdapter, createWalletPoolAdapter, type PosPoolAdapter } from "../lib/staking/pos-pool";
 import { WalletContextGuard, type WalletContext } from "../lib/staking/wallet-context";
+import { withoutExperimentalPermissionRevocation } from "../lib/staking/wallet-connector";
 import { WalletModal } from "./wallet-modal";
 import {
   canManuallyCheckReceipt,
@@ -261,8 +262,15 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     }
   }
 
-  function disconnect() {
-    disconnectMutation.mutate();
+  async function disconnect() {
+    const connector = connection.connector;
+    if (!connector) return;
+    setWalletMessage("");
+    try {
+      await disconnectMutation.mutateAsync({ connector: withoutExperimentalPermissionRevocation(connector) });
+    } catch (error) {
+      setWalletMessage(stakingErrorMessage(error));
+    }
   }
 
   async function switchNetwork() {
@@ -436,7 +444,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
       <section className="stake-wallet-bar">
         {!account ? <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
-          : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
+          : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" disabled={disconnectMutation.isPending} onClick={() => void disconnect()}>{disconnectMutation.isPending ? "Disconnecting..." : "Disconnect"}</button></>}
         {walletMessage && !walletModalOpen && <output role="alert">{walletMessage}</output>}
       </section>
       {walletModalOpen && <WalletModal connectors={connectors} errorMessage={walletMessage} pendingConnectorUid={pendingConnectorUid} onClose={() => setWalletModalOpen(false)} onSelect={(connector) => void connect(connector)} />}
