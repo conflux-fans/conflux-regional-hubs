@@ -15,8 +15,9 @@ export function WalletModal({ connectors, errorMessage, pendingConnectorUid, onC
 
   useEffect(() => {
     const dialog = dialogRef.current;
-    dialog?.showModal();
-    return () => dialog?.close();
+    if (!dialog || dialog.open) return;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
   }, []);
 
   return (
