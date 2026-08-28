@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { confluxESpace } from "viem/chains";
+import { confluxESpace } from "wagmi/chains";
 
 export const wagmiConfig = createConfig({
   chains: [confluxESpace],
