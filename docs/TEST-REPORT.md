@@ -1,12 +1,12 @@
 # Test report
 
-Date: 2026-08-27
+Date: 2026-08-28
 
 ## Automated evidence
 
-- `npm run lint` — passed with zero errors and zero warnings.
-- TypeScript/Node test suite — passed 31/31 tests.
-- Next.js production build — passed, including TypeScript validation and native `sqlite3` bundling.
+- `npm run lint` — passed with zero errors; one pre-existing navigation warning remains in `app/components/sign-out-button.tsx`.
+- TypeScript/Node test suite — passed 39/39 tests.
+- Next.js webpack production build — passed, including TypeScript validation and native `sqlite3` bundling. A Turbopack rerun was blocked by the verification sandbox denying its CSS worker a temporary loopback port; the same Turbopack build had passed before the review fixes.
 - Production server smoke test — `/`, `/login`, and the unauthenticated `/studio` login screen returned HTTP 200.
 - SQLite migration command — passed against SQLite 3.52.0; repeated runs retain one applied migration.
 - Default-off and explicitly enabled staking production builds — passed.
@@ -29,9 +29,11 @@ Date: 2026-08-27
 11. Regional content and article drafts persist and can be read back from SQLite.
 12. CFX/Drip/votePower conversion remains exact at large `bigint` values and rejects invalid or overflowing input.
 13. User assets derive redeemable principal from `locked`, current stake from `available`, and withdrawable principal from both unlocked votes and pool liquidity.
-14. The adapter sends native value only with `increaseStake` and blocks writes on unexpected chain, proxy target, implementation, or bridge state.
-15. Wallet account/network/disconnect events clear stale state; transaction states retain hashes through confirmation timeouts.
-16. Queues paginate in groups of 50, sort by end block, and determine maturity from the current block.
+14. The adapter sends native value only with `increaseStake` and blocks writes on unexpected chain, proxy target, implementation, bridge state, or required read failure.
+15. Wallet account/network/disconnect events invalidate the old wallet generation; transaction states retain hashes through unknown receipts and only recover wallet replacements with a definite replacement receipt.
+16. Stake affordability includes the actual 120% gas limit, and malformed pool metrics degrade their own card while disabling writes.
+17. Amount inputs expose accessible validation relationships, and the narrow-screen staking layout retains its single-column breakpoint.
+18. Queues paginate in groups of 50, sort by end block, and determine maturity from the current block.
 
 ## Production-only tests remaining
 

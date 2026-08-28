@@ -21,6 +21,11 @@ function fakeConnection(overrides = {}) {
         birdgeAddrSetted: true,
         _poolLockPeriod: 56_160n,
         _poolUnlockPeriod: 4_320n,
+        poolName: "PoS Pool",
+        poolSummary: { available: 230n },
+        stakerNumber: 21n,
+        poolAPY: 612n,
+        withdrawableCfx: 188_000n * DRIP_PER_CFX,
       };
       return values[method];
     },
@@ -76,6 +81,43 @@ test("write safety rejects an unexpected network, target, implementation, or unc
     () => new PosPoolAdapter(fakeConnection({ call: async (method) => method === "birdgeAddrSetted" ? false : 1n }), STAKING_CONTRACT_ADDRESS).estimateStake(parseStakeAmount("1000")),
     /bridge/i,
   );
+});
+
+test("write safety fails closed when a required pool read is unavailable", async () => {
+  const base = fakeConnection();
+  const connection = fakeConnection({
+    async call(method, args = []) {
+      if (method === "poolAPY") throw new Error("poolAPY unavailable");
+      return base.call(method, args);
+    },
+  });
+  const adapter = new PosPoolAdapter(connection, STAKING_CONTRACT_ADDRESS);
+
+  const overview = await adapter.readPoolOverview();
+  assert.equal(overview.writeReady, false);
+  await assert.rejects(() => adapter.estimateStake(parseStakeAmount("1000")), /poolAPY unavailable/);
+});
+
+test("a malformed pool metric degrades only that card and disables writes", async () => {
+  const base = fakeConnection();
+  const adapter = new PosPoolAdapter(fakeConnection({
+    async call(method, args = []) {
+      if (method === "poolAPY") return "not-a-number";
+      return base.call(method, args);
+    },
+  }), STAKING_CONTRACT_ADDRESS);
+
+  const overview = await adapter.readPoolOverview();
+  assert.equal(overview.totalStakedCfx, 230_000n);
+  assert.equal(overview.apyRaw, null);
+  assert.equal(overview.writeReady, false);
+  assert.match(overview.validationError.message, /pool APY/i);
+});
+
+test("stake affordability includes the gas-limit safety margin", async () => {
+  const adapter = new PosPoolAdapter(fakeConnection({ feePerGas: async () => 3n }), STAKING_CONTRACT_ADDRESS);
+  const amount = parseStakeAmount("1000");
+  assert.equal(await adapter.estimatedStakeCost(amount, 120_000n), amount.valueDrip + 360_000n);
 });
 
 test("queue reads use pages of 50 and stop at the first short page", async () => {

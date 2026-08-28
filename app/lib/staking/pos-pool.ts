@@ -74,6 +74,15 @@ function parseUserSummary(value: unknown): UserSummary {
   };
 }
 
+function parseSettled<T>(result: PromiseSettledResult<unknown>, parser: (value: unknown) => T) {
+  if (result.status === "rejected") return { value: null, error: result.reason ?? new Error("Required staking read failed.") };
+  try {
+    return { value: parser(result.value), error: null };
+  } catch (error) {
+    return { value: null, error };
+  }
+}
+
 export class PosPoolAdapter {
   readonly connection: PoolConnection;
   readonly contractAddress: string;
@@ -106,27 +115,54 @@ export class PosPoolAdapter {
     };
   }
 
-  async readPoolOverview() {
-    const [name, summary, stakerCount, apyRaw, withdrawableCfxDrip, validation, secondsPerBlock] = await Promise.allSettled([
+  private async readRequiredPoolState() {
+    const [name, summary, stakerCount, apyRaw, withdrawableCfxDrip] = await Promise.allSettled([
       this.connection.call("poolName"),
       this.connection.call("poolSummary"),
       this.connection.call("stakerNumber"),
       this.connection.call("poolAPY"),
       this.connection.call("withdrawableCfx"),
+    ]);
+    const parsedName = parseSettled(name, (value) => {
+      if (typeof value !== "string") throw new Error("Invalid pool name returned by the staking contract.");
+      return value;
+    });
+    const parsedSummary = parseSettled(summary, (value) => votesToCfx(toBigInt(tupleValue(value, "available", 0), "pool available votes")));
+    const parsedStakerCount = parseSettled(stakerCount, (value) => toBigInt(value, "staker count"));
+    const parsedApy = parseSettled(apyRaw, (value) => toBigInt(value, "pool APY"));
+    const parsedWithdrawable = parseSettled(withdrawableCfxDrip, (value) => toBigInt(value, "withdrawable CFX"));
+    const parsedReads = [parsedName, parsedSummary, parsedStakerCount, parsedApy, parsedWithdrawable];
+    return {
+      name: parsedName.value ?? "",
+      totalStakedCfx: parsedSummary.value,
+      stakerCount: parsedStakerCount.value,
+      apyRaw: parsedApy.value,
+      withdrawableCfxDrip: parsedWithdrawable.value,
+      validationError: parsedReads.find((result) => result.error)?.error ?? null,
+    };
+  }
+
+  async readPoolOverview() {
+    const [requiredReads, validation, secondsPerBlock] = await Promise.allSettled([
+      this.readRequiredPoolState(),
       this.validateContract(),
       this.connection.secondsPerBlock(),
     ]);
+    const required = requiredReads.status === "fulfilled" ? requiredReads.value : null;
     const validationResult = validation.status === "fulfilled" ? validation.value : null;
+    const validationError = validation.status === "rejected" ? validation.reason
+      : requiredReads.status === "rejected" ? requiredReads.reason
+        : required?.validationError ?? null;
     return {
-      name: name.status === "fulfilled" && typeof name.value === "string" ? name.value : "",
-      totalStakedCfx: summary.status === "fulfilled" ? votesToCfx(toBigInt(tupleValue(summary.value, "available", 0), "pool available votes")) : null,
-      stakerCount: stakerCount.status === "fulfilled" ? toBigInt(stakerCount.value, "staker count") : null,
-      apyRaw: apyRaw.status === "fulfilled" ? toBigInt(apyRaw.value, "pool APY") : null,
-      withdrawableCfxDrip: withdrawableCfxDrip.status === "fulfilled" ? toBigInt(withdrawableCfxDrip.value, "withdrawable CFX") : null,
+      name: required?.name ?? "",
+      totalStakedCfx: required?.totalStakedCfx ?? null,
+      stakerCount: required?.stakerCount ?? null,
+      apyRaw: required?.apyRaw ?? null,
+      withdrawableCfxDrip: required?.withdrawableCfxDrip ?? null,
       secondsPerBlock: secondsPerBlock.status === "fulfilled" ? secondsPerBlock.value : 2,
-      writeReady: Boolean(validationResult),
+      writeReady: Boolean(validationResult) && Boolean(required) && !validationError,
       validation: validationResult,
-      validationError: validation.status === "rejected" ? validation.reason : null,
+      validationError,
     };
   }
 
@@ -171,6 +207,10 @@ export class PosPoolAdapter {
     return this.connection.estimate("increaseStake", [amount.votePower], { value: amount.valueDrip });
   }
 
+  async estimatedStakeCost(amount: StakeAmount, gasLimit: bigint) {
+    return amount.valueDrip + gasLimit * await this.connection.feePerGas();
+  }
+
   async estimateUnstake(votePower: bigint) {
     await this.assertWriteSafety();
     return this.connection.estimate("decreaseStake", [votePower], { value: 0n });
@@ -211,7 +251,11 @@ export class PosPoolAdapter {
   }
 
   private async assertWriteSafety() {
-    await this.validateContract();
+    const [, required] = await Promise.all([
+      this.validateContract(),
+      this.readRequiredPoolState(),
+    ]);
+    if (required.validationError) throw required.validationError;
   }
 }
 
@@ -277,6 +321,7 @@ export class EthersPoolConnection implements PoolConnection {
   receipt(hash: string) {
     return this.provider.getTransactionReceipt(hash);
   }
+
 }
 
 export function createReadPoolAdapter(rpcUrl: string) {

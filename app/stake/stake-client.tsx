@@ -8,10 +8,15 @@ import { stakingErrorDetail, stakingErrorMessage } from "../lib/staking/errors";
 import { queueNodeView, type QueueNode } from "../lib/staking/models";
 import { createReadPoolAdapter, createWalletPoolAdapter, type PosPoolAdapter } from "../lib/staking/pos-pool";
 import { discoverInjectedWallets, InjectedWalletSession, type DiscoveredWallet, type InjectedProvider } from "../lib/staking/provider";
+import { WalletContextGuard, type WalletContext } from "../lib/staking/wallet-context";
 import {
+  canManuallyCheckReceipt,
+  classifyReceiptStatus,
   gasLimitWithMargin,
   initialTransactionState,
+  isTransactionPending,
   pendingTransactionKey,
+  resolveConfirmedReplacement,
   transitionTransaction,
   type TransactionEvent,
   type TransactionPhase,
@@ -46,14 +51,11 @@ function phaseLabel(phase: TransactionPhase) {
     confirming: "等待链上确认…",
     success: "交易已确认",
     refreshing: "正在刷新链上数据…",
+    validation_error: "请检查输入金额",
     rejected: "操作已取消",
     reverted: "交易执行失败",
     rpc_error: "网络服务暂时不可用",
   }[phase];
-}
-
-function isPending(state: TransactionState) {
-  return ["validating", "estimating", "awaiting_signature", "submitted", "confirming", "refreshing"].includes(state.phase);
 }
 
 function shortAddress(address: string) {
@@ -88,12 +90,12 @@ function QueuePanel({ title, queue, currentBlock, activeLabel, secondsPerBlock }
 
 function TransactionNotice({ state, onCheck }: { state: TransactionState; onCheck?: () => void }) {
   if (state.phase === "idle") return null;
-  const tone = state.phase === "success" ? "success" : ["rejected", "reverted", "rpc_error"].includes(state.phase) ? "error" : "pending";
+  const tone = state.phase === "success" ? "success" : ["validation_error", "rejected", "reverted", "rpc_error"].includes(state.phase) ? "error" : "pending";
   return (
     <output className={`stake-transaction ${tone}`} aria-live="polite">
       <b>{state.message || phaseLabel(state.phase)}</b>
       {state.hash && <a href={transactionExplorerUrl(state.hash)} target="_blank" rel="noreferrer">查看交易 ↗</a>}
-      {state.phase === "submitted" && onCheck && <button type="button" onClick={onCheck}>查询回执</button>}
+      {canManuallyCheckReceipt(state) && onCheck && <button type="button" onClick={onCheck}>查询回执</button>}
       {state.detail && <details><summary>技术详情</summary><code>{state.detail}</code></details>}
     </output>
   );
@@ -118,16 +120,16 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   const walletAdapter = useRef<PosPoolAdapter | null>(null);
   const unsubscribe = useRef<(() => void) | null>(null);
   const userRequest = useRef(0);
-  const accountRef = useRef<string | null>(null);
-  const chainIdRef = useRef<bigint | null>(null);
+  const receiptQueries = useRef(new Set<string>());
+  const walletContext = useRef(new WalletContextGuard());
 
   const updateTransaction = useCallback((action: Action, event: TransactionEvent) => {
     setTransactions((current) => ({ ...current, [action]: transitionTransaction(current[action], event) }));
   }, []);
 
   const restorePendingTransactions = useCallback((nextAccount: string) => {
-    setTransactions((current) => {
-      const restored = { ...current };
+    setTransactions(() => {
+      const restored = { ...initialTransactions };
       for (const action of Object.keys(initialTransactions) as Action[]) {
         const hash = window.localStorage.getItem(pendingTransactionKey(nextAccount, action));
         if (hash) restored[action] = transitionTransaction(restored[action], { type: "submitted", hash, message: "发现一笔待确认交易" });
@@ -153,56 +155,70 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     setStakeInput("");
     setUnstakeInput("");
     setTransactions(initialTransactions);
+    setUserLoading(false);
   }, []);
 
-  const refreshUser = useCallback(async (nextAccount = account) => {
+  const refreshUser = useCallback(async (nextAccount?: string | null) => {
     const adapter = walletAdapter.current;
-    if (!adapter || !nextAccount || chainId !== CONFLUX_ESPACE_CHAIN_ID) return;
+    const context = walletContext.current.current();
+    const targetAccount = nextAccount ?? context.account;
+    if (!adapter || !targetAccount || context.chainId !== CONFLUX_ESPACE_CHAIN_ID) return;
     const request = ++userRequest.current;
     setUserLoading(true);
     try {
-      const snapshot = await adapter.readUserSnapshot(nextAccount);
-      if (request === userRequest.current) {
+      const snapshot = await adapter.readUserSnapshot(targetAccount);
+      if (request === userRequest.current && adapter === walletAdapter.current && walletContext.current.matches(context)) {
         setUser(snapshot);
         setWalletMessage("");
       }
     } catch (error) {
-      if (request === userRequest.current) setWalletMessage(stakingErrorMessage(error));
+      if (request === userRequest.current && adapter === walletAdapter.current && walletContext.current.matches(context)) setWalletMessage(stakingErrorMessage(error));
     } finally {
       if (request === userRequest.current) setUserLoading(false);
     }
-  }, [account, chainId]);
+  }, []);
+
+  const isCurrentWallet = useCallback((context: WalletContext) => walletContext.current.matches(context), []);
 
   const prepareWalletAdapter = useCallback(async (provider: InjectedProvider, nextAccount: string, nextChainId: bigint) => {
+    const context = walletContext.current.replace(nextAccount, nextChainId);
     clearUser();
     setAccount(nextAccount);
     setChainId(nextChainId);
-    accountRef.current = nextAccount;
-    chainIdRef.current = nextChainId;
     restorePendingTransactions(nextAccount);
     walletAdapter.current = null;
     if (nextChainId !== CONFLUX_ESPACE_CHAIN_ID) return;
+    setUserLoading(true);
     try {
       const adapter = await createWalletPoolAdapter(provider);
+      if (!isCurrentWallet(context)) return;
       walletAdapter.current = adapter;
-      const request = ++userRequest.current;
-      setUserLoading(true);
-      const snapshot = await adapter.readUserSnapshot(nextAccount);
-      if (request === userRequest.current) setUser(snapshot);
+      await refreshUser(nextAccount);
     } catch (error) {
-      setWalletMessage(stakingErrorMessage(error));
+      if (isCurrentWallet(context)) setWalletMessage(stakingErrorMessage(error));
     } finally {
-      setUserLoading(false);
+      if (isCurrentWallet(context)) setUserLoading(false);
     }
-  }, [clearUser, restorePendingTransactions]);
+  }, [clearUser, isCurrentWallet, refreshUser, restorePendingTransactions]);
 
   useEffect(() => {
+    const refreshVisibleData = () => {
+      if (document.visibilityState !== "visible") return;
+      void Promise.all([refreshPool(), refreshUser()]);
+    };
     const initial = window.setTimeout(() => void refreshPool(), 0);
-    const timer = window.setInterval(() => void refreshPool(), 30_000);
-    const onFocus = () => void refreshPool();
+    const timer = window.setInterval(refreshVisibleData, 30_000);
+    const onFocus = () => refreshVisibleData();
+    const onVisibility = () => refreshVisibleData();
     window.addEventListener("focus", onFocus);
-    return () => { window.clearTimeout(initial); window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
-  }, [refreshPool]);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [refreshPool, refreshUser]);
 
   useEffect(() => {
     void discoverInjectedWallets(window as typeof window & { ethereum?: InjectedProvider }).then((found) => {
@@ -223,21 +239,21 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       walletProvider.current = wallet.provider;
       unsubscribe.current?.();
       unsubscribe.current = session.subscribe((change) => {
-        clearUser();
         if (change.type === "disconnect" || (change.type === "accounts" && !change.account)) {
+          walletContext.current.clear();
+          clearUser();
           setAccount(null);
-          accountRef.current = null;
+          setChainId(null);
           walletAdapter.current = null;
           return;
         }
         if (change.type === "chain") {
-          setChainId(change.chainId);
-          chainIdRef.current = change.chainId;
-          if (accountRef.current && walletProvider.current) void prepareWalletAdapter(walletProvider.current, accountRef.current, change.chainId);
+          const currentAccount = walletContext.current.current().account;
+          if (currentAccount && walletProvider.current) void prepareWalletAdapter(walletProvider.current, currentAccount, change.chainId);
           return;
         }
         if (change.type === "accounts" && change.account && walletProvider.current) {
-          void prepareWalletAdapter(walletProvider.current, change.account, chainIdRef.current ?? connected.chainId);
+          void prepareWalletAdapter(walletProvider.current, change.account, walletContext.current.current().chainId ?? connected.chainId);
         }
       });
       await prepareWalletAdapter(wallet.provider, connected.account, connected.chainId);
@@ -249,14 +265,13 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   }
 
   function disconnect() {
+    walletContext.current.clear();
     unsubscribe.current?.();
     unsubscribe.current = null;
     walletProvider.current = null;
     walletAdapter.current = null;
     setAccount(null);
     setChainId(null);
-    accountRef.current = null;
-    chainIdRef.current = null;
     clearUser();
   }
 
@@ -272,10 +287,16 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
   async function runTransaction(action: Action) {
     const adapter = walletAdapter.current;
-    if (!adapter || !account || !user || chainId !== CONFLUX_ESPACE_CHAIN_ID || isPending(transactions[action])) return;
+    if (!adapter || !account || !user || chainId !== CONFLUX_ESPACE_CHAIN_ID || isTransactionPending(transactions[action])) return;
+    const operationAccount = account;
+    const operationContext = walletContext.current.current();
+    const updateIfCurrent = (event: TransactionEvent) => {
+      if (isCurrentWallet(operationContext)) updateTransaction(action, event);
+    };
     let submittedHash: string | undefined;
+    let phase: TransactionPhase = "validating";
     try {
-      updateTransaction(action, { type: "validating" });
+      updateIfCurrent({ type: "validating" });
       let votePower = 0n;
       let stakeAmount: ReturnType<typeof parseStakeAmount> | undefined;
       if (action === "stake") stakeAmount = parseStakeAmount(stakeInput);
@@ -290,46 +311,71 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       }
       if (action === "claim" && user.position.claimableInterestDrip === 0n) throw new Error("No claimable interest");
 
-      updateTransaction(action, { type: "estimating" });
+      phase = "estimating";
+      updateIfCurrent({ type: "estimating" });
       const estimate = action === "stake" ? await adapter.estimateStake(stakeAmount!)
         : action === "unstake" ? await adapter.estimateUnstake(votePower)
           : action === "withdraw" ? await adapter.estimateWithdraw(votePower)
             : await adapter.estimateClaim();
       const gasLimit = gasLimitWithMargin(estimate);
       if (action === "stake" && stakeAmount) {
-        const feePerGas = await adapter.connection.feePerGas();
-        if (stakeAmount.valueDrip + estimate * feePerGas > user.balanceDrip) throw new Error("余额不足以支付质押金额和预计 gas");
+        if (await adapter.estimatedStakeCost(stakeAmount, gasLimit) > user.balanceDrip) {
+          phase = "validating";
+          throw new Error("余额不足以支付质押金额和预计 gas");
+        }
       }
 
-      updateTransaction(action, { type: "awaiting_signature" });
+      if (!isCurrentWallet(operationContext)) return;
+      phase = "awaiting_signature";
+      updateIfCurrent({ type: "awaiting_signature" });
       const transaction = action === "stake" ? await adapter.sendStake(stakeAmount!, gasLimit)
         : action === "unstake" ? await adapter.sendUnstake(votePower, gasLimit)
           : action === "withdraw" ? await adapter.sendWithdraw(votePower, gasLimit)
             : await adapter.sendClaim(gasLimit);
       submittedHash = transaction.hash;
-      window.localStorage.setItem(pendingTransactionKey(account, action), transaction.hash);
-      updateTransaction(action, { type: "submitted", hash: transaction.hash });
-      updateTransaction(action, { type: "confirming" });
+      window.localStorage.setItem(pendingTransactionKey(operationAccount, action), transaction.hash);
+      updateIfCurrent({ type: "submitted", hash: transaction.hash });
+      updateIfCurrent({ type: "confirming" });
       const receipt = await transaction.wait(1, 180_000);
       if (!receipt) throw new Error("Transaction confirmation timeout");
-      if (receipt.status !== 1) {
-        window.localStorage.removeItem(pendingTransactionKey(account, action));
-        updateTransaction(action, { type: "reverted", hash: transaction.hash, message: "交易执行失败" });
-        await Promise.all([refreshPool(), refreshUser(account)]);
+      const receiptOutcome = classifyReceiptStatus(receipt.status);
+      if (receiptOutcome === "unknown") throw new Error("Unknown transaction receipt status");
+      if (receiptOutcome === "failed") {
+        window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
+        updateIfCurrent({ type: "reverted", hash: transaction.hash, message: "交易执行失败" });
+        if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         return;
       }
-      window.localStorage.removeItem(pendingTransactionKey(account, action));
-      updateTransaction(action, { type: "success", hash: transaction.hash, message: successMessages[action] });
-      updateTransaction(action, { type: "refreshing", hash: transaction.hash, message: "交易已确认，正在刷新链上数据…" });
-      setStakeInput("");
-      setUnstakeInput("");
-      await Promise.all([refreshPool(), refreshUser(account)]);
-      updateTransaction(action, { type: "success", hash: transaction.hash, message: successMessages[action] });
+      window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
+      if (isCurrentWallet(operationContext)) {
+        updateIfCurrent({ type: "refreshing", hash: transaction.hash, message: "交易已确认，正在刷新链上数据…" });
+        setStakeInput("");
+        setUnstakeInput("");
+        await Promise.all([refreshPool(), refreshUser(operationAccount)]);
+        updateIfCurrent({ type: "success", hash: transaction.hash, message: successMessages[action] });
+      }
     } catch (error) {
+      const replacement = submittedHash ? resolveConfirmedReplacement(error) : null;
+      if (replacement) {
+        window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
+        if (replacement.outcome === "success") {
+          if (isCurrentWallet(operationContext)) {
+            updateIfCurrent({ type: "refreshing", hash: replacement.hash, message: "加速交易已确认，正在刷新链上数据…" });
+            setStakeInput("");
+            setUnstakeInput("");
+            await Promise.all([refreshPool(), refreshUser(operationAccount)]);
+            updateIfCurrent({ type: "success", hash: replacement.hash, message: successMessages[action] });
+          }
+        } else {
+          updateIfCurrent({ type: "reverted", hash: replacement.hash, message: "原交易已被钱包取消或替代交易执行失败" });
+          if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
+        }
+        return;
+      }
       const code = error && typeof error === "object" ? (error as { code?: number | string }).code : undefined;
-      const phase = code === 4001 || code === "ACTION_REJECTED" ? "rejected" : code === "CALL_EXCEPTION" ? "reverted" : "rpc_error";
-      updateTransaction(action, { type: phase, ...(submittedHash ? { hash: submittedHash } : {}), message: stakingErrorMessage(error), detail: stakingErrorDetail(error) });
-      if (submittedHash) await Promise.all([refreshPool(), refreshUser(account)]);
+      const errorPhase = submittedHash ? "rpc_error" : phase === "validating" ? "validation_error" : code === 4001 || code === "ACTION_REJECTED" ? "rejected" : code === "CALL_EXCEPTION" ? "reverted" : "rpc_error";
+      updateIfCurrent({ type: errorPhase, ...(submittedHash ? { hash: submittedHash } : {}), message: submittedHash ? "交易已提交，但回执暂未确认，请继续查询" : stakingErrorMessage(error), detail: stakingErrorDetail(error) });
+      if (submittedHash && isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
     }
   }
 
@@ -337,26 +383,56 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     const adapter = walletAdapter.current;
     const hash = transactions[action].hash;
     if (!adapter || !hash || !account) return;
+    const queryKey = pendingTransactionKey(account, action);
+    if (receiptQueries.current.has(queryKey)) return;
+    receiptQueries.current.add(queryKey);
+    const operationAccount = account;
+    const operationContext = walletContext.current.current();
+    const updateIfCurrent = (event: TransactionEvent) => {
+      if (isCurrentWallet(operationContext)) updateTransaction(action, event);
+    };
     try {
+      updateIfCurrent({ type: "confirming", hash, message: "正在查询链上回执…" });
       const receipt = await adapter.transactionReceipt(hash);
-      if (!receipt) { updateTransaction(action, { type: "submitted", hash, message: "交易仍在等待确认" }); return; }
-      if (receipt.status !== 1) {
-        window.localStorage.removeItem(pendingTransactionKey(account, action));
-        updateTransaction(action, { type: "reverted", hash, message: "交易执行失败" });
-        await Promise.all([refreshPool(), refreshUser(account)]);
+      if (!receipt) {
+        updateIfCurrent({ type: "submitted", hash, message: "交易仍在等待确认；未知状态不会解除本动作的提交锁。" });
         return;
       }
-      window.localStorage.removeItem(pendingTransactionKey(account, action));
-      updateTransaction(action, { type: "refreshing", hash, message: "交易已确认，正在刷新链上数据…" });
-      await Promise.all([refreshPool(), refreshUser(account)]);
-      updateTransaction(action, { type: "success", hash, message: successMessages[action] });
+      const receiptOutcome = classifyReceiptStatus(receipt.status);
+      if (receiptOutcome === "unknown") {
+        updateIfCurrent({ type: "submitted", hash, message: "RPC 返回了未知回执状态；本动作继续保持提交锁。" });
+        return;
+      }
+      if (receiptOutcome === "failed") {
+        window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
+        updateIfCurrent({ type: "reverted", hash, message: "交易执行失败" });
+        if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
+        return;
+      }
+      window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
+      updateIfCurrent({ type: "refreshing", hash, message: "交易已确认，正在刷新链上数据…" });
+      if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
+      updateIfCurrent({ type: "success", hash, message: successMessages[action] });
     } catch (error) {
-      updateTransaction(action, { type: "rpc_error", hash, message: stakingErrorMessage(error), detail: stakingErrorDetail(error) });
+      updateIfCurrent({ type: "rpc_error", hash, message: "回执查询失败，交易仍按未决状态处理", detail: stakingErrorDetail(error) });
+    } finally {
+      receiptQueries.current.delete(queryKey);
     }
   }
 
   const correctNetwork = chainId === CONFLUX_ESPACE_CHAIN_ID;
   const poolName = pool?.name || poolFallbackName;
+  const stakeInputError = (() => {
+    if (!stakeInput) return "";
+    try { parseStakeAmount(stakeInput); return ""; } catch (error) { return stakingErrorMessage(error); }
+  })();
+  const unstakeInputError = (() => {
+    if (!unstakeInput) return "";
+    try {
+      const amount = parseStakeAmount(unstakeInput);
+      return user && amount.cfx > user.position.redeemableCfx ? "输入金额超过当前可赎回额度" : "";
+    } catch (error) { return stakingErrorMessage(error); }
+  })();
 
   return (
     <div className="stake-dashboard v2-wrap">
@@ -393,25 +469,27 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
           <div className="stake-actions">
             <article>
               <span>01 / STAKE</span><h3>质押 CFX</h3><p>最少 1000 CFX，且必须为 1000 的整数倍。确认后进入约 13 天锁定期。</p>
-              <label htmlFor="stake-amount">质押金额 <small>CFX</small></label><input id="stake-amount" inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="3000" />
-              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || isPending(transactions.stake)}>质押</button>
+              <label htmlFor="stake-amount">质押金额 <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="3000" />
+              <small id="stake-amount-error" className="stake-input-error" role="alert">{stakeInputError}</small>
+              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>质押</button>
               <TransactionNotice state={transactions.stake} onCheck={() => void checkReceipt("stake")} />
             </article>
             <article>
               <span>02 / UNSTAKE</span><h3>赎回 CFX</h3><p>仅可赎回已过质押锁定期的金额。确认后进入约 1 天解锁期，不会立即到账。</p>
-              <label htmlFor="unstake-amount">赎回金额 <small>最多 {formatCfx(user.position.redeemableCfx)}</small></label><input id="unstake-amount" inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || isPending(transactions.unstake)}>赎回</button>
+              <label htmlFor="unstake-amount">赎回金额 <small>最多 {formatCfx(user.position.redeemableCfx)}</small></label><input id="unstake-amount" aria-describedby="unstake-amount-error" aria-invalid={Boolean(unstakeInputError)} inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
+              <small id="unstake-amount-error" className="stake-input-error" role="alert">{unstakeInputError}</small>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || Boolean(unstakeInputError) || isTransactionPending(transactions.unstake)}>赎回</button>
               <TransactionNotice state={transactions.unstake} onCheck={() => void checkReceipt("unstake")} />
             </article>
             <article>
               <span>03 / WITHDRAW</span><h3>提取本金</h3><p>本次提取 {formatCfx(user.position.withdrawableCfx)}。已解锁本金仍可能受全池桥接流动性限制。</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isPending(transactions.withdraw)}>提取当前可提取额度</button>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isTransactionPending(transactions.withdraw)}>提取当前可提取额度</button>
               {user.position.unlockedCfx > 0n && user.position.withdrawableVotes === 0n && <small className="stake-liquidity-note">等待矿池补充提取流动性</small>}
               <TransactionNotice state={transactions.withdraw} onCheck={() => void checkReceipt("withdraw")} />
             </article>
             <article>
               <span>04 / REWARDS</span><h3>领取全部收益</h3><p>可领取 {formatDripAsCfx(user.position.claimableInterestDrip)}。本期仅支持一次领取全部收益。</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isPending(transactions.claim)}>领取全部收益</button>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isTransactionPending(transactions.claim)}>领取全部收益</button>
               <TransactionNotice state={transactions.claim} onCheck={() => void checkReceipt("claim")} />
             </article>
           </div>

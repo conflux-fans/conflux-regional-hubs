@@ -7,6 +7,7 @@ export type TransactionPhase =
   | "confirming"
   | "success"
   | "refreshing"
+  | "validation_error"
   | "rejected"
   | "reverted"
   | "rpc_error";
@@ -41,6 +42,42 @@ export function transitionTransaction(state: TransactionState, event: Transactio
 
 export function gasLimitWithMargin(estimate: bigint) {
   return (estimate * 120n + 99n) / 100n;
+}
+
+export function isTransactionPending(state: TransactionState) {
+  if (["validating", "estimating", "awaiting_signature", "submitted", "confirming", "refreshing"].includes(state.phase)) {
+    return true;
+  }
+  return state.phase === "rpc_error" && Boolean(state.hash);
+}
+
+export function canManuallyCheckReceipt(state: TransactionState) {
+  return Boolean(state.hash) && (state.phase === "submitted" || state.phase === "rpc_error");
+}
+
+export function classifyReceiptStatus(status: unknown): "success" | "failed" | "unknown" {
+  if (status === 1) return "success";
+  if (status === 0) return "failed";
+  return "unknown";
+}
+
+export function resolveConfirmedReplacement(error: unknown): { hash: string; outcome: "success" | "cancelled_or_failed" } | null {
+  if (!error || typeof error !== "object") return null;
+  const value = error as {
+    code?: unknown;
+    cancelled?: unknown;
+    replacement?: { hash?: unknown };
+    receipt?: { hash?: unknown; status?: unknown };
+  };
+  if (value.code !== "TRANSACTION_REPLACED" || typeof value.cancelled !== "boolean" || !value.receipt || (value.receipt.status !== 0 && value.receipt.status !== 1)) return null;
+  const hash = typeof value.replacement?.hash === "string" ? value.replacement.hash
+    : typeof value.receipt.hash === "string" ? value.receipt.hash
+      : null;
+  if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) return null;
+  return {
+    hash,
+    outcome: !value.cancelled && value.receipt.status === 1 ? "success" : "cancelled_or_failed",
+  };
 }
 
 export function pendingTransactionKey(account: string, action: string) {
