@@ -64,9 +64,9 @@ test("queue status is decided by block height, not an estimated date", () => {
 });
 
 test("known wallet and contract failures map to recoverable product messages", () => {
-  assert.equal(stakingErrorMessage({ code: 4001 }), "操作已取消");
-  assert.equal(stakingErrorMessage(new Error("execution reverted: Locked is not enough")), "当前可赎回余额不足或存在锁仓限制");
-  assert.equal(stakingErrorMessage(new Error("Withdrawable CFX is not enough")), "矿池当前可提取流动性不足");
-  assert.equal(stakingErrorMessage(new Error("金额必须是 1000 CFX 的正整数倍")), "金额必须是 1000 CFX 的正整数倍");
-  assert.equal(stakingErrorMessage(new Error("余额不足以支付质押金额和预计 gas")), "钱包余额不足以支付金额和预计 gas");
+  assert.equal(stakingErrorMessage({ code: 4001 }), "Action cancelled");
+  assert.equal(stakingErrorMessage(new Error("execution reverted: Locked is not enough")), "Not enough principal is available to unstake, or it remains locked");
+  assert.equal(stakingErrorMessage(new Error("Withdrawable CFX is not enough")), "Pool withdrawal liquidity is currently insufficient");
+  assert.equal(stakingErrorMessage(new Error("Amount must be a positive whole multiple of 1,000 CFX")), "Amount must be a positive whole multiple of 1,000 CFX");
+  assert.equal(stakingErrorMessage(new Error("Insufficient balance to cover the stake amount and estimated gas")), "Wallet balance cannot cover the amount and estimated gas");
 });

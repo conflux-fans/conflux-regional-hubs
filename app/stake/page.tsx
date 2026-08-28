@@ -25,9 +25,9 @@ export default async function StakePage({ searchParams }: { searchParams: Promis
             <Link href={`/?region=${region.key}`}>← Home</Link>
           </div>
           <aside>
-            <b>Conflux eSpace 主网</b>
-            <span>合约 {shortAddress(STAKING_CONTRACT_ADDRESS)}</span>
-            <p>APY 是历史指标，不代表固定或保证收益。质押和赎回存在锁定期，跨空间结算及矿池流动性可能延迟本金提取。</p>
+            <b>Conflux eSpace Mainnet</b>
+            <span>Contract {shortAddress(STAKING_CONTRACT_ADDRESS)}</span>
+            <p>APY is a historical metric, not a fixed or guaranteed return. Staking and unstaking have lock periods, and cross-space settlement or pool liquidity may delay principal withdrawals.</p>
           </aside>
         </header>
         {staking.enabled ? (
@@ -35,8 +35,8 @@ export default async function StakePage({ searchParams }: { searchParams: Promis
         ) : (
           <section className="stake-disabled v2-wrap" role="status">
             <span>STAKING PAUSED</span>
-            <h2>质押功能暂未开放</h2>
-            <p>{staking.configurationError ? "上线配置未通过安全白名单校验。" : "功能已随代码交付，但默认保持关闭；完成代理实现、ABI 和只读调用复核后再开启。"}</p>
+            <h2>Staking is not available yet</h2>
+            <p>{staking.configurationError ? "The launch configuration failed the security allowlist check." : "The feature is implemented but disabled by default. Enable it only after reviewing the proxy implementation, ABI, and read-only calls."}</p>
           </section>
         )}
       </main>

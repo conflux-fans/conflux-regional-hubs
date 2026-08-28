@@ -10,13 +10,13 @@ export type StakeAmount = {
 };
 
 export function parseStakeAmount(input: string): StakeAmount {
-  if (!/^[0-9]+$/.test(input)) throw new Error("请输入不含小数的 CFX 数量");
+  if (!/^[0-9]+$/.test(input)) throw new Error("Enter a whole-number CFX amount");
   const cfx = BigInt(input);
   if (cfx < CFX_PER_VOTE || cfx % CFX_PER_VOTE !== 0n) {
-    throw new Error("金额必须是 1000 CFX 的正整数倍");
+    throw new Error("Amount must be a positive whole multiple of 1,000 CFX");
   }
   const votePower = cfx / CFX_PER_VOTE;
-  if (votePower > MAX_UINT64) throw new Error("票数超过 uint64 上限");
+  if (votePower > MAX_UINT64) throw new Error("Vote power exceeds the uint64 maximum");
   return { cfx, votePower, valueDrip: cfx * DRIP_PER_CFX };
 }
 

@@ -35,26 +35,26 @@ const initialTransactions: Record<Action, TransactionState> = {
 };
 
 const successMessages: Record<Action, string> = {
-  stake: "质押交易已确认，正在锁定",
-  unstake: "赎回交易已确认，进入解锁期",
-  withdraw: "本金已提取至当前钱包",
-  claim: "收益已领取至当前钱包",
+  stake: "Stake confirmed and entering the lock period",
+  unstake: "Unstake confirmed and entering the unlock period",
+  withdraw: "Principal withdrawn to your wallet",
+  claim: "Rewards claimed to your wallet",
 };
 
 function phaseLabel(phase: TransactionPhase) {
   return {
     idle: "",
-    validating: "正在校验金额和网络…",
-    estimating: "正在估算 gas…",
-    awaiting_signature: "请在钱包中确认…",
-    submitted: "交易已提交",
-    confirming: "等待链上确认…",
-    success: "交易已确认",
-    refreshing: "正在刷新链上数据…",
-    validation_error: "请检查输入金额",
-    rejected: "操作已取消",
-    reverted: "交易执行失败",
-    rpc_error: "网络服务暂时不可用",
+    validating: "Validating amount and network...",
+    estimating: "Estimating gas...",
+    awaiting_signature: "Confirm in your wallet...",
+    submitted: "Transaction submitted",
+    confirming: "Waiting for onchain confirmation...",
+    success: "Transaction confirmed",
+    refreshing: "Refreshing onchain data...",
+    validation_error: "Check the entered amount",
+    rejected: "Action cancelled",
+    reverted: "Transaction failed",
+    rpc_error: "Network service is temporarily unavailable",
   }[phase];
 }
 
@@ -63,11 +63,11 @@ function shortAddress(address: string) {
 }
 
 function approximateTime(seconds: bigint) {
-  if (seconds <= 0n) return "已到期";
+  if (seconds <= 0n) return "Matured";
   const days = seconds / 86_400n;
-  if (days > 0n) return `预计约 ${days} 天`;
+  if (days > 0n) return `About ${days} days (estimated)`;
   const hours = (seconds + 3599n) / 3600n;
-  return `预计约 ${hours} 小时`;
+  return `About ${hours} hours (estimated)`;
 }
 
 function QueuePanel({ title, queue, currentBlock, activeLabel, secondsPerBlock }: { title: string; queue: QueueNode[]; currentBlock: bigint; activeLabel: string; secondsPerBlock: number }) {
@@ -77,13 +77,13 @@ function QueuePanel({ title, queue, currentBlock, activeLabel, secondsPerBlock }
   return (
     <section className="stake-queue">
       <button type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
-        <span><b>{title}</b><small>{pending.length} 个进行中批次 · {formatCfx(pendingCfx)}</small></span>
-        <i>{expanded ? "收起 −" : "展开 +"}</i>
+        <span><b>{title}</b><small>{pending.length} active {pending.length === 1 ? "batch" : "batches"} · {formatCfx(pendingCfx)}</small></span>
+        <i>{expanded ? "Collapse −" : "Expand +"}</i>
       </button>
       {expanded && (queue.length ? <div className="stake-queue-list">{queue.map((node, index) => {
         const view = queueNodeView(node, currentBlock, secondsPerBlock);
-        return <article key={`${node.endBlock}-${index}`}><span><b>{formatCfx(view.amountCfx)}</b><small>目标区块 #{view.endBlock.toString()}</small></span><span><b>{view.matured ? "已到期" : activeLabel}</b><small>{approximateTime(view.estimatedSeconds)}</small></span></article>;
-      })}</div> : <p className="stake-empty">当前没有队列记录</p>)}
+        return <article key={`${node.endBlock}-${index}`}><span><b>{formatCfx(view.amountCfx)}</b><small>Target block #{view.endBlock.toString()}</small></span><span><b>{view.matured ? "Matured" : activeLabel}</b><small>{approximateTime(view.estimatedSeconds)}</small></span></article>;
+      })}</div> : <p className="stake-empty">No queue entries</p>)}
     </section>
   );
 }
@@ -94,9 +94,9 @@ function TransactionNotice({ state, onCheck }: { state: TransactionState; onChec
   return (
     <output className={`stake-transaction ${tone}`} aria-live="polite">
       <b>{state.message || phaseLabel(state.phase)}</b>
-      {state.hash && <a href={transactionExplorerUrl(state.hash)} target="_blank" rel="noreferrer">查看交易 ↗</a>}
-      {canManuallyCheckReceipt(state) && onCheck && <button type="button" onClick={onCheck}>查询回执</button>}
-      {state.detail && <details><summary>技术详情</summary><code>{state.detail}</code></details>}
+      {state.hash && <a href={transactionExplorerUrl(state.hash)} target="_blank" rel="noreferrer">View transaction ↗</a>}
+      {canManuallyCheckReceipt(state) && onCheck && <button type="button" onClick={onCheck}>Check receipt</button>}
+      {state.detail && <details><summary>Technical details</summary><code>{state.detail}</code></details>}
     </output>
   );
 }
@@ -132,7 +132,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       const restored = { ...initialTransactions };
       for (const action of Object.keys(initialTransactions) as Action[]) {
         const hash = window.localStorage.getItem(pendingTransactionKey(nextAccount, action));
-        if (hash) restored[action] = transitionTransaction(restored[action], { type: "submitted", hash, message: "发现一笔待确认交易" });
+        if (hash) restored[action] = transitionTransaction(restored[action], { type: "submitted", hash, message: "Pending transaction found" });
       }
       return restored;
     });
@@ -230,7 +230,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
 
   async function connect() {
     const wallet = wallets.find((item) => item.id === selectedWallet) ?? wallets[0];
-    if (!wallet) { setWalletMessage("未检测到兼容的浏览器钱包"); return; }
+    if (!wallet) { setWalletMessage("No compatible browser wallet detected"); return; }
     setConnecting(true);
     setWalletMessage("");
     try {
@@ -321,7 +321,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (action === "stake" && stakeAmount) {
         if (await adapter.estimatedStakeCost(stakeAmount, gasLimit) > user.balanceDrip) {
           phase = "validating";
-          throw new Error("余额不足以支付质押金额和预计 gas");
+          throw new Error("Insufficient balance to cover the stake amount and estimated gas");
         }
       }
 
@@ -342,13 +342,13 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (receiptOutcome === "unknown") throw new Error("Unknown transaction receipt status");
       if (receiptOutcome === "failed") {
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-        updateIfCurrent({ type: "reverted", hash: transaction.hash, message: "交易执行失败" });
+        updateIfCurrent({ type: "reverted", hash: transaction.hash, message: "Transaction failed" });
         if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         return;
       }
       window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
       if (isCurrentWallet(operationContext)) {
-        updateIfCurrent({ type: "refreshing", hash: transaction.hash, message: "交易已确认，正在刷新链上数据…" });
+        updateIfCurrent({ type: "refreshing", hash: transaction.hash, message: "Transaction confirmed. Refreshing onchain data..." });
         setStakeInput("");
         setUnstakeInput("");
         await Promise.all([refreshPool(), refreshUser(operationAccount)]);
@@ -360,21 +360,21 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
         if (replacement.outcome === "success") {
           if (isCurrentWallet(operationContext)) {
-            updateIfCurrent({ type: "refreshing", hash: replacement.hash, message: "加速交易已确认，正在刷新链上数据…" });
+            updateIfCurrent({ type: "refreshing", hash: replacement.hash, message: "Replacement transaction confirmed. Refreshing onchain data..." });
             setStakeInput("");
             setUnstakeInput("");
             await Promise.all([refreshPool(), refreshUser(operationAccount)]);
             updateIfCurrent({ type: "success", hash: replacement.hash, message: successMessages[action] });
           }
         } else {
-          updateIfCurrent({ type: "reverted", hash: replacement.hash, message: "原交易已被钱包取消或替代交易执行失败" });
+          updateIfCurrent({ type: "reverted", hash: replacement.hash, message: "The original transaction was cancelled, or its replacement failed" });
           if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         }
         return;
       }
       const code = error && typeof error === "object" ? (error as { code?: number | string }).code : undefined;
       const errorPhase = submittedHash ? "rpc_error" : phase === "validating" ? "validation_error" : code === 4001 || code === "ACTION_REJECTED" ? "rejected" : code === "CALL_EXCEPTION" ? "reverted" : "rpc_error";
-      updateIfCurrent({ type: errorPhase, ...(submittedHash ? { hash: submittedHash } : {}), message: submittedHash ? "交易已提交，但回执暂未确认，请继续查询" : stakingErrorMessage(error), detail: stakingErrorDetail(error) });
+      updateIfCurrent({ type: errorPhase, ...(submittedHash ? { hash: submittedHash } : {}), message: submittedHash ? "Transaction submitted, but the receipt is not confirmed yet. Continue checking." : stakingErrorMessage(error), detail: stakingErrorDetail(error) });
       if (submittedHash && isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
     }
   }
@@ -392,29 +392,29 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (isCurrentWallet(operationContext)) updateTransaction(action, event);
     };
     try {
-      updateIfCurrent({ type: "confirming", hash, message: "正在查询链上回执…" });
+      updateIfCurrent({ type: "confirming", hash, message: "Checking the onchain receipt..." });
       const receipt = await adapter.transactionReceipt(hash);
       if (!receipt) {
-        updateIfCurrent({ type: "submitted", hash, message: "交易仍在等待确认；未知状态不会解除本动作的提交锁。" });
+        updateIfCurrent({ type: "submitted", hash, message: "The transaction is still awaiting confirmation. An unknown status keeps this action locked." });
         return;
       }
       const receiptOutcome = classifyReceiptStatus(receipt.status);
       if (receiptOutcome === "unknown") {
-        updateIfCurrent({ type: "submitted", hash, message: "RPC 返回了未知回执状态；本动作继续保持提交锁。" });
+        updateIfCurrent({ type: "submitted", hash, message: "The RPC returned an unknown receipt status. This action remains locked." });
         return;
       }
       if (receiptOutcome === "failed") {
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-        updateIfCurrent({ type: "reverted", hash, message: "交易执行失败" });
+        updateIfCurrent({ type: "reverted", hash, message: "Transaction failed" });
         if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         return;
       }
       window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-      updateIfCurrent({ type: "refreshing", hash, message: "交易已确认，正在刷新链上数据…" });
+      updateIfCurrent({ type: "refreshing", hash, message: "Transaction confirmed. Refreshing onchain data..." });
       if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
       updateIfCurrent({ type: "success", hash, message: successMessages[action] });
     } catch (error) {
-      updateIfCurrent({ type: "rpc_error", hash, message: "回执查询失败，交易仍按未决状态处理", detail: stakingErrorDetail(error) });
+      updateIfCurrent({ type: "rpc_error", hash, message: "Receipt lookup failed. The transaction remains pending.", detail: stakingErrorDetail(error) });
     } finally {
       receiptQueries.current.delete(queryKey);
     }
@@ -430,79 +430,79 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     if (!unstakeInput) return "";
     try {
       const amount = parseStakeAmount(unstakeInput);
-      return user && amount.cfx > user.position.redeemableCfx ? "输入金额超过当前可赎回额度" : "";
+      return user && amount.cfx > user.position.redeemableCfx ? "Entered amount exceeds the amount currently available to unstake" : "";
     } catch (error) { return stakingErrorMessage(error); }
   })();
 
   return (
     <div className="stake-dashboard v2-wrap">
       <section className="stake-pool" aria-busy={!pool && !poolError}>
-        <div><span>POOL OVERVIEW</span><h2>{poolName}</h2><p>无需连接钱包即可查看矿池链上数据。</p></div>
+        <div><span>POOL OVERVIEW</span><h2>{poolName}</h2><p>View live onchain pool data without connecting a wallet.</p></div>
         <div className="stake-metrics">
-          <article><span>总质押量</span><b>{pool ? pool.totalStakedCfx === null ? "暂不可用" : formatCfx(pool.totalStakedCfx) : "读取中…"}</b></article>
-          <article><span>质押人数</span><b>{pool ? pool.stakerCount === null ? "暂不可用" : pool.stakerCount.toLocaleString("en-US") : "读取中…"}</b></article>
-          <article><span>最近 APY</span><b>{pool ? pool.apyRaw === null ? "暂不可用" : formatApy(pool.apyRaw) : "读取中…"}</b><small>历史指标，非保证收益</small></article>
+          <article><span>Total staked</span><b>{pool ? pool.totalStakedCfx === null ? "Unavailable" : formatCfx(pool.totalStakedCfx) : "Loading..."}</b></article>
+          <article><span>Stakers</span><b>{pool ? pool.stakerCount === null ? "Unavailable" : pool.stakerCount.toLocaleString("en-US") : "Loading..."}</b></article>
+          <article><span>Recent APY</span><b>{pool ? pool.apyRaw === null ? "Unavailable" : formatApy(pool.apyRaw) : "Loading..."}</b><small>Historical metric, not guaranteed returns</small></article>
         </div>
-        {poolError && <output className="stake-global-error" role="alert">矿池暂不可用：{poolError}。写操作已禁用。</output>}
+        {poolError && <output className="stake-global-error" role="alert">Pool unavailable: {poolError}. Transactions are disabled.</output>}
       </section>
 
       <section className="stake-wallet-bar">
-        {!wallets.length ? <div><b>未检测到兼容钱包</b><span>请安装 MetaMask 或其他 EIP‑1193 浏览器钱包。</span></div>
-          : !account ? <><label>选择钱包<select value={selectedWallet} onChange={(event) => setSelectedWallet(event.target.value)}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></label><button type="button" onClick={connect} disabled={connecting}>{connecting ? "等待钱包…" : "连接钱包"}</button></>
-            : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace 主网" : `错误网络 · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>复制地址</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>切换网络</button>}<button type="button" onClick={disconnect}>断开</button></>}
+        {!wallets.length ? <div><b>No compatible wallet detected</b><span>Install MetaMask or another EIP-1193 browser wallet.</span></div>
+          : !account ? <><label>Select wallet<select value={selectedWallet} onChange={(event) => setSelectedWallet(event.target.value)}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></label><button type="button" onClick={connect} disabled={connecting}>{connecting ? "Waiting for wallet..." : "Connect wallet"}</button></>
+            : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" onClick={disconnect}>Disconnect</button></>}
         {walletMessage && <output role="alert">{walletMessage}</output>}
       </section>
 
-      {account && !correctNetwork && <section className="stake-network-warning" role="alert"><b>请切换到 Conflux eSpace 主网</b><p>错误网络下所有质押写操作均已禁用，目标 chain ID 为 1030（0x406）。</p></section>}
+      {account && !correctNetwork && <section className="stake-network-warning" role="alert"><b>Switch to Conflux eSpace Mainnet</b><p>All staking transactions are disabled on the wrong network. The required chain ID is 1030 (0x406).</p></section>}
 
       <section className="stake-user" aria-busy={userLoading}>
-        <div className="stake-section-heading"><span>YOUR POSITION</span><h2>你的链上资产</h2>{account && <p>钱包余额：{user ? formatDripAsCfx(user.balanceDrip) : "读取中…"}</p>}</div>
-        {!account ? <p className="stake-empty">连接钱包后查看质押、赎回和收益状态。</p> : !user ? <p className="stake-empty">{userLoading ? "正在读取账户数据…" : "账户数据暂不可用"}</p> : <>
+        <div className="stake-section-heading"><span>YOUR POSITION</span><h2>Your onchain assets</h2>{account && <p>Wallet balance: {user ? formatDripAsCfx(user.balanceDrip) : "Loading..."}</p>}</div>
+        {!account ? <p className="stake-empty">Connect your wallet to view staking, unstaking, and reward status.</p> : !user ? <p className="stake-empty">{userLoading ? "Loading account data..." : "Account data unavailable"}</p> : <>
           <div className="stake-assets">
-            <article><span>当前质押</span><b>{formatCfx(user.position.stakedCfx)}</b></article>
-            <article><span>可赎回</span><b>{formatCfx(user.position.redeemableCfx)}</b></article>
-            <article><span>待解锁</span><b>{formatCfx(user.position.pendingUnlockCfx)}</b></article>
-            <article><span>已解锁本金</span><b>{formatCfx(user.position.unlockedCfx)}</b></article>
-            <article><span>当前可提取本金</span><b>{formatCfx(user.position.withdrawableCfx)}</b>{user.position.unlockedCfx > user.position.withdrawableCfx && <small>其余本金等待矿池补充流动性</small>}</article>
-            <article><span>可领取 / 累计收益</span><b>{formatDripAsCfx(user.position.claimableInterestDrip)}</b><small>累计 {formatDripAsCfx(user.position.totalInterestDrip)}</small></article>
+            <article><span>Currently staked</span><b>{formatCfx(user.position.stakedCfx)}</b></article>
+            <article><span>Available to unstake</span><b>{formatCfx(user.position.redeemableCfx)}</b></article>
+            <article><span>Pending unlock</span><b>{formatCfx(user.position.pendingUnlockCfx)}</b></article>
+            <article><span>Unlocked principal</span><b>{formatCfx(user.position.unlockedCfx)}</b></article>
+            <article><span>Currently withdrawable</span><b>{formatCfx(user.position.withdrawableCfx)}</b>{user.position.unlockedCfx > user.position.withdrawableCfx && <small>Remaining principal is waiting for pool liquidity</small>}</article>
+            <article><span>Claimable / total rewards</span><b>{formatDripAsCfx(user.position.claimableInterestDrip)}</b><small>Total {formatDripAsCfx(user.position.totalInterestDrip)}</small></article>
           </div>
           <div className="stake-actions">
             <article>
-              <span>01 / STAKE</span><h3>质押 CFX</h3><p>最少 1000 CFX，且必须为 1000 的整数倍。确认后进入约 13 天锁定期。</p>
-              <label htmlFor="stake-amount">质押金额 <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="3000" />
+              <span>01 / STAKE</span><h3>Stake CFX</h3><p>Minimum 1,000 CFX in whole multiples of 1,000. Once confirmed, funds enter a lock period of about 13 days.</p>
+              <label htmlFor="stake-amount">Stake amount <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="3000" />
               <small id="stake-amount-error" className="stake-input-error" role="alert">{stakeInputError}</small>
-              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>质押</button>
+              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>Stake</button>
               <TransactionNotice state={transactions.stake} onCheck={() => void checkReceipt("stake")} />
             </article>
             <article>
-              <span>02 / UNSTAKE</span><h3>赎回 CFX</h3><p>仅可赎回已过质押锁定期的金额。确认后进入约 1 天解锁期，不会立即到账。</p>
-              <label htmlFor="unstake-amount">赎回金额 <small>最多 {formatCfx(user.position.redeemableCfx)}</small></label><input id="unstake-amount" aria-describedby="unstake-amount-error" aria-invalid={Boolean(unstakeInputError)} inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
+              <span>02 / UNSTAKE</span><h3>Unstake CFX</h3><p>Only funds that have completed the staking lock period can be unstaked. Once confirmed, they enter an unlock period of about one day and are not immediately available.</p>
+              <label htmlFor="unstake-amount">Unstake amount <small>Max {formatCfx(user.position.redeemableCfx)}</small></label><input id="unstake-amount" aria-describedby="unstake-amount-error" aria-invalid={Boolean(unstakeInputError)} inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
               <small id="unstake-amount-error" className="stake-input-error" role="alert">{unstakeInputError}</small>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || Boolean(unstakeInputError) || isTransactionPending(transactions.unstake)}>赎回</button>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || Boolean(unstakeInputError) || isTransactionPending(transactions.unstake)}>Unstake</button>
               <TransactionNotice state={transactions.unstake} onCheck={() => void checkReceipt("unstake")} />
             </article>
             <article>
-              <span>03 / WITHDRAW</span><h3>提取本金</h3><p>本次提取 {formatCfx(user.position.withdrawableCfx)}。已解锁本金仍可能受全池桥接流动性限制。</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isTransactionPending(transactions.withdraw)}>提取当前可提取额度</button>
-              {user.position.unlockedCfx > 0n && user.position.withdrawableVotes === 0n && <small className="stake-liquidity-note">等待矿池补充提取流动性</small>}
+              <span>03 / WITHDRAW</span><h3>Withdraw principal</h3><p>This withdrawal: {formatCfx(user.position.withdrawableCfx)}. Unlocked principal may still be limited by the pool&apos;s bridge liquidity.</p>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isTransactionPending(transactions.withdraw)}>Withdraw available amount</button>
+              {user.position.unlockedCfx > 0n && user.position.withdrawableVotes === 0n && <small className="stake-liquidity-note">Waiting for pool withdrawal liquidity</small>}
               <TransactionNotice state={transactions.withdraw} onCheck={() => void checkReceipt("withdraw")} />
             </article>
             <article>
-              <span>04 / REWARDS</span><h3>领取全部收益</h3><p>可领取 {formatDripAsCfx(user.position.claimableInterestDrip)}。本期仅支持一次领取全部收益。</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isTransactionPending(transactions.claim)}>领取全部收益</button>
+              <span>04 / REWARDS</span><h3>Claim all rewards</h3><p>Claimable: {formatDripAsCfx(user.position.claimableInterestDrip)}. This version only supports claiming all rewards at once.</p>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isTransactionPending(transactions.claim)}>Claim all rewards</button>
               <TransactionNotice state={transactions.claim} onCheck={() => void checkReceipt("claim")} />
             </article>
           </div>
           <div className="stake-queues">
-            <QueuePanel title="质押锁定队列" queue={user.inQueue} currentBlock={user.currentBlock} activeLabel="锁定中" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
-            <QueuePanel title="赎回解锁队列" queue={user.outQueue} currentBlock={user.currentBlock} activeLabel="解锁中" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
+            <QueuePanel title="Stake lock queue" queue={user.inQueue} currentBlock={user.currentBlock} activeLabel="Locking" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
+            <QueuePanel title="Unstake unlock queue" queue={user.outQueue} currentBlock={user.currentBlock} activeLabel="Unlocking" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
           </div>
         </>}
       </section>
 
       <section className="stake-risks">
-        <span>RISK DISCLOSURE</span><h2>提交前请了解</h2>
-        <div><p>你正在与第三方 PoS 矿池代理合约交互，本站不托管私钥、不代签交易，也不会要求助记词。</p><p>验证节点处罚、合约、RPC、跨空间桥和流动性风险都可能影响收益或到账时间。最终状态以 eSpace 链上回执和当前区块为准。</p></div>
+        <span>RISK DISCLOSURE</span><h2>Before you submit</h2>
+        <div><p>You are interacting with a third-party PoS pool proxy contract. This site never holds private keys, signs transactions for you, or asks for a seed phrase.</p><p>Validator penalties, contract, RPC, cross-space bridge, and liquidity risks may affect returns or settlement times. The final state is determined by the eSpace receipt and current block.</p></div>
         <code>{getAddress(contractAddress)}</code>
       </section>
     </div>
