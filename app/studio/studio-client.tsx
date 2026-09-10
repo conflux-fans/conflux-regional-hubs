@@ -55,7 +55,7 @@ function contrast(a: string, b: string) {
 }
 
 export function StudioClient({ region, initialContent, initialModules, initialContributors, initialArticles = [], setupOnly = false }: { region: RegionalConfig; initialContent: EditableRegionalContent; initialModules: RegionalModule[]; initialContributors: RegionalContributor[]; initialArticles?: LocalArticle[]; setupOnly?: boolean }) {
-  const [mode, setMode] = useState<StudioMode>("setup");
+  const [mode, setMode] = useState<StudioMode>(setupOnly ? "setup" : "manage");
   const [setupStep, setSetupStep] = useState(0);
   const [managerPanel, setManagerPanel] = useState<ManagerPanel>("journal");
   const [briefStatus, setBriefStatus] = useState<Status>({ tone: "idle", message: "" });

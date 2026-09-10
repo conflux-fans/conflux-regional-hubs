@@ -8,7 +8,7 @@ const temporaryDirectory = await mkdtemp(join(tmpdir(), "regional-hub-sqlite-"))
 process.env.SQLITE_PATH = join(temporaryDirectory, "app.db");
 
 const { closeDatabase, getDatabase } = await import("../db/index.ts");
-const { getManagedArticles, getRegionalContent, saveLocalArticle, saveRegionalContent } = await import("../app/lib/content.ts");
+const { getLocalArticle, getManagedArticles, getRegionalContent, saveLocalArticle, saveRegionalContent } = await import("../app/lib/content.ts");
 const { getRegionalArticles } = await import("../app/lib/articles.ts");
 const { regions } = await import("../app/regional.ts");
 
@@ -58,4 +58,27 @@ test("the Journal index can load more than twelve published articles", async () 
 
   const articles = await getRegionalArticles(regions.africa);
   assert.equal(articles.length, 13);
+});
+
+test("a published article can be edited without changing its identity or status", async () => {
+  const created = await saveLocalArticle("africa", {
+    title: "Original published title",
+    excerpt: "Original summary",
+    body: "Original body",
+    status: "published",
+  }, "manager@example.com");
+
+  const updated = await saveLocalArticle("africa", {
+    id: created.id,
+    title: "Updated published title",
+    excerpt: "Updated summary",
+    body: "Updated body",
+    status: "published",
+  }, "manager@example.com");
+  const article = await getLocalArticle("africa", created.slug);
+
+  assert.equal(updated.id, created.id);
+  assert.equal(updated.slug, created.slug);
+  assert.equal(article?.title, "Updated published title");
+  assert.equal(article?.status, "published");
 });
