@@ -23,11 +23,10 @@ function AfricaHome({ region, articles, suffix, modules, contributors }: { regio
             <p className="v2-kicker">{region.heroEyebrow}</p>
             <h1>{region.headline}</h1>
             <p>{region.intro}</p>
-            <div className="pupu-signal"><i /><span>ENGLISH</span><span>KUDI = MONEY IN HAUSA</span></div>
           </div>
           <div className="pupu-portals" aria-label="Primary site areas">
             <Link href={`/stake${suffix}`} className="pupu-portal pupu-stake"><small>01 / PARTICIPATE</small><strong>{region.stakeLabel}</strong><span>Support the network ↗</span></Link>
-            <Link href={`/insights${suffix}`} className="pupu-portal pupu-stories"><small>02 / DISCOVER</small><strong>{region.journalLabel}</strong><span>Read the latest ↗</span></Link>
+            <Link href={`/journal${suffix}`} className="pupu-portal pupu-stories"><small>02 / DISCOVER</small><strong>{region.journalLabel}</strong><span>Read the latest ↗</span></Link>
           </div>
         </div>
         <div className="pupu-ticker" aria-label="Community themes"><span>KUDI</span><i>✦</i><span>STORIES</span><i>✦</i><span>STAKING</span><i>✦</i><span>AFRICA ONCHAIN</span></div>
@@ -35,11 +34,10 @@ function AfricaHome({ region, articles, suffix, modules, contributors }: { regio
 
       <section className="pupu-manifesto v2-wrap">
         <div><p className="v2-kicker">{region.localModuleEyebrow}</p><h2>{region.localModuleTitle}</h2></div>
-        <div><span className="pupu-index">54°</span><p>{region.localModuleText}</p><p>From Lagos to Nairobi, Accra to Cape Town—the network grows wherever people build.</p></div>
       </section>
 
       <section className="v2-journal pupu-journal v2-wrap" id="journal">
-        <div className="v2-section-head"><div><p className="v2-kicker">{region.journalEyebrow}</p><h2>{region.journalTitle}</h2></div><Link href={`/insights${suffix}`}>All stories <span>↗</span></Link></div>
+        <div className="v2-section-head"><div><p className="v2-kicker">{region.journalEyebrow}</p><h2>{region.journalTitle}</h2></div><Link href={`/journal${suffix}`}>All stories <span>↗</span></Link></div>
         <ArticleFeed articles={articles} region={region} />
       </section>
       <OptionalModules modules={modules} />
@@ -58,7 +56,7 @@ function AfricaHome({ region, articles, suffix, modules, contributors }: { regio
 export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const region = await getRegionalConfig(resolveRegion(params.region));
-  const articles = await getRegionalArticles(region);
+  const articles = await getRegionalArticles(region, 6);
   const modules = await getRegionalModules(region.key);
   const contributors = await getRegionalContributors(region.key);
   const suffix = `?region=${region.key}`;
@@ -75,7 +73,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
             <div className="v2-hero-meta"><span>{region.language}</span><i /><span>CONFLUX COMMUNITY</span></div>
           </div>
           <div className="v2-pillar-nav" aria-label="Primary site areas">
-            <Link href={`/insights${suffix}`} className="v2-pillar v2-pillar-journal">
+            <Link href={`/journal${suffix}`} className="v2-pillar v2-pillar-journal">
               <span className="v2-pillar-top"><small>01 / READ</small><small>AUTO FEED</small></span>
               <strong>{region.journalLabel}</strong>
               <p>{region.journalTitle}</p>
@@ -99,7 +97,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
         </section>
 
         <section className="v2-journal v2-wrap" id="journal">
-          <div className="v2-section-head"><div><p className="v2-kicker">{region.journalEyebrow}</p><h2>{region.journalTitle}</h2></div><Link href={`/insights${suffix}`}>View all <span>↗</span></Link></div>
+          <div className="v2-section-head"><div><p className="v2-kicker">{region.journalEyebrow}</p><h2>{region.journalTitle}</h2></div><Link href={`/journal${suffix}`}>View all <span>↗</span></Link></div>
           <ArticleFeed articles={articles} region={region} />
         </section>
 

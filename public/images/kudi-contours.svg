@@ -7,7 +7,7 @@
     <path d="M81 867c203-72 337 15 526-91 189-105 351-80 505-13 154 67 303 38 467-21"/>
   </g>
   <g fill="#111617" opacity=".055" font-family="Arial,sans-serif" font-weight="800">
-    <text x="90" y="240" font-size="180">₦</text><text x="520" y="180" font-size="112">GH₵</text><text x="1030" y="255" font-size="150">KSh</text><text x="1340" y="170" font-size="94">R</text>
+    <text x="90" y="240" font-size="180">₦</text><text x="520" y="180" font-size="112">GH₵</text>
   </g>
   <g fill="#ff684f" opacity=".55">
     <rect x="1110" y="520" width="22" height="98" rx="11"/><rect x="1145" y="480" width="22" height="138" rx="11"/><rect x="1180" y="440" width="22" height="178" rx="11"/><rect x="1215" y="500" width="22" height="118" rx="11"/><rect x="1250" y="538" width="22" height="80" rx="11"/>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { articleValidationError } from "../../lib/article-validation";
 import { getAuthorizedEditor } from "../../lib/editor-auth";
 import { createVibePrompt, saveLocalArticle, saveRegionalBrief, saveRegionalContent, saveRegionalContributors, saveRegionalModules, type EditableRegionalContent, type RegionalBriefInput, type RegionalContributor, type RegionalModule } from "../../lib/content";
 import { resolveRegion } from "../../regional";
@@ -53,7 +54,8 @@ export async function POST(request: Request) {
   if (payload.action === "save-article" || payload.action === "publish-article") {
     const input = { title: text(payload.title, 140), excerpt: text(payload.excerpt, 320), body: text(payload.body, 24000) };
     const status = payload.status === "draft" ? "draft" : "published";
-    if (!input.title || !input.excerpt || (status === "published" && input.body.length < 40)) return NextResponse.json({ error: status === "draft" ? "Add a title and summary before saving the draft." : "Add a title, summary, and complete article body." }, { status: 400 });
+    const validationError = articleValidationError(input, status);
+    if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
     const saved = await saveLocalArticle(region, { id: typeof payload.id === "number" ? payload.id : undefined, ...input, status }, editor.email);
     return NextResponse.json({ ok: true, article: { ...saved, ...input, region, authorEmail: editor.email, status }, url: status === "published" ? `/journal/${saved.slug}?region=${region}` : undefined });
   }

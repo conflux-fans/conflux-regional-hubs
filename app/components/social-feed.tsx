@@ -11,7 +11,6 @@ export async function SocialFeed({ modules }: { modules: RegionalModule[] }) {
     <section className="social-hub v2-wrap" aria-labelledby="social-hub-title">
       <header className="social-hub-head">
         <div><p className="v2-kicker">LIVE CONNECTIONS / COMMUNITY SIGNAL</p><h2 id="social-hub-title">Follow the conversation.</h2></div>
-        <p>Official feeds update automatically when the deployment credentials are connected. Until then, every supplied profile remains a working public link.</p>
       </header>
       <div className="social-platforms">
         {feeds.map(({ module, items }) => {

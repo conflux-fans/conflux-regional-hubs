@@ -9,6 +9,8 @@ process.env.SQLITE_PATH = join(temporaryDirectory, "app.db");
 
 const { closeDatabase, getDatabase } = await import("../db/index.ts");
 const { getManagedArticles, getRegionalContent, saveLocalArticle, saveRegionalContent } = await import("../app/lib/content.ts");
+const { getRegionalArticles } = await import("../app/lib/articles.ts");
+const { regions } = await import("../app/regional.ts");
 
 after(async () => {
   await closeDatabase();
@@ -42,4 +44,18 @@ test("regional content and article drafts persist in the SQLite file", async () 
   }, "manager@example.com");
   assert.ok(saved.id > 0);
   assert.equal((await getManagedArticles("africa"))[0]?.title, "SQLite migration test");
+});
+
+test("the Journal index can load more than twelve published articles", async () => {
+  for (let index = 1; index <= 13; index += 1) {
+    await saveLocalArticle("africa", {
+      title: `Published article ${index}`,
+      excerpt: `Summary ${index}`,
+      body: `Body ${index}`,
+      status: "published",
+    }, "manager@example.com");
+  }
+
+  const articles = await getRegionalArticles(regions.africa);
+  assert.equal(articles.length, 13);
 });

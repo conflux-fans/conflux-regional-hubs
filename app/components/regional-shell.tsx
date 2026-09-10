@@ -24,7 +24,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
             <span><strong>{region.wordmark}</strong><small>CONFLUX AFRICA COMMUNITY</small></span>
           </Link>
           <nav aria-label="Main navigation">
-            <Link href={`/insights${suffix}`}>{region.journalLabel}</Link>
+            <Link href={`/journal${suffix}`}>{region.journalLabel}</Link>
             <Link href={`/stake${suffix}`}>{region.stakeLabel}</Link>
             {region.communityLinks.length > 0 && <a href="#community">{region.communityLabel}</a>}
           </nav>
@@ -33,7 +33,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
       </header>
       {children}
       <footer className="v2-footer">
-        <div className="v2-wrap"><div className="v2-footer-brand">{region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}<strong>{region.wordmark}</strong></div><p>{region.domain} · {region.footerText}</p><small>© 2026 · Interactive regional template · Not financial advice.</small></div>
+        <div className="v2-wrap"><div className="v2-footer-brand">{region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}<strong>{region.wordmark}</strong></div><p>{region.domain} · {region.footerText}</p><small>© 2026 · Kudi Hub</small></div>
       </footer>
     </div>
   );

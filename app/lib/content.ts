@@ -149,12 +149,13 @@ export async function saveRegionalContributors(region: RegionKey, contributors: 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(region, item.name, item.role, item.shortBio, item.fullBio, item.photoUrl, index, item.isVisible ? 1 : 0, email, now)));
 }
 
-export async function getLocalArticles(region: RegionKey, limit = 12): Promise<LocalArticle[]> {
+export async function getLocalArticles(region: RegionKey, limit?: number): Promise<LocalArticle[]> {
   try {
     const db = await database();
-    const result = await db.prepare(
-      "SELECT id, slug, region, title, excerpt, body, author_email AS authorEmail, status, published_at AS publishedAt FROM articles WHERE region = ? AND status = 'published' ORDER BY published_at DESC LIMIT ?",
-    ).bind(region, limit).all<LocalArticle>();
+    const query = `SELECT id, slug, region, title, excerpt, body, author_email AS authorEmail, status, published_at AS publishedAt
+      FROM articles WHERE region = ? AND status = 'published' ORDER BY published_at DESC${typeof limit === "number" ? " LIMIT ?" : ""}`;
+    const statement = db.prepare(query);
+    const result = await (typeof limit === "number" ? statement.bind(region, limit) : statement.bind(region)).all<LocalArticle>();
     return result.results ?? [];
   } catch {
     return [];

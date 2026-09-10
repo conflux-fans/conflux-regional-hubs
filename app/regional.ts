@@ -76,7 +76,7 @@ export const regions: Record<RegionKey, RegionalConfig> = {
     communityLabel: "Community",
     localModuleEyebrow: "ONE NETWORK / MANY HORIZONS",
     localModuleTitle: "Money moves where community leads.",
-    localModuleText: "From local currencies to shared rhythms, Kudi Hub follows the builders, communities, and ideas moving value across a connected continent.",
+    localModuleText: "",
     motif: "sun",
     layout: "editorial",
     articleSource: { format: "json", url: "" },

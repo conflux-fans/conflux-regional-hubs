@@ -32,7 +32,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
   const region = await getRegionalConfig(resolveRegion(query.region));
   const article = await getLocalArticle(region.key, slug);
 
-  if (!article) return <RegionalShell region={region}><main className="article-page v2-wrap"><p className="v2-kicker">JOURNAL / {region.code}</p><h1>Article not found.</h1><Link href={`/insights?region=${region.key}`}>← Back to Journal</Link></main></RegionalShell>;
+  if (!article) return <RegionalShell region={region}><main className="article-page v2-wrap"><p className="v2-kicker">JOURNAL / {region.code}</p><h1>Article not found.</h1><Link href={`/journal?region=${region.key}`}>← Back to Journal</Link></main></RegionalShell>;
 
   const canonicalUrl = `${siteOrigin()}/journal/${encodeURIComponent(slug)}?region=${region.key}`;
   return (
@@ -41,7 +41,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
         <header><p className="v2-kicker">{region.journalLabel} / {new Date(article.publishedAt).toLocaleDateString(region.key === "korea" ? "ko-KR" : "en-GB")}</p><h1>{article.title}</h1><p>{article.excerpt}</p></header>
         <div className="article-body"><Markdown source={article.body} /></div>
         <ShareActions title={article.title} canonicalUrl={canonicalUrl} />
-        <footer><span>Published by the {region.name} regional team</span><Link href={`/insights?region=${region.key}`}>← {region.journalLabel}</Link></footer>
+        <footer><span>Published by the {region.name} regional team</span><Link href={`/journal?region=${region.key}`}>← {region.journalLabel}</Link></footer>
       </article>
     </RegionalShell>
   );

@@ -1,5 +1,5 @@
-import type { RegionalConfig } from "../regional";
-import { getLocalArticles } from "./content";
+import type { RegionalConfig } from "../regional.ts";
+import { getLocalArticles } from "./content.ts";
 
 export type RegionalArticle = {
   title: string;
@@ -8,6 +8,10 @@ export type RegionalArticle = {
   excerpt?: string;
   external?: boolean;
 };
+
+function take<T>(items: T[], limit?: number) {
+  return typeof limit === "number" ? items.slice(0, limit) : items;
+}
 
 function cleanText(value: unknown) {
   if (typeof value !== "string") return "";
@@ -24,14 +28,14 @@ function safeUrl(value: unknown) {
   }
 }
 
-function fromJson(payload: unknown): RegionalArticle[] {
+function fromJson(payload: unknown, limit?: number): RegionalArticle[] {
   const source = Array.isArray(payload)
     ? payload
     : payload && typeof payload === "object" && "items" in payload && Array.isArray(payload.items)
       ? payload.items
       : [];
 
-  return source.slice(0, 12).flatMap((item) => {
+  return take(source, limit).flatMap((item) => {
     if (!item || typeof item !== "object") return [];
     const record = item as Record<string, unknown>;
     const title = cleanText(record.title);
@@ -46,8 +50,9 @@ function tag(block: string, name: string) {
   return cleanText(match?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1") ?? "");
 }
 
-function fromRss(xml: string): RegionalArticle[] {
-  return [...xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)].slice(0, 12).flatMap((match) => {
+function fromRss(xml: string, limit?: number): RegionalArticle[] {
+  const items = [...xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)];
+  return take(items, limit).flatMap((match) => {
     const title = tag(match[0], "title");
     const url = safeUrl(tag(match[0], "link"));
     if (!title || !url) return [];
@@ -55,8 +60,8 @@ function fromRss(xml: string): RegionalArticle[] {
   });
 }
 
-export async function getRegionalArticles(region: RegionalConfig): Promise<RegionalArticle[]> {
-  const local = (await getLocalArticles(region.key)).map((article) => ({
+export async function getRegionalArticles(region: RegionalConfig, limit?: number): Promise<RegionalArticle[]> {
+  const local = (await getLocalArticles(region.key, limit)).map((article) => ({
     title: article.title,
     url: `/journal/${article.slug}?region=${region.key}`,
     date: new Date(article.publishedAt).toLocaleDateString(region.key === "korea" ? "ko-KR" : "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
@@ -69,8 +74,8 @@ export async function getRegionalArticles(region: RegionalConfig): Promise<Regio
   try {
     const response = await fetch(sourceUrl, { next: { revalidate: 900 } });
     if (!response.ok) return local;
-    const remote = region.articleSource.format === "rss" ? fromRss(await response.text()) : fromJson(await response.json());
-    return [...local, ...remote].slice(0, 12);
+    const remote = region.articleSource.format === "rss" ? fromRss(await response.text(), limit) : fromJson(await response.json(), limit);
+    return take([...local, ...remote], limit);
   } catch {
     return local;
   }
