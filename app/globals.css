@@ -1147,6 +1147,12 @@ button, input { font: inherit; }
 .feed-card-featured { background: var(--region-accent); color: #fff; }
 .feed-card-featured > span,
 .feed-card-featured p { color: rgba(255,255,255,.82); }
+.pupu-journal .feed-card h3 { font-size: 26px; line-height: 1.12; }
+.pupu-journal .feed-card-featured h3 { font-size: 42px; line-height: 1.02; }
+.pupu-journal .feed-card > span { color: #303839; font-size: 10px; font-weight: 700; letter-spacing: .08em; }
+.pupu-journal .feed-card p { color: #303839; font-size: 14px; }
+.pupu-journal .feed-card-featured > span,
+.pupu-journal .feed-card-featured p { color: #fff; }
 .pupu-stake-panel { background: var(--ink); color: #fff; border-color: var(--ink); }
 .pupu-stake-panel .v2-kicker-light { color: var(--region-secondary); }
 .region-africa .regional-modules { color: var(--ink); }
@@ -1308,6 +1314,8 @@ button, input { font: inherit; }
   .article-manager-counts span:last-child { border-bottom: 0; }
   .article-manager-list > article { grid-template-columns: 1fr; gap: 18px; }
   .article-manager-actions { grid-column: auto; flex-wrap: wrap; }
+  .pupu-journal .feed-card h3 { font-size: 24px; }
+  .pupu-journal .feed-card-featured h3 { font-size: 34px; }
   .journal-editor-actions { grid-template-columns: 1fr; }
   .journal-editor-actions > button:first-child { min-height: 50px; }
   .markdown-preview { padding: 20px; }

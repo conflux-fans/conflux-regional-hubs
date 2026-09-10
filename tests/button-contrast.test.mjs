@@ -9,11 +9,21 @@ function luminance(color) {
 }
 
 function contrastRatio(foreground, background) {
-  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  const foregroundChannels = foreground.match(/[\d.]+/g).map(Number);
+  const backgroundChannels = background.match(/[\d.]+/g).map(Number);
+  const alpha = foregroundChannels[3] ?? 1;
+  const composited = `rgb(${foregroundChannels.slice(0, 3).map((channel, index) => Math.round(channel * alpha + backgroundChannels[index] * (1 - alpha))).join(", ")})`;
+  const values = [luminance(composited), luminance(background)].sort((a, b) => b - a);
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-test("the Journal publish button text remains readable when hovered", async () => {
+function assertMinimumContrast(window, elements, background, minimum, message) {
+  for (const element of elements) {
+    assert.ok(contrastRatio(window.getComputedStyle(element).color, background) >= minimum, message);
+  }
+}
+
+async function styledDocument(markup) {
   const source = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const css = source
     .replace(/^@import[^;]+;/gm, "")
@@ -24,8 +34,26 @@ test("the Journal publish button text remains readable when hovered", async () =
     .replaceAll("var(--ink)", "#111617")
     .replaceAll("var(--white)", "#fffef8")
     .replaceAll("var(--paper)", "#f3f1e9");
-  const document = new JSDOM(`<!doctype html><style>${css}</style><main class="studio-page region-africa"><div class="journal-editor-actions"><button class="v2-button v2-button-accent is-hovered">Publish to Crypto news</button></div></main>`).window.document;
+  return new JSDOM(`<!doctype html><style>${css}</style>${markup}`).window.document;
+}
+
+test("the Journal publish button text remains readable when hovered", async () => {
+  const document = await styledDocument(`<main class="studio-page region-africa"><div class="journal-editor-actions"><button class="v2-button v2-button-accent is-hovered">Publish to Crypto news</button></div></main>`);
   const style = document.defaultView.getComputedStyle(document.querySelector("button"));
 
   assert.ok(contrastRatio(style.color, style.backgroundColor) >= 4.5, `Unreadable hover colors: ${style.color} on ${style.backgroundColor}`);
+});
+
+test("homepage Journal cards use compact titles and prominent metadata", async () => {
+  const document = await styledDocument(`<main class="region-africa"><section class="pupu-journal"><div class="feed-grid"><a class="feed-card feed-card-featured"><span>10 SEP 2026</span><h3>Featured article</h3><p>Featured summary</p></a><a class="feed-card"><span>09 SEP 2026</span><h3>Standard article</h3><p>Standard summary</p></a></div></section></main>`);
+  const window = document.defaultView;
+  const featuredCard = document.querySelector(".feed-card-featured");
+  const standardCard = document.querySelector(".feed-card:not(.feed-card-featured)");
+  const featuredBackground = window.getComputedStyle(featuredCard).backgroundColor;
+  const standardBackground = window.getComputedStyle(standardCard).backgroundColor;
+
+  assert.ok(parseFloat(window.getComputedStyle(featuredCard.querySelector("h3")).fontSize) <= 42, "Featured article title is too large");
+  assert.ok(parseFloat(window.getComputedStyle(standardCard.querySelector("h3")).fontSize) <= 26, "Standard article title is too large");
+  assertMinimumContrast(window, [featuredCard.querySelector("span"), featuredCard.querySelector("p")], featuredBackground, 4.5, "Featured article metadata is too faint");
+  assertMinimumContrast(window, [standardCard.querySelector("span"), standardCard.querySelector("p")], standardBackground, 7, "Standard article metadata is too faint");
 });
