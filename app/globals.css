@@ -1152,7 +1152,7 @@ button, input { font: inherit; }
 .pupu-journal .feed-card > span { color: #303839; font-size: 10px; font-weight: 700; letter-spacing: .08em; }
 .pupu-journal .feed-card p { color: #303839; font-size: 14px; }
 .pupu-journal .feed-card-featured > span,
-.pupu-journal .feed-card-featured p { color: #fff; }
+.pupu-journal .feed-card-featured p { color: #e9edff; }
 .pupu-stake-panel { background: var(--ink); color: #fff; border-color: var(--ink); }
 .pupu-stake-panel .v2-kicker-light { color: var(--region-secondary); }
 .region-africa .regional-modules { color: var(--ink); }

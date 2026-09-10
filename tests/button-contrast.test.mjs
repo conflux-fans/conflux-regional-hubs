@@ -51,9 +51,13 @@ test("homepage Journal cards use compact titles and prominent metadata", async (
   const standardCard = document.querySelector(".feed-card:not(.feed-card-featured)");
   const featuredBackground = window.getComputedStyle(featuredCard).backgroundColor;
   const standardBackground = window.getComputedStyle(standardCard).backgroundColor;
+  const featuredMetadata = [featuredCard.querySelector("span"), featuredCard.querySelector("p")];
 
   assert.ok(parseFloat(window.getComputedStyle(featuredCard.querySelector("h3")).fontSize) <= 42, "Featured article title is too large");
   assert.ok(parseFloat(window.getComputedStyle(standardCard.querySelector("h3")).fontSize) <= 26, "Standard article title is too large");
-  assertMinimumContrast(window, [featuredCard.querySelector("span"), featuredCard.querySelector("p")], featuredBackground, 4.5, "Featured article metadata is too faint");
+  for (const element of featuredMetadata) {
+    assert.equal(window.getComputedStyle(element).color, "rgb(233, 237, 255)", "Featured article metadata should be light gray on blue");
+  }
+  assertMinimumContrast(window, featuredMetadata, featuredBackground, 4.5, "Featured article metadata is too faint");
   assertMinimumContrast(window, [standardCard.querySelector("span"), standardCard.querySelector("p")], standardBackground, 7, "Standard article metadata is too faint");
 });
