@@ -63,7 +63,7 @@ button, input { font: inherit; }
 .v2-button-dark { background: var(--ink); color: var(--white); }
 .v2-button-dark:hover { background: var(--region-accent); color: var(--ink); }
 .v2-button-accent { background: var(--region-accent); color: var(--region-on-accent); }
-.v2-button-accent:hover { background: var(--white); }
+.v2-button-accent:hover { background: var(--white); color: var(--ink); }
 .v2-text-link { display: flex; gap: 30px; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 11px; font-weight: 700; }
 .v2-pillar-nav { display: grid; grid-template-rows: 1fr 1fr; border-inline: 1px solid var(--ink); }
 .v2-pillar { position: relative; min-height: 330px; padding: 35px 38px; display: flex; flex-direction: column; overflow: hidden; border-bottom: 1px solid var(--ink); transition: padding .28s ease, filter .28s ease; }
