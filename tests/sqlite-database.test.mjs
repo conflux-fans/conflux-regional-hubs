@@ -8,7 +8,7 @@ const temporaryDirectory = await mkdtemp(join(tmpdir(), "regional-hub-sqlite-"))
 process.env.SQLITE_PATH = join(temporaryDirectory, "app.db");
 
 const { closeDatabase, getDatabase } = await import("../db/index.ts");
-const { getLocalArticle, getManagedArticles, getRegionalContent, saveLocalArticle, saveRegionalContent } = await import("../app/lib/content.ts");
+const { deleteLocalArticle, getLocalArticle, getManagedArticles, getRegionalContent, saveLocalArticle, saveRegionalContent } = await import("../app/lib/content.ts");
 const { getRegionalArticles } = await import("../app/lib/articles.ts");
 const { regions } = await import("../app/regional.ts");
 
@@ -81,4 +81,20 @@ test("a published article can be edited without changing its identity or status"
   assert.equal(updated.slug, created.slug);
   assert.equal(article?.title, "Updated published title");
   assert.equal(article?.status, "published");
+});
+
+test("an article can only be deleted from its own regional Journal", async () => {
+  const created = await saveLocalArticle("africa", {
+    title: "Article to delete",
+    excerpt: "Delete test summary",
+    body: "Delete test body",
+    status: "published",
+  }, "manager@example.com");
+
+  assert.equal(await deleteLocalArticle("korea", created.id), false);
+  assert.ok(await getLocalArticle("africa", created.slug));
+
+  assert.equal(await deleteLocalArticle("africa", created.id), true);
+  assert.equal(await getLocalArticle("africa", created.slug), null);
+  assert.equal((await getManagedArticles("africa")).some((article) => article.id === created.id), false);
 });

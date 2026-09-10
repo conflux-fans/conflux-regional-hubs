@@ -55,6 +55,21 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
     });
   }
 
+  async function deleteArticle(article: LocalArticle) {
+    if (!window.confirm(`Delete “${article.title}”? This cannot be undone.`)) return;
+    setNotice({ message: "Deleting article…", tone: "ok" });
+    try {
+      const response = await fetch("/api/studio", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete-article", region, id: article.id }) });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) { setNotice({ message: data.error || "Could not delete the article.", tone: "error" }); return; }
+      setArticles((current) => current.filter((item) => item.id !== article.id));
+      setDraft((current) => current.id === article.id ? blank : current);
+      setNotice({ message: `“${article.title}” was deleted.`, tone: "ok" });
+    } catch {
+      setNotice({ message: "Could not delete the article. Check your connection and try again.", tone: "error" });
+    }
+  }
+
   if (view === "list") {
     const publishedCount = articles.filter((article) => article.status === "published").length;
     const draftCount = articles.length - publishedCount;
@@ -65,11 +80,12 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
         <button className="v2-button v2-button-dark" type="button" onClick={startArticle}>New article <span>＋</span></button>
       </header>
       <div className="article-manager-counts" aria-label="Article totals"><span><b>{articles.length}</b>All articles</span><span><b>{publishedCount}</b>Published</span><span><b>{draftCount}</b>Drafts</span></div>
+      {notice && <output className={`studio-status ${notice.tone}`}>{notice.message}</output>}
       {articles.length ? <div className="article-manager-list">
         {articles.map((article) => <article key={article.id}>
           <div className="article-manager-status"><span className={`article-status article-status-${article.status}`}>{article.status}</span><time dateTime={new Date(article.publishedAt).toISOString()}>{new Date(article.publishedAt).toLocaleDateString()}</time></div>
           <div className="article-manager-copy"><h3>{article.title}</h3><p>{article.excerpt}</p></div>
-          <div className="article-manager-actions"><button type="button" onClick={() => edit(article)}>Edit</button>{article.status === "published" && <Link href={`/journal/${article.slug}?region=${region}`}>View article ↗</Link>}</div>
+          <div className="article-manager-actions"><button type="button" onClick={() => edit(article)}>Edit</button>{article.status === "published" && <Link href={`/journal/${article.slug}?region=${region}`}>View article ↗</Link>}<button className="article-delete-button" type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`}>Delete</button></div>
         </article>)}
       </div> : <div className="article-manager-empty"><h3>No articles yet.</h3><p>Create the first Journal article, save it as a draft, or publish it when ready.</p><button type="button" onClick={startArticle}>Create an article →</button></div>}
     </section>;

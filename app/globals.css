@@ -1271,6 +1271,7 @@ button, input { font: inherit; }
 .article-manager-actions button,
 .article-manager-actions a { min-height: 42px; display: inline-flex; align-items: center; padding: 0 13px; border: 1px solid var(--ink); background: #fff; color: var(--ink); font-size: 12px; font-weight: 750; cursor: pointer; }
 .article-manager-actions button { background: var(--ink); color: #fff; }
+.article-manager-actions .article-delete-button { background: #fff; color: #a21818; border-color: #a21818; }
 .article-manager-empty { padding: 55px; border: 1px dashed var(--ink); text-align: center; }
 .article-manager-empty h3 { margin: 0 0 10px; font-size: 28px; }
 .article-manager-empty p { margin: 0 0 24px; color: #596263; }

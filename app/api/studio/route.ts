@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { articleValidationError } from "../../lib/article-validation";
 import { getAuthorizedEditor } from "../../lib/editor-auth";
-import { createVibePrompt, saveLocalArticle, saveRegionalBrief, saveRegionalContent, saveRegionalContributors, saveRegionalModules, type EditableRegionalContent, type RegionalBriefInput, type RegionalContributor, type RegionalModule } from "../../lib/content";
+import { createVibePrompt, deleteLocalArticle, saveLocalArticle, saveRegionalBrief, saveRegionalContent, saveRegionalContributors, saveRegionalModules, type EditableRegionalContent, type RegionalBriefInput, type RegionalContributor, type RegionalModule } from "../../lib/content";
 import { resolveRegion } from "../../regional";
 
 function text(value: unknown, max: number) {
@@ -50,6 +50,13 @@ export async function POST(request: Request) {
   }
 
   if (!editor) return NextResponse.json({ error: "Editor authorization required." }, { status: 403 });
+
+  if (payload.action === "delete-article") {
+    const id = typeof payload.id === "number" && Number.isInteger(payload.id) ? payload.id : 0;
+    if (!id) return NextResponse.json({ error: "Select a valid article to delete." }, { status: 400 });
+    if (!await deleteLocalArticle(region, id)) return NextResponse.json({ error: "Article not found." }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  }
 
   if (payload.action === "save-article" || payload.action === "publish-article") {
     const input = { title: text(payload.title, 140), excerpt: text(payload.excerpt, 320), body: text(payload.body, 24000) };

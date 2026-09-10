@@ -236,6 +236,13 @@ export async function saveLocalArticle(region: RegionKey, input: { id?: number; 
   return { id: Number(result.meta.last_row_id ?? 0), slug, publishedAt: timestamp };
 }
 
+export async function deleteLocalArticle(region: RegionKey, id: number) {
+  if (!Number.isInteger(id) || id <= 0) return false;
+  const db = await database();
+  const result = await db.prepare("DELETE FROM articles WHERE id = ? AND region = ?").bind(id, region).run();
+  return result.meta.changes === 1;
+}
+
 export type RegionalBriefInput = {
   submitterName: string;
   submitterEmail: string;
