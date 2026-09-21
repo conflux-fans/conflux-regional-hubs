@@ -249,7 +249,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (!cancelled) setWalletMessage(stakingErrorMessage(error));
     });
     return () => { cancelled = true; };
-  }, [account, activeConnector, chainId, contractAddress, prepareWalletAdapter]);
+  }, [account, activeConnector, chainId, prepareWalletAdapter]);
 
   async function connect(connector: Connector) {
     setPendingConnectorUid(connector.uid);
