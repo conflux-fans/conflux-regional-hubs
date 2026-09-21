@@ -44,3 +44,5 @@ next-env.d.ts
 /work/
 /data/*.db
 /data/*.db-*
+admin-account.txt
+how-to-deploy.txt
