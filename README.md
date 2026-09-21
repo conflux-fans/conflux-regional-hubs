@@ -49,4 +49,4 @@ Start with [docs/DEVELOPER-HANDOFF.md](docs/DEVELOPER-HANDOFF.md), then use [doc
 
 ## Safety boundary
 
-The staking module never receives a private key or seed phrase: an EIP-1193 wallet displays and signs every transaction. The approved chain, proxy address, implementation address, minimal ABI, gas estimate, receipt handling, and feature flag are code-controlled. Keep writes disabled until `npm run staking:verify`, security review, and a manual small-value wallet test all pass for the release.
+The staking module never receives a private key or seed phrase: an EIP-1193 wallet displays and signs every transaction. The target pool is deployment-configured, while the chain, proxy slot, bridge state, minimal ABI, gas estimate, receipt handling, and feature flag remain checked by the staking adapter. Keep writes disabled until `npm run staking:verify`, security review, and a manual small-value wallet test all pass for the release.

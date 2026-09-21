@@ -2,11 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { parseStakeAmount, DRIP_PER_CFX } from "../app/lib/staking/amounts.ts";
 import {
-  APPROVED_POOL_IMPLEMENTATION,
   CONFLUX_ESPACE_CHAIN_ID,
   STAKING_CONTRACT_ADDRESS,
 } from "../app/lib/staking/constants.ts";
-import { PosPoolAdapter } from "../app/lib/staking/pos-pool.ts";
+import { createReadPoolAdapter, PosPoolAdapter } from "../app/lib/staking/pos-pool.ts";
 
 function fakeConnection(overrides = {}) {
   const calls = [];
@@ -14,7 +13,7 @@ function fakeConnection(overrides = {}) {
     calls,
     async chainId() { return CONFLUX_ESPACE_CHAIN_ID; },
     async code() { return "0x6001"; },
-    async implementationAddress() { return APPROVED_POOL_IMPLEMENTATION; },
+    async implementationAddress() { return "0x54A356139FAA4a793A9A8e4ff2BA5f25553A807F"; },
     async call(method, args = []) {
       calls.push(["call", method, args]);
       const values = {
@@ -67,15 +66,22 @@ test("only increaseStake carries the exact native CFX value", async () => {
   ]);
 });
 
-test("write safety rejects an unexpected network, target, implementation, or unconfigured bridge", async () => {
+test("configured pool addresses are passed through to the read adapter", () => {
+  const contractAddress = "0x447Da341FA55E307F384a9d8CC0C933d67a0b2B0";
+  const adapter = createReadPoolAdapter("https://evm.confluxrpc.com", contractAddress);
+  assert.equal(adapter.contractAddress, contractAddress);
+});
+
+test("write safety rejects an unexpected network, malformed implementation, or unconfigured bridge", async () => {
   await assert.rejects(
     () => new PosPoolAdapter(fakeConnection({ chainId: async () => 1n }), STAKING_CONTRACT_ADDRESS).estimateStake(parseStakeAmount("1000")),
     /network/i,
   );
-  assert.throws(() => new PosPoolAdapter(fakeConnection(), "0x0000000000000000000000000000000000000001"), /allowlist/i);
+  const configuredAdapter = new PosPoolAdapter(fakeConnection(), "0x0000000000000000000000000000000000000001");
+  assert.equal(configuredAdapter.contractAddress, "0x0000000000000000000000000000000000000001");
   await assert.rejects(
-    () => new PosPoolAdapter(fakeConnection({ implementationAddress: async () => "0x0000000000000000000000000000000000000001" }), STAKING_CONTRACT_ADDRESS).estimateStake(parseStakeAmount("1000")),
-    /implementation/i,
+    () => new PosPoolAdapter(fakeConnection({ implementationAddress: async () => "0x1234" }), STAKING_CONTRACT_ADDRESS).estimateStake(parseStakeAmount("1000")),
+    /address/i,
   );
   await assert.rejects(
     () => new PosPoolAdapter(fakeConnection({ call: async (method) => method === "birdgeAddrSetted" ? false : 1n }), STAKING_CONTRACT_ADDRESS).estimateStake(parseStakeAmount("1000")),

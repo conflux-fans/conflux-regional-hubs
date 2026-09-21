@@ -1,8 +1,5 @@
 import { getAddress } from "ethers";
-import {
-  CONFLUX_ESPACE_CHAIN_ID,
-  STAKING_CONTRACT_ADDRESS,
-} from "./constants.ts";
+import { CONFLUX_ESPACE_CHAIN_ID } from "./constants.ts";
 
 type PublicStakingEnvironment = Record<string, string | undefined>;
 
@@ -18,10 +15,10 @@ export function resolveStakingConfig(environment: PublicStakingEnvironment): Sta
     const rpcUrl = new URL(environment.NEXT_PUBLIC_CONFLUX_RPC_URL ?? "");
     const contractAddress = getAddress(environment.NEXT_PUBLIC_STAKING_CONTRACT ?? "");
     if (network !== "espace-mainnet" || chainId !== CONFLUX_ESPACE_CHAIN_ID) throw new Error("network");
-    if (!/^https?:$/.test(rpcUrl.protocol) || contractAddress !== STAKING_CONTRACT_ADDRESS) throw new Error("target");
+    if (!/^https?:$/.test(rpcUrl.protocol)) throw new Error("rpc");
     return { enabled: true, rpcUrl: rpcUrl.toString(), contractAddress, chainId };
   } catch {
-    return { enabled: false, configurationError: "Staking configuration is incomplete or outside the approved allowlist." };
+    return { enabled: false, configurationError: "Staking configuration is incomplete or invalid." };
   }
 }
 

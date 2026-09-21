@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveStakingConfig } from "../app/lib/staking/config.ts";
-import { STAKING_CONTRACT_ADDRESS } from "../app/lib/staking/constants.ts";
 import { wagmiConfig } from "../app/lib/staking/wagmi-config.ts";
 
 test("disabled or invalid staking configuration remains fail-closed", () => {
@@ -10,13 +9,15 @@ test("disabled or invalid staking configuration remains fail-closed", () => {
   assert.equal(invalid.enabled, false);
   assert.match(invalid.configurationError, /configuration/i);
 
-  assert.equal(resolveStakingConfig({
+  const configured = resolveStakingConfig({
     NEXT_PUBLIC_STAKING_ENABLED: "true",
     NEXT_PUBLIC_CONFLUX_NETWORK: "espace-mainnet",
     NEXT_PUBLIC_CONFLUX_CHAIN_ID: "1030",
     NEXT_PUBLIC_CONFLUX_RPC_URL: "https://evm.confluxrpc.com",
-    NEXT_PUBLIC_STAKING_CONTRACT: STAKING_CONTRACT_ADDRESS,
-  }).enabled, true);
+    NEXT_PUBLIC_STAKING_CONTRACT: "0x447Da341FA55E307F384a9d8CC0C933d67a0b2B0",
+  });
+  assert.equal(configured.enabled, true);
+  if (configured.enabled) assert.equal(configured.contractAddress, "0x447Da341FA55E307F384a9d8CC0C933d67a0b2B0");
 });
 
 test("wallet hooks are configured for Conflux eSpace", () => {

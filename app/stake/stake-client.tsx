@@ -123,7 +123,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   const account = readyConnection?.account ?? null;
   const chainId = readyConnection?.chainId ?? null;
   const activeConnector = readyConnection?.connector;
-  const readAdapter = useMemo(() => createReadPoolAdapter(rpcUrl), [rpcUrl]);
+  const readAdapter = useMemo(() => createReadPoolAdapter(rpcUrl, contractAddress), [contractAddress, rpcUrl]);
   const walletAdapter = useRef<PosPoolAdapter | null>(null);
   const userRequest = useRef(0);
   const receiptQueries = useRef(new Set<string>());
@@ -202,7 +202,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     if (nextChainId !== CONFLUX_ESPACE_CHAIN_ID) return;
     setUserLoading(true);
     try {
-      const adapter = await createWalletPoolAdapter(provider);
+      const adapter = await createWalletPoolAdapter(provider, contractAddress);
       if (!isCurrentWallet(context)) return;
       walletAdapter.current = adapter;
       await refreshUser(nextAccount);
@@ -211,7 +211,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     } finally {
       if (isCurrentWallet(context)) setUserLoading(false);
     }
-  }, [clearUser, isCurrentWallet, refreshUser, restorePendingTransactions]);
+  }, [clearUser, contractAddress, isCurrentWallet, refreshUser, restorePendingTransactions]);
 
   useEffect(() => {
     const refreshVisibleData = () => {
@@ -249,7 +249,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (!cancelled) setWalletMessage(stakingErrorMessage(error));
     });
     return () => { cancelled = true; };
-  }, [account, activeConnector, chainId, prepareWalletAdapter]);
+  }, [account, activeConnector, chainId, contractAddress, prepareWalletAdapter]);
 
   async function connect(connector: Connector) {
     setPendingConnectorUid(connector.uid);

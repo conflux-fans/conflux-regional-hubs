@@ -2,7 +2,6 @@ import Link from "next/link";
 import { RegionalShell } from "../components/regional-shell";
 import { getRegionalConfig } from "../lib/content";
 import { getStakingConfig } from "../lib/staking/config";
-import { STAKING_CONTRACT_ADDRESS } from "../lib/staking/constants";
 import { resolveRegion } from "../regional";
 import { StakeClient } from "./stake-client";
 
@@ -26,7 +25,7 @@ export default async function StakePage({ searchParams }: { searchParams: Promis
           </div>
           <aside>
             <b>Conflux eSpace Mainnet</b>
-            <span>Contract {shortAddress(STAKING_CONTRACT_ADDRESS)}</span>
+            <span>Contract {staking.enabled ? shortAddress(staking.contractAddress) : "Unavailable"}</span>
             <p>APY is a historical metric, not a fixed or guaranteed return. Staking and unstaking have lock periods, and cross-space settlement or pool liquidity may delay principal withdrawals.</p>
           </aside>
         </header>
@@ -36,7 +35,7 @@ export default async function StakePage({ searchParams }: { searchParams: Promis
           <section className="stake-disabled v2-wrap" role="status">
             <span>STAKING PAUSED</span>
             <h2>Staking is not available yet</h2>
-            <p>{staking.configurationError ? "The launch configuration failed the security allowlist check." : "The feature is implemented but disabled by default. Enable it only after reviewing the proxy implementation, ABI, and read-only calls."}</p>
+            <p>{staking.configurationError ? "The launch configuration is incomplete or invalid." : "The feature is implemented but disabled by default. Enable it only after reviewing the proxy implementation, ABI, and read-only calls."}</p>
           </section>
         )}
       </main>

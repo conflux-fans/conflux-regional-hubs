@@ -11,7 +11,7 @@ Date: 2026-08-28
 - SQLite migration command — passed against SQLite 3.52.0; repeated runs retain one applied migration.
 - Default-off and explicitly enabled staking production builds — passed.
 - Next.js was upgraded to the 16.3.3 security release; `npm audit --omit=dev` reports zero vulnerabilities.
-- `npm run staking:verify` — passed read-only mainnet checks for chain 1030, proxy code, approved EIP-1967 implementation, bridge readiness, periods, pool/user reads, and paginated queues.
+- `npm run staking:verify` — passed read-only mainnet checks for the configured chain 1030 target, proxy code and EIP-1967 slot, bridge readiness, periods, pool/user reads, and paginated queues.
 - Enabled `/stake` HTTP smoke test — returned 200 with pool metrics, network disclosure, wallet fallback, and risk content. A connected browser instance was unavailable, so screenshot-based desktop/mobile QA remains manual.
 
 ## Tested contracts
@@ -29,7 +29,7 @@ Date: 2026-08-28
 11. Regional content and article drafts persist and can be read back from SQLite.
 12. CFX/Drip/votePower conversion remains exact at large `bigint` values and rejects invalid or overflowing input.
 13. User assets derive redeemable principal from `locked`, current stake from `available`, and withdrawable principal from both unlocked votes and pool liquidity.
-14. The adapter sends native value only with `increaseStake` and blocks writes on unexpected chain, proxy target, implementation, bridge state, or required read failure.
+14. The adapter sends native value only with `increaseStake` and blocks writes on unexpected chain, missing proxy code, malformed implementation slot, bridge state, or required read failure.
 15. Wallet account/network/disconnect events invalidate the old wallet generation; transaction states retain hashes through unknown receipts and only recover wallet replacements with a definite replacement receipt.
 16. Stake affordability includes the actual 120% gas limit, and malformed pool metrics degrade their own card while disabling writes.
 17. Amount inputs expose accessible validation relationships, and the narrow-screen staking layout retains its single-column breakpoint.

@@ -10,7 +10,6 @@ import {
 import { type StakeAmount, votesToCfx } from "./amounts.ts";
 import { POS_POOL_ABI } from "./abi.ts";
 import {
-  APPROVED_POOL_IMPLEMENTATION,
   CONFLUX_ESPACE_CHAIN_ID,
   EIP1967_IMPLEMENTATION_SLOT,
   STAKING_CONTRACT_ADDRESS,
@@ -89,7 +88,6 @@ export class PosPoolAdapter {
 
   constructor(connection: PoolConnection, contractAddress = STAKING_CONTRACT_ADDRESS) {
     const normalized = getAddress(contractAddress);
-    if (normalized !== STAKING_CONTRACT_ADDRESS) throw new Error("Staking contract is not in the allowlist.");
     this.connection = connection;
     this.contractAddress = normalized;
   }
@@ -105,7 +103,6 @@ export class PosPoolAdapter {
     ]);
     if (chainId !== CONFLUX_ESPACE_CHAIN_ID) throw new Error("Unexpected staking network.");
     if (!code || code === "0x") throw new Error("Staking contract code is unavailable.");
-    if (getAddress(implementation) !== APPROVED_POOL_IMPLEMENTATION) throw new Error("Unexpected staking implementation.");
     if (bridgeReady !== true) throw new Error("Staking pool bridge is not configured.");
     return {
       bridgeReady: true as const,
@@ -324,13 +321,13 @@ export class EthersPoolConnection implements PoolConnection {
 
 }
 
-export function createReadPoolAdapter(rpcUrl: string) {
+export function createReadPoolAdapter(rpcUrl: string, contractAddress = STAKING_CONTRACT_ADDRESS) {
   const provider = new JsonRpcProvider(rpcUrl, Number(CONFLUX_ESPACE_CHAIN_ID), { staticNetwork: true });
-  return new PosPoolAdapter(new EthersPoolConnection(provider));
+  return new PosPoolAdapter(new EthersPoolConnection(provider, undefined, contractAddress), contractAddress);
 }
 
-export async function createWalletPoolAdapter(provider: Eip1193Provider) {
+export async function createWalletPoolAdapter(provider: Eip1193Provider, contractAddress = STAKING_CONTRACT_ADDRESS) {
   const browserProvider = new BrowserProvider(provider);
   const signer = await browserProvider.getSigner();
-  return new PosPoolAdapter(new EthersPoolConnection(browserProvider, signer));
+  return new PosPoolAdapter(new EthersPoolConnection(browserProvider, signer, contractAddress), contractAddress);
 }

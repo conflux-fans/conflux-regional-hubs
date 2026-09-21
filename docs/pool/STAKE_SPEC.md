@@ -51,7 +51,7 @@ eSpace 矿池合约会把新增质押转给已配置的桥接地址，并从桥�
 | 网络 | Conflux eSpace 主网 | `eth_chainId` 必须返回 `0x406`（十进制 `1030`） |
 | 钱包 | MetaMask 等 EIP-1193 注入钱包 | 使用钱包提供的 EIP-1193 provider；多钱包环境不得默认覆盖用户选择 |
 | SDK | `ethers` v6 | 金额和整数全程使用 `bigint`，不得经过 JavaScript `number` |
-| 合约地址 | `0x3cbc6F7D406fe9701573FE6DdF28f4F17b5d46A3` | 必须由开发者配置并进入允许列表 |
+| 合约地址 | 由 `NEXT_PUBLIC_STAKING_CONTRACT` 配置 | 必须是目标 eSpace 矿池代理地址；每个部署可以使用不同地址 |
 | ABI | `docs/pool/IPoSPool.json` | 使用当前 eSpace 实现的最小用户 ABI，不向 UI 暴露管理员或桥接写方法 |
 | CFX 最小单位 | Drip | `1 CFX = 10^18 Drip` |
 | 票数单位 | votePower | `1 votePower = 1000 CFX` |
@@ -65,12 +65,12 @@ eSpace 矿池合约会把新增质押转给已配置的桥接地址，并从桥�
 每次发布到生产前必须重新验证：
 
 - `eth_chainId` 返回 `0x406`；
-- 代理地址代码非空，代理实现地址与已审核记录一致；
+- 代理地址代码非空，EIP-1967 实现槽可解析；上线前应人工核对实现代码和 ABI；
 - 当前实现的已验证 ABI 与仓库最小 ABI 中使用的方法签名一致；
 - `birdgeAddrSetted()` 为 `true`，且 `_poolLockPeriod()`、`_poolUnlockPeriod()` 可正常读取；
 - 本文使用的最小 ABI 能成功调用全部只读方法；
-- 交易目标仍是允许列表中的代理地址；
-- 合约版本或实现地址变化时暂停写操作，复核实现源码和 ABI 后再恢复。
+- 交易目标仍是部署配置的代理地址；
+- 发布前若发现合约版本或实现地址变化，应人工暂停写操作，复核实现源码和 ABI 后再恢复。
 
 只读校验失败时页面进入“暂不可用”状态，不允许继续发起交易。
 
@@ -211,7 +211,7 @@ APY 是合约按近期区块数据计算的历史指标，不是保证收益。A
 | 网络切换 | 清除合约实例和用户缓存，重新校验后再启用交易 |
 | 钱包断开/权限撤销 | 清空用户数据并回到未连接状态 |
 
-地址展示为 EIP-55 checksum 短格式，但复制按钮复制完整 eSpace 十六进制地址。交易目标必须是允许列表中的完整代理地址。
+地址展示为 EIP-55 checksum 短格式，但复制按钮复制完整 eSpace 十六进制地址。交易目标必须是部署配置中的完整代理地址。
 
 ## 8. 用户操作规格
 
@@ -315,14 +315,14 @@ idle
 
 ### 10.2 安全约束
 
-- 合约地址、chain ID 和允许调用的方法由开发者控制，不接受 URL、CMS 或用户输入覆盖；
+- 合约地址、chain ID 和允许调用的方法由部署配置与代码控制，不接受 URL、CMS 或用户输入覆盖；
 - 前端最小 ABI 只包含本规格的读方法、四个写方法和相关事件；
 - 交易发送前再次校验 chain ID、`to`、method selector、参数和值；
 - 禁止请求无限授权；本流程直接发送原生 CFX，不需要 ERC-20 allowance；
 - 不把私钥、助记词或钱包授权信息发送到应用服务端、日志或分析平台；
 - 日志可记录 network、规范化地址、方法、tx hash 和错误码，但账户地址应遵守隐私策略；
 - 页面明确披露：第三方矿池合约、跨空间桥、验证节点、锁定周期、提取流动性和协议处罚风险；
-- 合约代理实现变化、链 ID 不符或校验失败时，宁可只读降级，不允许继续交易。
+- 发布前发现合约代理实现变化、链 ID 不符或校验失败时，宁可只读降级，不允许继续交易。
 
 ## 11. 建议实现边界
 
@@ -331,7 +331,7 @@ idle
 ```text
 app/stake/page.tsx                 Server 页面外壳、区域文案与初始结构
 app/stake/stake-client.tsx         Client 交互、状态组合与可访问 UI
-app/lib/staking/constants.ts       chain、单位和经审核的合约允许列表
+app/lib/staking/constants.ts       chain、单位和 EIP-1967 槽位常量
 app/lib/staking/abi.ts             从 artifact 固化的最小用户 ABI
 app/lib/staking/amounts.ts         Drip/CFX/votePower 的纯函数转换
 app/lib/staking/provider.ts        EIP-1193 provider 发现、连接、事件订阅
@@ -355,7 +355,7 @@ NEXT_PUBLIC_CONFLUX_RPC_URL=https://evm.confluxrpc.com
 NEXT_PUBLIC_STAKING_CONTRACT=0x3cbc6F7D406fe9701573FE6DdF28f4F17b5d46A3
 ```
 
-生产构建中 `NEXT_PUBLIC_STAKING_ENABLED=true` 时，配置缺失、chain ID 非 `1030` 或地址不在代码允许列表都应使构建失败或功能保持禁用。RPC URL 是公开读取端点，不得放私钥。
+生产构建中 `NEXT_PUBLIC_STAKING_ENABLED=true` 时，配置缺失、chain ID 非 `1030` 或 RPC/地址格式无效都应使构建失败或功能保持禁用。RPC URL 是公开读取端点，不得放私钥。
 
 ## 12. 数据刷新与并发
 

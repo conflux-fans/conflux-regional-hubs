@@ -13,7 +13,7 @@ This repository is the shared regional application. It includes the responsive K
 4. Run `npm run auth:setup` in a trusted terminal. Add every required manager when prompted, then configure the resulting `ADMIN_CREDENTIALS_JSON` and `AUTH_SESSION_SECRET` as server-side deployment secrets. Never configure a plaintext password.
 5. Protect `/api/auth/login` with the hosting provider's rate-limiting controls and rotate `AUTH_SESSION_SECRET` to revoke all active manager sessions. The environment-backed list supports up to 20 managers; replace it with a database-backed account model if self-service account management or roles are required.
 6. Supply `INSTAGRAM_ACCESS_TOKEN` and `X_BEARER_TOKEN` for the included server adapters. YouTube uses its public Atom feed when a `/channel/UC…` URL is supplied. The configured Instagram/X profile links and fallback cards work without credentials. Never put social access tokens in browser code.
-7. Keep `NEXT_PUBLIC_STAKING_ENABLED=false` for the first deployment. Configure the approved eSpace values from `.env.example`, run `npm run staking:verify`, compare the proxy implementation and ABI with the reviewed release, then complete an explicit manual small-value wallet test before enabling writes.
+7. Keep `NEXT_PUBLIC_STAKING_ENABLED=false` for the first deployment. Configure the target eSpace pool from `.env.example`, run `npm run staking:verify`, compare the proxy implementation and ABI with the reviewed release, then complete an explicit manual small-value wallet test before enabling writes.
 8. Connect the approved domain, configure HTTPS, set canonical metadata, and verify DNS.
 9. Run responsive, accessibility, editorial-permission, content, wallet, transaction, and rollback tests.
 
@@ -24,7 +24,7 @@ This repository is the shared regional application. It includes the responsive K
 - Storage: a persistent volume or object-storage adapter for future direct media uploads.
 - Authentication: application-owned email/password login for up to 20 configured managers, with an independent PBKDF2 hash per account and signed, `HttpOnly`, `SameSite=Lax` sessions. Add a database-backed account model when roles or self-service account management are required.
 - Social ingestion: scheduled server jobs, official APIs, cached normalized feed items.
-- Staking: read and write adapters isolated under `app/lib/staking`, with an approved chain/address/implementation allowlist, EIP-1193 wallet confirmation, read-only release verification, and a default-off feature flag.
+- Staking: read and write adapters isolated under `app/lib/staking`, with deployment-configured pool targets, runtime chain/proxy-slot/bridge checks, EIP-1193 wallet confirmation, read-only release verification, and a default-off feature flag.
 
 ## Per-region configuration
 

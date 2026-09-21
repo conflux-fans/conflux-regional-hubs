@@ -1,15 +1,22 @@
 import { getAddress } from "ethers";
 import { formatApy, formatCfx, formatDripAsCfx } from "../app/lib/staking/amounts.ts";
+import { resolveStakingConfig } from "../app/lib/staking/config.ts";
 import {
-  APPROVED_POOL_IMPLEMENTATION,
   CONFLUX_ESPACE_RPC_URL,
-  STAKING_CONTRACT_ADDRESS,
 } from "../app/lib/staking/constants.ts";
 import { createReadPoolAdapter } from "../app/lib/staking/pos-pool.ts";
 
-const rpcUrl = process.env.NEXT_PUBLIC_CONFLUX_RPC_URL?.trim() || CONFLUX_ESPACE_RPC_URL;
+const staking = resolveStakingConfig({
+  NEXT_PUBLIC_STAKING_ENABLED: "true",
+  NEXT_PUBLIC_CONFLUX_NETWORK: process.env.NEXT_PUBLIC_CONFLUX_NETWORK || "espace-mainnet",
+  NEXT_PUBLIC_CONFLUX_CHAIN_ID: process.env.NEXT_PUBLIC_CONFLUX_CHAIN_ID || "1030",
+  NEXT_PUBLIC_CONFLUX_RPC_URL: process.env.NEXT_PUBLIC_CONFLUX_RPC_URL?.trim() || CONFLUX_ESPACE_RPC_URL,
+  NEXT_PUBLIC_STAKING_CONTRACT: process.env.NEXT_PUBLIC_STAKING_CONTRACT?.trim(),
+});
+if (!staking.enabled) throw new Error(staking.configurationError || "Staking configuration is invalid.");
+const { rpcUrl, contractAddress } = staking;
 const probeAccount = getAddress("0x0000000000000000000000000000000000000001");
-const adapter = createReadPoolAdapter(rpcUrl);
+const adapter = createReadPoolAdapter(rpcUrl, contractAddress);
 
 const overview = await adapter.readPoolOverview();
 if (!overview.writeReady || !overview.validation) throw overview.validationError ?? new Error("Staking contract validation failed.");
@@ -26,9 +33,8 @@ await Promise.all([
 
 console.log(JSON.stringify({
   chain: "Conflux eSpace mainnet (1030)",
-  contract: STAKING_CONTRACT_ADDRESS,
+  contract: contractAddress,
   implementation: overview.validation.implementation,
-  implementationApproved: overview.validation.implementation === APPROVED_POOL_IMPLEMENTATION,
   bridgeReady: overview.validation.bridgeReady,
   lockPeriodBlocks: overview.validation.lockPeriodBlocks.toString(),
   unlockPeriodBlocks: overview.validation.unlockPeriodBlocks.toString(),

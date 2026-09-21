@@ -24,7 +24,7 @@ For local development, run `npm run dev`. The important routes are `/`, `/insigh
 5. Run `npm run auth:setup`, add every manager when prompted, and store the generated `ADMIN_CREDENTIALS_JSON` and `AUTH_SESSION_SECRET` in the deployment secret manager.
 6. Add the social credentials listed in `.env.example` if automatic Instagram/X feeds are required. The supplied account links remain functional before credentials are connected.
 7. Add storage before enabling image uploads.
-8. Keep staking disabled until `npm run staking:verify`, the release security review, and a manual small-value wallet test pass against the approved eSpace proxy implementation.
+8. Keep staking disabled until `npm run staking:verify`, the release security review, and a manual small-value wallet test pass against the configured eSpace pool and reviewed proxy implementation.
 9. Attach DNS, confirm HTTPS, and validate canonical/Open Graph URLs using the final domain.
 
 ## Turn the next questionnaire prompt into a site
