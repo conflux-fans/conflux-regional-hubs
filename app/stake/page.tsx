@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RegionalShell } from "../components/regional-shell";
 import { getRegionalConfig } from "../lib/content";
+import { regionalMetadata } from "../lib/page-metadata";
 import { stakeCopy } from "../lib/staking/copy";
 import { getStakingConfig } from "../lib/staking/config";
-import { regions, resolveRegion } from "../regional";
+import { resolveRegion } from "../regional";
 import { StakeClient } from "./stake-client";
 
 function shortAddress(address: string) {
@@ -13,8 +14,12 @@ function shortAddress(address: string) {
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const params = await searchParams;
-  const region = regions[resolveRegion(params.region)];
-  return { title: `${region.stakeLabel} — ${region.wordmark}`, description: region.stakeIntro };
+  const region = await getRegionalConfig(resolveRegion(params.region));
+  return regionalMetadata(region, {
+    title: `${region.stakeLabel} — ${region.wordmark}`,
+    description: region.stakeIntro,
+    path: `/stake?region=${region.key}`,
+  });
 }
 
 export default async function StakePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

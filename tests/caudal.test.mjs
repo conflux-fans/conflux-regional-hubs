@@ -27,6 +27,36 @@ test("LATAM module defaults exclude events and newsletter and preserve social co
   assert.match(regions.latam.communityLinks[0].url, /Conflux_LATAM/);
 });
 
+test("Every region carries its own SEO metadata", async () => {
+  const { regions } = await import("../app/regional.ts");
+  const { siteMetadata, regionShareImage, regionHtmlLang, deploymentRegion } = await import("../app/lib/page-metadata.ts");
+  for (const [key, region] of Object.entries(regions)) {
+    assert.ok(region.seo.title.toLowerCase().includes(region.wordmark.toLowerCase()), `${key} title should reference its own wordmark`);
+    assert.ok(region.seo.description.length > 20, `${key} needs a description`);
+  }
+  assert.match(siteMetadata(regions.latam).title, /Caudal/);
+  assert.doesNotMatch(siteMetadata(regions.latam).title, /Kudi/);
+  assert.equal(siteMetadata(regions.africa).title, "Kudi Hub — Africa Onchain");
+  assert.equal(regionShareImage(regions.latam), "/brand/caudal/logo-blue.png");
+  assert.equal(regionHtmlLang(regions.latam), "es");
+  assert.ok(deploymentRegion().key in regions);
+});
+
+test("Root layout metadata is derived from the deployment region", async () => {
+  const layout = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(layout, /Kudi Hub/);
+  assert.match(layout, /siteMetadata\(region\)/);
+  assert.match(layout, /lang=\{regionHtmlLang\(region\)\}/);
+});
+
+test("Journal and stake routes generate region-aware metadata", async () => {
+  for (const file of ["../app/journal/page.tsx", "../app/stake/page.tsx", "../app/page.tsx"]) {
+    const source = await readFile(new URL(file, import.meta.url), "utf8");
+    assert.match(source, /export async function generateMetadata/, `${file} should generate metadata`);
+    assert.match(source, /regionalMetadata\(|siteMetadata\(/, `${file} should use the regional metadata helper`);
+  }
+});
+
 test("Caudal language toggle is cookie-driven and latam-guarded", async () => {
   const source = await readFile(new URL("../app/lib/content.ts", import.meta.url), "utf8");
   assert.match(source, /caudal-locale/);

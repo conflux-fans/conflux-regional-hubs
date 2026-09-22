@@ -16,6 +16,7 @@ export type RegionalContributorProfile = {
 export type RegionalConfig = {
   locale?: "es" | "en";
   uiCopy?: Record<string, string>;
+  seo: { title: string; description: string };
   key: RegionKey;
   code: string;
   name: string;
@@ -53,6 +54,10 @@ export type RegionalConfig = {
 export const regions: Record<RegionKey, RegionalConfig> = {
   latam: {
     key: "latam",
+    seo: {
+      title: "Caudal — Conflux para Latinoamérica",
+      description: "Noticias, comunidad y staking de Conflux para Latinoamérica, en un solo lugar.",
+    },
     code: "LATAM",
     name: "Latinoamérica",
     wordmark: "Caudal",
@@ -103,6 +108,10 @@ export const regions: Record<RegionKey, RegionalConfig> = {
   },
   africa: {
     key: "africa",
+    seo: {
+      title: "Kudi Hub — Africa Onchain",
+      description: "African voices, blockchain perspectives, and a safer path to CFX staking.",
+    },
     code: "AF",
     name: "Africa",
     wordmark: "Kudi Hub",
@@ -166,6 +175,10 @@ export const regions: Record<RegionKey, RegionalConfig> = {
   },
   korea: {
     key: "korea",
+    seo: {
+      title: "Conflux Korea — 한국의 Conflux",
+      description: "한국의 Conflux 뉴스, 스테이킹, 커뮤니티를 한 곳에서.",
+    },
     code: "KR",
     name: "Korea",
     wordmark: "CONFLUX KOREA",

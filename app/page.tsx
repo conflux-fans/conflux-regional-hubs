@@ -6,18 +6,13 @@ import { Contributors } from "./components/contributors";
 import { SocialFeed } from "./components/social-feed";
 import { getRegionalArticles } from "./lib/articles";
 import { getRegionalConfig, getRegionalContributors, getRegionalModules, type RegionalContributor, type RegionalModule } from "./lib/content";
+import { siteMetadata } from "./lib/page-metadata";
 import { resolveRegion } from "./regional";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  if (resolveRegion(params.region) !== "latam") return {};
-  const region = await getRegionalConfig("latam");
-  return {
-    title: `Caudal — ${region.headline}`,
-    description: region.intro,
-    openGraph: { title: `Caudal — ${region.headline}`, description: region.intro, images: [] },
-    twitter: { card: "summary" as const, title: `Caudal — ${region.headline}`, description: region.intro, images: [] },
-  };
+  const region = await getRegionalConfig(resolveRegion(params.region));
+  return siteMetadata(region);
 }
 
 function OptionalModules({ modules }: { modules: RegionalModule[] }) {
