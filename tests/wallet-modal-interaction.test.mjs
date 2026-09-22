@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { JSDOM } from "jsdom";
@@ -22,6 +23,20 @@ function loadWalletModal(source) {
   const localRequire = (id) => {
     if (id === "next/image") {
       return { __esModule: true, default: (props) => React.createElement("img", props) };
+    }
+    if (id.startsWith(".")) {
+      const dependencySource = readFileSync(new URL(`../app/stake/${id.replace(/(\.ts)?$/, ".ts")}`, import.meta.url), "utf8");
+      const dependencyModule = { exports: {} };
+      const dependencyCompiled = ts.transpileModule(dependencySource, {
+        compilerOptions: {
+          esModuleInterop: true,
+          jsx: ts.JsxEmit.ReactJSX,
+          module: ts.ModuleKind.CommonJS,
+          target: ts.ScriptTarget.ES2022,
+        },
+      }).outputText;
+      new Function("require", "module", "exports", dependencyCompiled)(localRequire, dependencyModule, dependencyModule.exports);
+      return dependencyModule.exports;
     }
     return projectRequire(id);
   };

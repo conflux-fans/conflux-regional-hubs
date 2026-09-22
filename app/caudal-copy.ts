@@ -14,5 +14,5 @@ export const caudalCopy: Record<string,string> = {
   "es.teamIntro":"Conoce al equipo de Conflux LATAM.", "en.teamIntro":"Meet the Conflux LATAM team. Profiles are provided in Spanish.",
   "en.headline":"Conflux for Latin America.", "en.intro":"Conflux news, resources, community and opportunities, all in one place.",
   "en.heroEyebrow":"LATIN AMERICA IN MOTION", "en.journalLabel":"News", "en.journalTitle":"Local ideas. Regional impact.", "en.journalEyebrow":"NEWS / CONFLUX LATAM",
-  "en.stakeLabel":"Staking", "en.stakeEyebrow":"PARTICIPATE IN CONFLUX", "en.stakeHeading":"Your participation. A stronger network.", "en.stakingDescription":"Explore CFX staking. Contract connections will be enabled after technical and security review.", "en.footerText":"Conflux for Latin America", "en.communityLabel":"Community",
+  "en.stakeLabel":"Staking", "en.stakeEyebrow":"PARTICIPATE IN CONFLUX", "en.stakeHeading":"Your participation. A stronger network.", "en.stakingDescription":"Stake CFX with wallet confirmation, visible lock periods, and chain-verified transaction status.", "en.footerText":"Conflux for Latin America", "en.communityLabel":"Community",
 };

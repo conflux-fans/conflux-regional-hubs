@@ -3,3 +3,19 @@
 @media(max-width:800px){.caudal-header{gap:12px;flex-wrap:wrap}.caudal-header nav{order:3;flex-basis:100%;justify-content:space-between;margin:0;gap:12px;padding:12px 0;font-size:1rem}.caudal-language{margin-left:auto}.caudal-hero{display:flex;flex-direction:column;padding:35px 6% 0;gap:35px;min-height:0}.caudal-hero h1{font-size:clamp(3rem,11vw,5rem)}.caudal-hero-art{width:100%;min-height:380px;border-radius:22px;background-size:auto 125%;background-position:100% 62%}.caudal-hero-copy>p:not(.caudal-eyebrow){font-size:1.125rem}.caudal-paths,.caudal-staking,.caudal-community{grid-template-columns:1fr;gap:22px}.caudal-intro,.caudal-news,.caudal-community{padding:55px 6%}.caudal-section-title{display:block}.caudal-staking{padding:55px 6%}.caudal-footer nav{flex-wrap:wrap}.region-latam .feed-empty{display:block;padding:26px}.region-latam .feed-empty h3{font-size:1.6rem}.region-latam .contributors-grid{grid-template-columns:1fr}.caudal-logo{width:160px}.region-latam .v2-stake-hero{display:block}.region-latam .v2-wallet-card{margin-top:35px}}
 .region-latam .caudal-hero-art{background-size:auto 140%;background-position:100% 35%}
 .region-latam.studio-page input,.region-latam.studio-page textarea,.region-latam.studio-page select,.region-latam.studio-page button{font-size:1rem}
+
+/* LATAM staking dashboard (shared StakeClient component on the Caudal page) */
+.region-latam .stake-app{background:#fff;color:#26221f;padding-bottom:90px}
+.region-latam .stake-pool>div:first-child>span,.region-latam .stake-section-heading>span,.region-latam .stake-risks>span,.region-latam .stake-actions article>span,.region-latam .stake-assets span,.region-latam .stake-metrics span{color:#2051eb}
+.region-latam .stake-pool,.region-latam .stake-user,.region-latam .stake-metrics,.region-latam .stake-assets,.region-latam .stake-actions,.region-latam .stake-queue,.region-latam .stake-risks{border-color:#d9d9d5;border-radius:22px;overflow:hidden}
+.region-latam .stake-metrics article,.region-latam .stake-assets article,.region-latam .stake-actions>article,.region-latam .stake-queue-list,.region-latam .stake-queue .stake-empty{border-color:#e7e7e3}
+.region-latam .stake-actions input{border-radius:12px;border-color:#d9d9d5;background:#fff}
+.region-latam .stake-actions article>button,.region-latam .stake-wallet-bar button{border-radius:12px;border-color:#d9d9d5}
+.region-latam .stake-actions article>button.stake-secondary-button,.region-latam .stake-wallet-bar .stake-connect-button{background:#26221f}
+.region-latam .stake-empty{background:#fafafa}
+.region-latam .stake-app button:focus-visible,.region-latam .stake-app input:focus-visible,.region-latam .stake-app a:focus-visible{outline-color:#2051eb}
+.region-latam .stake-risks{background:#2051eb;border-color:#2051eb}
+.region-latam .stake-risks>span,.region-latam .stake-risks code{color:#fadbe5}
+.region-latam .stake-risks p{color:#dfe6f7}
+.region-latam .v2-wallet-card span{color:#2051eb;font:700 10px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.region-latam .stake-queues{margin-top:24px}

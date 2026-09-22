@@ -74,7 +74,7 @@ export const regions: Record<RegionKey, RegionalConfig> = {
     stakeLabel: "Staking",
     stakeEyebrow: "PARTICIPA EN CONFLUX",
     stakeHeading: "Tu participación. Una red más fuerte.",
-    stakeIntro: "Explora el staking de CFX. La conexión a contratos se habilitará tras la revisión técnica y de seguridad.",
+    stakeIntro: "Haz stake de CFX con confirmación desde tu billetera, períodos de bloqueo visibles y estado verificado en la cadena.",
     footerText: "Conflux para Latinoamérica",
     communityLabel: "Comunidad",
     localModuleEyebrow: "PERSONAS + IDEAS + OPORTUNIDADES",

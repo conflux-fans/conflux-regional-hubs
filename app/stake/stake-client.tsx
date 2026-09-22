@@ -5,6 +5,7 @@ import { getAddress, type Eip1193Provider } from "ethers";
 import { useConnect, useConnection, useConnectionEffect, useConnectors, useDisconnect, useSwitchChain, type Connector } from "wagmi";
 import { formatApy, formatCfx, formatDripAsCfx, parseStakeAmount } from "../lib/staking/amounts";
 import { CONFLUX_ESPACE_CHAIN_ID, transactionExplorerUrl } from "../lib/staking/constants";
+import { stakeCopy, translateStakingMessage, type StakeCopy, type StakeLocale } from "../lib/staking/copy";
 import { stakingErrorDetail, stakingErrorMessage } from "../lib/staking/errors";
 import { queueNodeView, type QueueNode } from "../lib/staking/models";
 import { createReadPoolAdapter, createWalletPoolAdapter, type PosPoolAdapter } from "../lib/staking/pos-pool";
@@ -36,74 +37,52 @@ const initialTransactions: Record<Action, TransactionState> = {
   claim: initialTransactionState(),
 };
 
-const successMessages: Record<Action, string> = {
-  stake: "Stake confirmed and entering the lock period",
-  unstake: "Unstake confirmed and entering the unlock period",
-  withdraw: "Principal withdrawn to your wallet",
-  claim: "Rewards claimed to your wallet",
-};
-
-function phaseLabel(phase: TransactionPhase) {
-  return {
-    idle: "",
-    validating: "Validating amount and network...",
-    estimating: "Estimating gas...",
-    awaiting_signature: "Confirm in your wallet...",
-    submitted: "Transaction submitted",
-    confirming: "Waiting for onchain confirmation...",
-    success: "Transaction confirmed",
-    refreshing: "Refreshing onchain data...",
-    validation_error: "Check the entered amount",
-    rejected: "Action cancelled",
-    reverted: "Transaction failed",
-    rpc_error: "Network service is temporarily unavailable",
-  }[phase];
+function approximateTime(seconds: bigint, copy: StakeCopy) {
+  if (seconds <= 0n) return copy.approx.matured;
+  const days = seconds / 86_400n;
+  if (days > 0n) return copy.approx.days(days);
+  const hours = (seconds + 3599n) / 3600n;
+  return copy.approx.hours(hours);
 }
 
 function shortAddress(address: string) {
   return `${address.slice(0, 8)}…${address.slice(-6)}`;
 }
 
-function approximateTime(seconds: bigint) {
-  if (seconds <= 0n) return "Matured";
-  const days = seconds / 86_400n;
-  if (days > 0n) return `About ${days} days (estimated)`;
-  const hours = (seconds + 3599n) / 3600n;
-  return `About ${hours} hours (estimated)`;
-}
-
-function QueuePanel({ title, queue, currentBlock, activeLabel, secondsPerBlock }: { title: string; queue: QueueNode[]; currentBlock: bigint; activeLabel: string; secondsPerBlock: number }) {
+function QueuePanel({ title, queue, currentBlock, activeLabel, secondsPerBlock, copy }: { title: string; queue: QueueNode[]; currentBlock: bigint; activeLabel: string; secondsPerBlock: number; copy: StakeCopy }) {
   const [expanded, setExpanded] = useState(false);
   const pending = queue.filter((node) => node.endBlock > currentBlock);
   const pendingCfx = pending.reduce((total, node) => total + node.votePower * 1000n, 0n);
   return (
     <section className="stake-queue">
       <button type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
-        <span><b>{title}</b><small>{pending.length} active {pending.length === 1 ? "batch" : "batches"} · {formatCfx(pendingCfx)}</small></span>
-        <i>{expanded ? "Collapse −" : "Expand +"}</i>
+        <span><b>{title}</b><small>{copy.queue.active(pending.length)} · {formatCfx(pendingCfx)}</small></span>
+        <i>{expanded ? copy.queue.collapse : copy.queue.expand}</i>
       </button>
       {expanded && (queue.length ? <div className="stake-queue-list">{queue.map((node, index) => {
         const view = queueNodeView(node, currentBlock, secondsPerBlock);
-        return <article key={`${node.endBlock}-${index}`}><span><b>{formatCfx(view.amountCfx)}</b><small>Target block #{view.endBlock.toString()}</small></span><span><b>{view.matured ? "Matured" : activeLabel}</b><small>{approximateTime(view.estimatedSeconds)}</small></span></article>;
-      })}</div> : <p className="stake-empty">No queue entries</p>)}
+        return <article key={`${node.endBlock}-${index}`}><span><b>{formatCfx(view.amountCfx)}</b><small>{copy.queue.targetBlock}{view.endBlock.toString()}</small></span><span><b>{view.matured ? copy.approx.matured : activeLabel}</b><small>{approximateTime(view.estimatedSeconds, copy)}</small></span></article>;
+      })}</div> : <p className="stake-empty">{copy.queue.empty}</p>)}
     </section>
   );
 }
 
-function TransactionNotice({ state, onCheck }: { state: TransactionState; onCheck?: () => void }) {
+function TransactionNotice({ state, onCheck, copy }: { state: TransactionState; onCheck?: () => void; copy: StakeCopy }) {
   if (state.phase === "idle") return null;
   const tone = state.phase === "success" ? "success" : ["validation_error", "rejected", "reverted", "rpc_error"].includes(state.phase) ? "error" : "pending";
   return (
     <output className={`stake-transaction ${tone}`} aria-live="polite">
-      <b>{state.message || phaseLabel(state.phase)}</b>
-      {state.hash && <a href={transactionExplorerUrl(state.hash)} target="_blank" rel="noreferrer">View transaction ↗</a>}
-      {canManuallyCheckReceipt(state) && onCheck && <button type="button" onClick={onCheck}>Check receipt</button>}
-      {state.detail && <details><summary>Technical details</summary><code>{state.detail}</code></details>}
+      <b>{state.message || copy.phaseLabel[state.phase]}</b>
+      {state.hash && <a href={transactionExplorerUrl(state.hash)} target="_blank" rel="noreferrer">{copy.notice.viewTransaction}</a>}
+      {canManuallyCheckReceipt(state) && onCheck && <button type="button" onClick={onCheck}>{copy.notice.checkReceipt}</button>}
+      {state.detail && <details><summary>{copy.notice.technicalDetails}</summary><code>{state.detail}</code></details>}
     </output>
   );
 }
 
-export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpcUrl: string; contractAddress: string; poolFallbackName: string }) {
+export function StakeClient({ rpcUrl, contractAddress, poolFallbackName, locale = "en" }: { rpcUrl: string; contractAddress: string; poolFallbackName: string; locale?: StakeLocale }) {
+  const copy = stakeCopy(locale);
+  const errorMessage = useCallback((error: unknown) => translateStakingMessage(locale, stakingErrorMessage(error)), [locale]);
   const [pool, setPool] = useState<PoolOverview | null>(null);
   const [poolError, setPoolError] = useState("");
   const [walletMessage, setWalletMessage] = useState("");
@@ -138,22 +117,22 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       const restored = { ...initialTransactions };
       for (const action of Object.keys(initialTransactions) as Action[]) {
         const hash = window.localStorage.getItem(pendingTransactionKey(nextAccount, action));
-        if (hash) restored[action] = transitionTransaction(restored[action], { type: "submitted", hash, message: "Pending transaction found" });
+        if (hash) restored[action] = transitionTransaction(restored[action], { type: "submitted", hash, message: copy.messages.pendingFound });
       }
       return restored;
     });
-  }, []);
+  }, [copy]);
 
   const refreshPool = useCallback(async () => {
     try {
       const overview = await readAdapter.readPoolOverview();
       setPool(overview);
-      setPoolError(overview.writeReady ? "" : stakingErrorMessage(overview.validationError));
+      setPoolError(overview.writeReady ? "" : errorMessage(overview.validationError));
     } catch (error) {
       setPool(null);
-      setPoolError(stakingErrorMessage(error));
+      setPoolError(errorMessage(error));
     }
-  }, [readAdapter]);
+  }, [errorMessage, readAdapter]);
 
   const clearUser = useCallback(() => {
     userRequest.current += 1;
@@ -186,11 +165,11 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
         setWalletMessage("");
       }
     } catch (error) {
-      if (request === userRequest.current && adapter === walletAdapter.current && walletContext.current.matches(context)) setWalletMessage(stakingErrorMessage(error));
+      if (request === userRequest.current && adapter === walletAdapter.current && walletContext.current.matches(context)) setWalletMessage(errorMessage(error));
     } finally {
       if (request === userRequest.current) setUserLoading(false);
     }
-  }, []);
+  }, [errorMessage]);
 
   const isCurrentWallet = useCallback((context: WalletContext) => walletContext.current.matches(context), []);
 
@@ -207,11 +186,11 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       walletAdapter.current = adapter;
       await refreshUser(nextAccount);
     } catch (error) {
-      if (isCurrentWallet(context)) setWalletMessage(stakingErrorMessage(error));
+      if (isCurrentWallet(context)) setWalletMessage(errorMessage(error));
     } finally {
       if (isCurrentWallet(context)) setUserLoading(false);
     }
-  }, [clearUser, contractAddress, isCurrentWallet, refreshUser, restorePendingTransactions]);
+  }, [clearUser, contractAddress, errorMessage, isCurrentWallet, refreshUser, restorePendingTransactions]);
 
   useEffect(() => {
     const refreshVisibleData = () => {
@@ -246,10 +225,10 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (!provider || typeof provider !== "object" || !("request" in provider)) throw new Error("Wallet provider is unavailable");
       return prepareWalletAdapter(provider as Eip1193Provider, account, chainId);
     }).catch((error) => {
-      if (!cancelled) setWalletMessage(stakingErrorMessage(error));
+      if (!cancelled) setWalletMessage(errorMessage(error));
     });
     return () => { cancelled = true; };
-  }, [account, activeConnector, chainId, prepareWalletAdapter]);
+  }, [account, activeConnector, chainId, errorMessage, prepareWalletAdapter]);
 
   async function connect(connector: Connector) {
     setPendingConnectorUid(connector.uid);
@@ -258,7 +237,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       await connectMutation.mutateAsync({ connector });
       setWalletModalOpen(false);
     } catch (error) {
-      setWalletMessage(stakingErrorMessage(error));
+      setWalletMessage(errorMessage(error));
     } finally {
       setPendingConnectorUid(undefined);
     }
@@ -271,7 +250,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     try {
       await disconnectMutation.mutateAsync({ connector: withoutExperimentalPermissionRevocation(connector) });
     } catch (error) {
-      setWalletMessage(stakingErrorMessage(error));
+      setWalletMessage(errorMessage(error));
     }
   }
 
@@ -279,7 +258,7 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
     try {
       await switchChainMutation.mutateAsync({ chainId: Number(CONFLUX_ESPACE_CHAIN_ID) });
     } catch (error) {
-      setWalletMessage(stakingErrorMessage(error));
+      setWalletMessage(errorMessage(error));
     }
   }
 
@@ -340,17 +319,17 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (receiptOutcome === "unknown") throw new Error("Unknown transaction receipt status");
       if (receiptOutcome === "failed") {
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-        updateIfCurrent({ type: "reverted", hash: transaction.hash, message: "Transaction failed" });
+        updateIfCurrent({ type: "reverted", hash: transaction.hash, message: copy.messages.txFailed });
         if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         return;
       }
       window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
       if (isCurrentWallet(operationContext)) {
-        updateIfCurrent({ type: "refreshing", hash: transaction.hash, message: "Transaction confirmed. Refreshing onchain data..." });
+        updateIfCurrent({ type: "refreshing", hash: transaction.hash, message: copy.messages.confirmedRefreshing });
         setStakeInput("");
         setUnstakeInput("");
         await Promise.all([refreshPool(), refreshUser(operationAccount)]);
-        updateIfCurrent({ type: "success", hash: transaction.hash, message: successMessages[action] });
+        updateIfCurrent({ type: "success", hash: transaction.hash, message: copy.success[action] });
       }
     } catch (error) {
       const replacement = submittedHash ? resolveConfirmedReplacement(error) : null;
@@ -358,21 +337,21 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
         if (replacement.outcome === "success") {
           if (isCurrentWallet(operationContext)) {
-            updateIfCurrent({ type: "refreshing", hash: replacement.hash, message: "Replacement transaction confirmed. Refreshing onchain data..." });
+            updateIfCurrent({ type: "refreshing", hash: replacement.hash, message: copy.messages.replacementConfirmed });
             setStakeInput("");
             setUnstakeInput("");
             await Promise.all([refreshPool(), refreshUser(operationAccount)]);
-            updateIfCurrent({ type: "success", hash: replacement.hash, message: successMessages[action] });
+            updateIfCurrent({ type: "success", hash: replacement.hash, message: copy.success[action] });
           }
         } else {
-          updateIfCurrent({ type: "reverted", hash: replacement.hash, message: "The original transaction was cancelled, or its replacement failed" });
+          updateIfCurrent({ type: "reverted", hash: replacement.hash, message: copy.messages.replacementFailed });
           if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         }
         return;
       }
       const code = error && typeof error === "object" ? (error as { code?: number | string }).code : undefined;
       const errorPhase = submittedHash ? "rpc_error" : phase === "validating" ? "validation_error" : code === 4001 || code === "ACTION_REJECTED" ? "rejected" : code === "CALL_EXCEPTION" ? "reverted" : "rpc_error";
-      updateIfCurrent({ type: errorPhase, ...(submittedHash ? { hash: submittedHash } : {}), message: submittedHash ? "Transaction submitted, but the receipt is not confirmed yet. Continue checking." : stakingErrorMessage(error), detail: stakingErrorDetail(error) });
+      updateIfCurrent({ type: errorPhase, ...(submittedHash ? { hash: submittedHash } : {}), message: submittedHash ? copy.messages.submittedUnconfirmed : errorMessage(error), detail: stakingErrorDetail(error) });
       if (submittedHash && isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
     }
   }
@@ -390,29 +369,29 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
       if (isCurrentWallet(operationContext)) updateTransaction(action, event);
     };
     try {
-      updateIfCurrent({ type: "confirming", hash, message: "Checking the onchain receipt..." });
+      updateIfCurrent({ type: "confirming", hash, message: copy.messages.checkingReceipt });
       const receipt = await adapter.transactionReceipt(hash);
       if (!receipt) {
-        updateIfCurrent({ type: "submitted", hash, message: "The transaction is still awaiting confirmation. An unknown status keeps this action locked." });
+        updateIfCurrent({ type: "submitted", hash, message: copy.messages.stillAwaiting });
         return;
       }
       const receiptOutcome = classifyReceiptStatus(receipt.status);
       if (receiptOutcome === "unknown") {
-        updateIfCurrent({ type: "submitted", hash, message: "The RPC returned an unknown receipt status. This action remains locked." });
+        updateIfCurrent({ type: "submitted", hash, message: copy.messages.rpcUnknown });
         return;
       }
       if (receiptOutcome === "failed") {
         window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-        updateIfCurrent({ type: "reverted", hash, message: "Transaction failed" });
+        updateIfCurrent({ type: "reverted", hash, message: copy.messages.txFailed });
         if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
         return;
       }
       window.localStorage.removeItem(pendingTransactionKey(operationAccount, action));
-      updateIfCurrent({ type: "refreshing", hash, message: "Transaction confirmed. Refreshing onchain data..." });
+      updateIfCurrent({ type: "refreshing", hash, message: copy.messages.confirmedRefreshing });
       if (isCurrentWallet(operationContext)) await Promise.all([refreshPool(), refreshUser(operationAccount)]);
-      updateIfCurrent({ type: "success", hash, message: successMessages[action] });
+      updateIfCurrent({ type: "success", hash, message: copy.success[action] });
     } catch (error) {
-      updateIfCurrent({ type: "rpc_error", hash, message: "Receipt lookup failed. The transaction remains pending.", detail: stakingErrorDetail(error) });
+      updateIfCurrent({ type: "rpc_error", hash, message: copy.messages.receiptLookupFailed, detail: stakingErrorDetail(error) });
     } finally {
       receiptQueries.current.delete(queryKey);
     }
@@ -422,85 +401,85 @@ export function StakeClient({ rpcUrl, contractAddress, poolFallbackName }: { rpc
   const poolName = pool?.name || poolFallbackName;
   const stakeInputError = (() => {
     if (!stakeInput) return "";
-    try { parseStakeAmount(stakeInput); return ""; } catch (error) { return stakingErrorMessage(error); }
+    try { parseStakeAmount(stakeInput); return ""; } catch (error) { return errorMessage(error); }
   })();
   const unstakeInputError = (() => {
     if (!unstakeInput) return "";
     try {
       const amount = parseStakeAmount(unstakeInput);
-      return user && amount.cfx > user.position.redeemableCfx ? "Entered amount exceeds the amount currently available to unstake" : "";
-    } catch (error) { return stakingErrorMessage(error); }
+      return user && amount.cfx > user.position.redeemableCfx ? copy.actions.unstakeExceeds : "";
+    } catch (error) { return errorMessage(error); }
   })();
 
   return (
     <div className="stake-dashboard v2-wrap">
       <section className="stake-pool" aria-busy={!pool && !poolError}>
-        <div><span>POOL OVERVIEW</span><h2>{poolName}</h2><p>View live onchain pool data without connecting a wallet.</p></div>
+        <div><span>{copy.pool.overview}</span><h2>{poolName}</h2><p>{copy.pool.live}</p></div>
         <div className="stake-metrics">
-          <article><span>Total staked</span><b>{pool ? pool.totalStakedCfx === null ? "Unavailable" : formatCfx(pool.totalStakedCfx) : "Loading..."}</b></article>
-          <article><span>Stakers</span><b>{pool ? pool.stakerCount === null ? "Unavailable" : pool.stakerCount.toLocaleString("en-US") : "Loading..."}</b></article>
-          <article><span>Recent APY</span><b>{pool ? pool.apyRaw === null ? "Unavailable" : formatApy(pool.apyRaw) : "Loading..."}</b><small>Historical metric, not guaranteed returns</small></article>
+          <article><span>{copy.pool.totalStaked}</span><b>{pool ? pool.totalStakedCfx === null ? copy.pool.unavailable : formatCfx(pool.totalStakedCfx) : copy.pool.loading}</b></article>
+          <article><span>{copy.pool.stakers}</span><b>{pool ? pool.stakerCount === null ? copy.pool.unavailable : pool.stakerCount.toLocaleString("en-US") : copy.pool.loading}</b></article>
+          <article><span>{copy.pool.recentApy}</span><b>{pool ? pool.apyRaw === null ? copy.pool.unavailable : formatApy(pool.apyRaw) : copy.pool.loading}</b><small>{copy.pool.apyNote}</small></article>
         </div>
-        {poolError && <output className="stake-global-error" role="alert">Pool unavailable: {poolError}. Transactions are disabled.</output>}
+        {poolError && <output className="stake-global-error" role="alert">{copy.pool.unavailableError(poolError)}</output>}
       </section>
 
       <section className="stake-wallet-bar">
-        {!account ? connection.status === "reconnecting" ? <button type="button" className="stake-connect-button" disabled>Restoring wallet...</button> : <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>Connect wallet</button>
-          : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? "Conflux eSpace Mainnet" : `Wrong network · chain ${chainId?.toString()}`}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>Copy address</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>Switch network</button>}<button type="button" disabled={disconnectMutation.isPending} onClick={() => void disconnect()}>{disconnectMutation.isPending ? "Disconnecting..." : "Disconnect"}</button></>}
+        {!account ? connection.status === "reconnecting" ? <button type="button" className="stake-connect-button" disabled>{copy.wallet.restoring}</button> : <button type="button" className="stake-connect-button" onClick={() => { setWalletMessage(""); setWalletModalOpen(true); }}>{copy.wallet.connect}</button>
+          : <><div><b>{shortAddress(account)}</b><span>{correctNetwork ? copy.wallet.network : copy.wallet.wrongNetwork(chainId?.toString() ?? "")}</span></div><button type="button" onClick={() => void navigator.clipboard.writeText(account)}>{copy.wallet.copyAddress}</button>{!correctNetwork && <button type="button" onClick={switchNetwork}>{copy.wallet.switchNetwork}</button>}<button type="button" disabled={disconnectMutation.isPending} onClick={() => void disconnect()}>{disconnectMutation.isPending ? copy.wallet.disconnecting : copy.wallet.disconnect}</button></>}
         {walletMessage && !walletModalOpen && <output role="alert">{walletMessage}</output>}
       </section>
-      {walletModalOpen && <WalletModal connectors={connectors} errorMessage={walletMessage} pendingConnectorUid={pendingConnectorUid} onClose={() => setWalletModalOpen(false)} onSelect={(connector) => void connect(connector)} />}
+      {walletModalOpen && <WalletModal connectors={connectors} errorMessage={walletMessage} pendingConnectorUid={pendingConnectorUid} locale={locale} onClose={() => setWalletModalOpen(false)} onSelect={(connector) => void connect(connector)} />}
 
-      {account && !correctNetwork && <section className="stake-network-warning" role="alert"><b>Switch to Conflux eSpace Mainnet</b><p>All staking transactions are disabled on the wrong network. The required chain ID is 1030 (0x406).</p></section>}
+      {account && !correctNetwork && <section className="stake-network-warning" role="alert"><b>{copy.wallet.switchTitle}</b><p>{copy.wallet.switchBody}</p></section>}
 
       <section className="stake-user" aria-busy={userLoading}>
-        <div className="stake-section-heading"><span>YOUR POSITION</span><h2>Your onchain assets</h2>{account && <p>Wallet balance: {user ? formatDripAsCfx(user.balanceDrip) : "Loading..."}</p>}</div>
-        {!account ? <p className="stake-empty">Connect your wallet to view staking, unstaking, and reward status.</p> : !user ? <p className="stake-empty">{userLoading ? "Loading account data..." : "Account data unavailable"}</p> : <>
+        <div className="stake-section-heading"><span>{copy.position.heading}</span><h2>{copy.position.title}</h2>{account && <p>{copy.position.balanceLabel}{user ? formatDripAsCfx(user.balanceDrip) : copy.pool.loading}</p>}</div>
+        {!account ? <p className="stake-empty">{copy.position.connectPrompt}</p> : !user ? <p className="stake-empty">{userLoading ? copy.position.loading : copy.position.unavailable}</p> : <>
           <div className="stake-assets">
-            <article><span>Currently staked</span><b>{formatCfx(user.position.stakedCfx)}</b></article>
-            <article><span>Available to unstake</span><b>{formatCfx(user.position.redeemableCfx)}</b></article>
-            <article><span>Pending unlock</span><b>{formatCfx(user.position.pendingUnlockCfx)}</b></article>
-            <article><span>Unlocked principal</span><b>{formatCfx(user.position.unlockedCfx)}</b></article>
-            <article><span>Currently withdrawable</span><b>{formatCfx(user.position.withdrawableCfx)}</b>{user.position.unlockedCfx > user.position.withdrawableCfx && <small>Remaining principal is waiting for pool liquidity</small>}</article>
-            <article><span>Claimable / total rewards</span><b>{formatDripAsCfx(user.position.claimableInterestDrip)}</b><small>Total {formatDripAsCfx(user.position.totalInterestDrip)}</small></article>
+            <article><span>{copy.position.staked}</span><b>{formatCfx(user.position.stakedCfx)}</b></article>
+            <article><span>{copy.position.availableUnstake}</span><b>{formatCfx(user.position.redeemableCfx)}</b></article>
+            <article><span>{copy.position.pendingUnlock}</span><b>{formatCfx(user.position.pendingUnlockCfx)}</b></article>
+            <article><span>{copy.position.unlockedPrincipal}</span><b>{formatCfx(user.position.unlockedCfx)}</b></article>
+            <article><span>{copy.position.withdrawable}</span><b>{formatCfx(user.position.withdrawableCfx)}</b>{user.position.unlockedCfx > user.position.withdrawableCfx && <small>{copy.position.liquidityNote}</small>}</article>
+            <article><span>{copy.position.claimable}</span><b>{formatDripAsCfx(user.position.claimableInterestDrip)}</b><small>{copy.position.totalPrefix}{formatDripAsCfx(user.position.totalInterestDrip)}</small></article>
           </div>
           <div className="stake-actions">
             <article>
-              <span>01 / STAKE</span><h3>Stake CFX</h3><p>Minimum 1,000 CFX in whole multiples of 1,000. Once confirmed, funds enter a lock period of about 13 days.</p>
-              <label htmlFor="stake-amount">Stake amount <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="1000" />
+              <span>{copy.actions.stakeStep}</span><h3>{copy.actions.stakeTitle}</h3><p>{copy.actions.stakeDescription}</p>
+              <label htmlFor="stake-amount">{copy.actions.stakeAmountLabel} <small>CFX</small></label><input id="stake-amount" aria-describedby="stake-amount-error" aria-invalid={Boolean(stakeInputError)} inputMode="numeric" pattern="[0-9]*" value={stakeInput} onChange={(event) => setStakeInput(event.target.value)} placeholder="1000" />
               <small id="stake-amount-error" className="stake-input-error" role="alert">{stakeInputError}</small>
-              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>Stake</button>
-              <TransactionNotice state={transactions.stake} onCheck={() => void checkReceipt("stake")} />
+              <button type="button" onClick={() => void runTransaction("stake")} disabled={!pool?.writeReady || !correctNetwork || Boolean(stakeInputError) || isTransactionPending(transactions.stake)}>{copy.actions.stakeButton}</button>
+              <TransactionNotice state={transactions.stake} onCheck={() => void checkReceipt("stake")} copy={copy} />
             </article>
             <article>
-              <span>02 / UNSTAKE</span><h3>Unstake CFX</h3><p>Only funds that have completed the staking lock period can be unstaked. Once confirmed, they enter an unlock period of about one day and are not immediately available.</p>
-              <label htmlFor="unstake-amount">Unstake amount <small>Max {formatCfx(user.position.redeemableCfx)}</small></label><input id="unstake-amount" aria-describedby="unstake-amount-error" aria-invalid={Boolean(unstakeInputError)} inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
+              <span>{copy.actions.unstakeStep}</span><h3>{copy.actions.unstakeTitle}</h3><p>{copy.actions.unstakeDescription}</p>
+              <label htmlFor="unstake-amount">{copy.actions.unstakeAmountLabel} <small>{copy.actions.max(formatCfx(user.position.redeemableCfx))}</small></label><input id="unstake-amount" aria-describedby="unstake-amount-error" aria-invalid={Boolean(unstakeInputError)} inputMode="numeric" pattern="[0-9]*" value={unstakeInput} onChange={(event) => setUnstakeInput(event.target.value)} placeholder="1000" />
               <small id="unstake-amount-error" className="stake-input-error" role="alert">{unstakeInputError}</small>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || Boolean(unstakeInputError) || isTransactionPending(transactions.unstake)}>Unstake</button>
-              <TransactionNotice state={transactions.unstake} onCheck={() => void checkReceipt("unstake")} />
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("unstake")} disabled={!pool?.writeReady || !correctNetwork || user.position.redeemableCfx === 0n || Boolean(unstakeInputError) || isTransactionPending(transactions.unstake)}>{copy.actions.unstakeButton}</button>
+              <TransactionNotice state={transactions.unstake} onCheck={() => void checkReceipt("unstake")} copy={copy} />
             </article>
             <article>
-              <span>03 / WITHDRAW</span><h3>Withdraw principal</h3><p>This withdrawal: {formatCfx(user.position.withdrawableCfx)}. Unlocked principal may still be limited by the pool&apos;s bridge liquidity.</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isTransactionPending(transactions.withdraw)}>Withdraw available amount</button>
-              {user.position.unlockedCfx > 0n && user.position.withdrawableVotes === 0n && <small className="stake-liquidity-note">Waiting for pool withdrawal liquidity</small>}
-              <TransactionNotice state={transactions.withdraw} onCheck={() => void checkReceipt("withdraw")} />
+              <span>{copy.actions.withdrawStep}</span><h3>{copy.actions.withdrawTitle}</h3><p>{copy.actions.thisWithdrawal(formatCfx(user.position.withdrawableCfx))} {copy.actions.withdrawDescription}</p>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("withdraw")} disabled={!pool?.writeReady || !correctNetwork || user.position.withdrawableVotes === 0n || isTransactionPending(transactions.withdraw)}>{copy.actions.withdrawButton}</button>
+              {user.position.unlockedCfx > 0n && user.position.withdrawableVotes === 0n && <small className="stake-liquidity-note">{copy.actions.withdrawLiquidityNote}</small>}
+              <TransactionNotice state={transactions.withdraw} onCheck={() => void checkReceipt("withdraw")} copy={copy} />
             </article>
             <article>
-              <span>04 / REWARDS</span><h3>Claim all rewards</h3><p>Claimable: {formatDripAsCfx(user.position.claimableInterestDrip)}. This version only supports claiming all rewards at once.</p>
-              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isTransactionPending(transactions.claim)}>Claim all rewards</button>
-              <TransactionNotice state={transactions.claim} onCheck={() => void checkReceipt("claim")} />
+              <span>{copy.actions.rewardsStep}</span><h3>{copy.actions.rewardsTitle}</h3><p>{copy.actions.claimableLabel(formatDripAsCfx(user.position.claimableInterestDrip))} {copy.actions.rewardsDescription}</p>
+              <button type="button" className="stake-secondary-button" onClick={() => void runTransaction("claim")} disabled={!pool?.writeReady || !correctNetwork || user.position.claimableInterestDrip === 0n || isTransactionPending(transactions.claim)}>{copy.actions.rewardsButton}</button>
+              <TransactionNotice state={transactions.claim} onCheck={() => void checkReceipt("claim")} copy={copy} />
             </article>
           </div>
           <div className="stake-queues">
-            <QueuePanel title="Stake lock queue" queue={user.inQueue} currentBlock={user.currentBlock} activeLabel="Locking" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
-            <QueuePanel title="Unstake unlock queue" queue={user.outQueue} currentBlock={user.currentBlock} activeLabel="Unlocking" secondsPerBlock={pool?.secondsPerBlock ?? 2} />
+            <QueuePanel title={copy.queue.lockQueue} queue={user.inQueue} currentBlock={user.currentBlock} activeLabel={copy.queue.locking} secondsPerBlock={pool?.secondsPerBlock ?? 2} copy={copy} />
+            <QueuePanel title={copy.queue.unlockQueue} queue={user.outQueue} currentBlock={user.currentBlock} activeLabel={copy.queue.unlocking} secondsPerBlock={pool?.secondsPerBlock ?? 2} copy={copy} />
           </div>
         </>}
       </section>
 
       <section className="stake-risks">
-        <span>RISK DISCLOSURE</span><h2>Before you submit</h2>
-        <div><p>You are interacting with a third-party PoS pool proxy contract. This site never holds private keys, signs transactions for you, or asks for a seed phrase.</p><p>Validator penalties, contract, RPC, cross-space bridge, and liquidity risks may affect returns or settlement times. The final state is determined by the eSpace receipt and current block.</p></div>
+        <span>{copy.risk.heading}</span><h2>{copy.risk.title}</h2>
+        <div><p>{copy.risk.p1}</p><p>{copy.risk.p2}</p></div>
         <code>{getAddress(contractAddress)}</code>
       </section>
     </div>

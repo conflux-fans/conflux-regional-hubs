@@ -33,3 +33,20 @@ test("Caudal language toggle is cookie-driven and latam-guarded", async () => {
   assert.match(source, /key === "latam"/);
   assert.match(source, /loadCaudalCopy/);
 });
+
+test("LATAM staking reuses the shared StakeClient with bilingual copy", async () => {
+  const page = await readFile(new URL("../app/stake/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /region\.key === "latam"[\s\S]*?<StakeClient/);
+  assert.match(page, /copy\.disabledTitle/);
+  const client = await readFile(new URL("../app/stake/stake-client.tsx", import.meta.url), "utf8");
+  assert.match(client, /locale = "en"/);
+  assert.match(client, /stakeCopy\(locale\)/);
+  const { stakeCopy, translateStakingMessage } = await import("../app/lib/staking/copy.ts");
+  assert.equal(stakeCopy("es").position.heading, "TU POSICIÓN");
+  assert.equal(stakeCopy("en").position.heading, "YOUR POSITION");
+  assert.equal(translateStakingMessage("es", "Action cancelled"), "Acción cancelada");
+  assert.equal(translateStakingMessage("en", "Action cancelled"), "Action cancelled");
+  for (const section of Object.keys(stakeCopy("en"))) {
+    assert.ok(stakeCopy("es")[section], `missing es copy section: ${section}`);
+  }
+});

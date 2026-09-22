@@ -1,12 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { RegionalShell } from "../components/regional-shell";
 import { getRegionalConfig } from "../lib/content";
+import { stakeCopy } from "../lib/staking/copy";
 import { getStakingConfig } from "../lib/staking/config";
-import { resolveRegion } from "../regional";
+import { regions, resolveRegion } from "../regional";
 import { StakeClient } from "./stake-client";
 
 function shortAddress(address: string) {
   return `${address.slice(0, 8)}…${address.slice(-6)}`;
+}
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const params = await searchParams;
+  const region = regions[resolveRegion(params.region)];
+  return { title: `${region.stakeLabel} — ${region.wordmark}`, description: region.stakeIntro };
 }
 
 export default async function StakePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -14,23 +22,36 @@ export default async function StakePage({ searchParams }: { searchParams: Promis
   const region = await getRegionalConfig(resolveRegion(params.region));
 
   if (region.key === "latam") {
-    const en = region.locale === "en";
+    const locale = region.locale === "en" ? "en" : "es";
+    const copy = stakeCopy(locale).page;
+    const staking = getStakingConfig();
     return (
       <RegionalShell region={region}>
-        <main className="v2-stake-page">
+        <main className="v2-stake-page stake-app">
           <section className="v2-stake-hero v2-wrap">
             <div>
               <p className="caudal-eyebrow">CONFLUX / CFX</p>
               <h1>{region.stakeLabel}</h1>
               <p>{region.stakeIntro}</p>
-              <Link href="/?region=latam">← {en ? "Home" : "Inicio"}</Link>
+              <Link href="/?region=latam">← {locale === "en" ? "Home" : "Inicio"}</Link>
             </div>
             <div className="v2-wallet-card">
-              <strong>{en ? "Staking is not enabled yet" : "El staking aún no está habilitado"}</strong>
-              <p>{en ? "This site does not connect wallets or move funds. The development team must connect the approved wallet and audited contract integration before enabling transactions." : "Este sitio no conecta billeteras ni mueve fondos. El equipo de desarrollo debe conectar la integración aprobada de billetera y contratos auditados antes de habilitar transacciones."}</p>
-              <button type="button" className="caudal-primary" disabled>{en ? "Connection pending" : "Conexión pendiente"}</button>
+              {staking.enabled ? (
+                <>
+                  <strong>{copy.network}</strong>
+                  <span>{copy.contract(shortAddress(staking.contractAddress))}</span>
+                  <p>{copy.disclaimer}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{copy.disabledTitle}</strong>
+                  <p>{copy.disabledBody}</p>
+                  <button type="button" className="caudal-primary" disabled>{copy.disabledButton}</button>
+                </>
+              )}
             </div>
           </section>
+          {staking.enabled && <StakeClient rpcUrl={staking.rpcUrl} contractAddress={staking.contractAddress} poolFallbackName="Conflux Latinoamérica PoS Pool" locale={locale} />}
         </main>
       </RegionalShell>
     );
