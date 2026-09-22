@@ -12,6 +12,30 @@ function shortAddress(address: string) {
 export default async function StakePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const region = await getRegionalConfig(resolveRegion(params.region));
+
+  if (region.key === "latam") {
+    const en = region.locale === "en";
+    return (
+      <RegionalShell region={region}>
+        <main className="v2-stake-page">
+          <section className="v2-stake-hero v2-wrap">
+            <div>
+              <p className="caudal-eyebrow">CONFLUX / CFX</p>
+              <h1>{region.stakeLabel}</h1>
+              <p>{region.stakeIntro}</p>
+              <Link href="/?region=latam">← {en ? "Home" : "Inicio"}</Link>
+            </div>
+            <div className="v2-wallet-card">
+              <strong>{en ? "Staking is not enabled yet" : "El staking aún no está habilitado"}</strong>
+              <p>{en ? "This site does not connect wallets or move funds. The development team must connect the approved wallet and audited contract integration before enabling transactions." : "Este sitio no conecta billeteras ni mueve fondos. El equipo de desarrollo debe conectar la integración aprobada de billetera y contratos auditados antes de habilitar transacciones."}</p>
+              <button type="button" className="caudal-primary" disabled>{en ? "Connection pending" : "Conexión pendiente"}</button>
+            </div>
+          </section>
+        </main>
+      </RegionalShell>
+    );
+  }
+
   const staking = getStakingConfig();
   return (
     <RegionalShell region={region}>

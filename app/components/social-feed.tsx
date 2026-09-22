@@ -8,7 +8,7 @@ function SocialIcon({ platform }: { platform: SocialPlatform }) {
   return <span aria-hidden="true">{platform.slice(0, 2).toUpperCase()}</span>;
 }
 
-export async function SocialFeed({ modules }: { modules: RegionalModule[] }) {
+export async function SocialFeed({ modules, locale = "en" }: { modules: RegionalModule[]; locale?: "en" | "es" }) {
   const connections = modules.filter((module) => module.enabled && ["instagram", "twitter", "youtube"].includes(module.moduleKey));
   if (!connections.length) return null;
   const feeds = await Promise.all(connections.map(async (module) => ({ module, items: await getSocialFeed(module) })));
@@ -16,7 +16,8 @@ export async function SocialFeed({ modules }: { modules: RegionalModule[] }) {
   return (
     <section className="social-hub v2-wrap" aria-labelledby="social-hub-title">
       <header className="social-hub-head">
-        <div><p className="v2-kicker">LIVE CONNECTIONS / COMMUNITY SIGNAL</p><h2 id="social-hub-title">Follow the conversation.</h2></div>
+        <div><p className="v2-kicker">{locale === "es" ? "CONFLUX / COMUNIDAD" : "LIVE CONNECTIONS / COMMUNITY SIGNAL"}</p><h2 id="social-hub-title">{locale === "es" ? "La conversación sigue." : "Follow the conversation."}</h2></div>
+        {locale === "es" && <p>Visita nuestros perfiles oficiales. Las publicaciones se mostrarán aquí cuando la conexión de la plataforma esté habilitada.</p>}
       </header>
       <div className="social-platforms">
         {feeds.map(({ module, items }) => {

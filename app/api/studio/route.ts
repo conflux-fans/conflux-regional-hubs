@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { articleValidationError } from "../../lib/article-validation";
+import { caudalCopy } from "../../caudal-copy";
 import { getAuthorizedEditor } from "../../lib/editor-auth";
+import { saveCaudalCopy } from "../../lib/caudal-copy";
 import { createVibePrompt, deleteLocalArticle, saveLocalArticle, saveRegionalBrief, saveRegionalContent, saveRegionalContributors, saveRegionalModules, type EditableRegionalContent, type RegionalBriefInput, type RegionalContributor, type RegionalModule } from "../../lib/content";
 import { resolveRegion } from "../../regional";
 
@@ -50,6 +52,14 @@ export async function POST(request: Request) {
   }
 
   if (!editor) return NextResponse.json({ error: "Editor authorization required." }, { status: 403 });
+
+  if (payload.action === "save-caudal-copy" && region === "latam") {
+    const raw = payload.copy && typeof payload.copy === "object" ? payload.copy as Record<string, unknown> : {};
+    const copy = Object.fromEntries(Object.keys(caudalCopy).map((key) => [key, text(raw[key], 2000)]));
+    if (Object.values(copy).some((value) => !value)) return NextResponse.json({ error: "Complete every copy field." }, { status: 400 });
+    await saveCaudalCopy(copy, editor.email);
+    return NextResponse.json({ ok: true });
+  }
 
   if (payload.action === "delete-article") {
     const id = typeof payload.id === "number" && Number.isInteger(payload.id) ? payload.id : 0;

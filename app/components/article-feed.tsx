@@ -6,7 +6,9 @@ export function ArticleFeed({ articles, region }: { articles: RegionalArticle[];
     return (
       <div className="feed-empty">
         <span>FEED / {region.code}</span>
-        <div><h3>No regional feed connected.</h3><p>Add this region’s blog feed and published articles will appear here automatically.</p></div>
+        {region.key === "latam"
+          ? <div><h3>{region.locale === "en" ? "The next story starts here." : "La próxima historia empieza aquí."}</h3><p>{region.locale === "en" ? "Regional articles will appear here when the team publishes them." : "Los artículos de la región aparecerán aquí cuando el equipo los publique."}</p></div>
+          : <div><h3>No regional feed connected.</h3><p>Add this region’s blog feed and published articles will appear here automatically.</p></div>}
       </div>
     );
   }
