@@ -1,4 +1,4 @@
-export type RegionKey = "africa" | "korea";
+export type RegionKey = "africa" | "korea" | "latam";
 
 export type RegionalArticleSource = {
   format: "json" | "rss";
@@ -14,6 +14,9 @@ export type RegionalContributorProfile = {
 };
 
 export type RegionalConfig = {
+  locale?: "es" | "en";
+  uiCopy?: Record<string, string>;
+  seo: { title: string; description: string };
   key: RegionKey;
   code: string;
   name: string;
@@ -49,8 +52,66 @@ export type RegionalConfig = {
 };
 
 export const regions: Record<RegionKey, RegionalConfig> = {
+  latam: {
+    key: "latam",
+    seo: {
+      title: "Caudal — Conflux para Latinoamérica",
+      description: "Noticias, comunidad y staking de Conflux para Latinoamérica, en un solo lugar.",
+    },
+    code: "LATAM",
+    name: "Latinoamérica",
+    wordmark: "Caudal",
+    logoStyle: "monogram",
+    domain: "caudal.hub",
+    language: "Español",
+    locale: "es",
+    accent: "#2051eb",
+    secondary: "#fadbe5",
+    tertiary: "#ff7691",
+    onAccent: "#ffffff",
+    surface: "#ffffff",
+    headline: "Conflux para Latinoamérica.",
+    intro: "Noticias, recursos, comunidad y oportunidades de Conflux, en un solo lugar.",
+    heroEyebrow: "LATINOAMÉRICA EN MOVIMIENTO",
+    journalLabel: "Actualidad",
+    journalTitle: "Ideas de aquí. Impacto en toda la región.",
+    journalEyebrow: "ACTUALIDAD / CONFLUX LATAM",
+    stakeLabel: "Staking",
+    stakeEyebrow: "PARTICIPA EN CONFLUX",
+    stakeHeading: "Tu participación. Una red más fuerte.",
+    stakeIntro: "Haz stake de CFX con confirmación desde tu billetera, períodos de bloqueo visibles y estado verificado en la cadena.",
+    footerText: "Conflux para Latinoamérica",
+    communityLabel: "Comunidad",
+    localModuleEyebrow: "PERSONAS + IDEAS + OPORTUNIDADES",
+    localModuleTitle: "Una región que fluye.",
+    localModuleText: "Comunidad, desarrolladores, usuarios y empresas de Web3 en Latinoamérica.",
+    motif: "grid",
+    layout: "editorial",
+    articleSource: { format: "json", url: "" },
+    communityLinks: [{ label: "Telegram", url: "https://t.me/Conflux_LATAM" }],
+    contributors: [
+      {
+        name: "Fabian Salazar",
+        role: "CM/BD LatAm Lead, Conflux Network",
+        shortBio: "Lidera el desarrollo de Conflux en Latinoamérica, conectando comunidad, empresas y oportunidades en toda la región.",
+        fullBio: "Fabián lidera el desarrollo de Conflux Network en Latinoamérica, trabajando de cerca con empresas, proyectos y comunidades de toda la región. Su foco está en crear alianzas, abrir nuevas oportunidades de negocio y hacer que Conflux tenga una presencia cada vez más cercana y útil en LatAm. También impulsa iniciativas locales, contenido, eventos y proyectos como Caudal para conectar mejor a la comunidad con el ecosistema.",
+        photoUrl: "",
+      },
+      {
+        name: "Romina (Mimi) Garbino",
+        role: "Embajadora LATAM, Conflux Network",
+        shortBio: "Apoya de cerca el crecimiento de Conflux en Latinoamérica, colaborando en comunidad, partnerships, research y ejecución regional.",
+        fullBio: "Romina es Embajadora de Conflux LatAm y una de las principales colaboradoras del trabajo regional. Apoya de forma directa iniciativas de comunidad, outreach, investigación, seguimiento de oportunidades y desarrollo de partnerships, trabajando junto a Fabian en la ejecución diaria de distintos proyectos en Latinoamérica. También participa en reuniones, coordinación con contactos y actividades que ayudan a mantener en movimiento las iniciativas de Conflux en la región.",
+        photoUrl: "",
+      },
+    ],
+  },
   africa: {
     key: "africa",
+    seo: {
+      title: "Kudi Hub — Africa Onchain",
+      description: "African voices, blockchain perspectives, and a safer path to CFX staking.",
+    },
     code: "AF",
     name: "Africa",
     wordmark: "Kudi Hub",
@@ -114,6 +175,10 @@ export const regions: Record<RegionKey, RegionalConfig> = {
   },
   korea: {
     key: "korea",
+    seo: {
+      title: "Conflux Korea — 한국의 Conflux",
+      description: "한국의 Conflux 뉴스, 스테이킹, 커뮤니티를 한 곳에서.",
+    },
     code: "KR",
     name: "Korea",
     wordmark: "CONFLUX KOREA",
@@ -150,5 +215,5 @@ export const regions: Record<RegionKey, RegionalConfig> = {
 
 export function resolveRegion(value: string | string[] | undefined): RegionKey {
   const candidate = Array.isArray(value) ? value[0] : value || process.env.NEXT_PUBLIC_REGION_SLUG;
-  return candidate === "korea" ? candidate : "africa";
+  return candidate === "korea" || candidate === "latam" ? candidate : "africa";
 }

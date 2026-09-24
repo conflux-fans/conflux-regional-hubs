@@ -7,6 +7,7 @@ test("manager supports Markdown formatting, drafts, reopening and publishing", a
   const studio = await readFile(new URL("../app/studio/studio-client.tsx", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/api/studio/route.ts", import.meta.url), "utf8");
   const article = await readFile(new URL("../app/journal/[slug]/page.tsx", import.meta.url), "utf8");
+  const metadata = await readFile(new URL("../app/lib/page-metadata.ts", import.meta.url), "utf8");
   assert.match(editor, /Save draft/);
   assert.match(editor, /Markdown/);
   assert.match(editor, /initialArticles/);
@@ -15,7 +16,9 @@ test("manager supports Markdown formatting, drafts, reopening and publishing", a
   assert.match(api, /status === "draft"/);
   assert.match(article, /<Markdown source=/);
   assert.match(article, /generateMetadata/);
-  assert.match(article, /alternates: \{ canonical:/);
+  assert.match(article, /regionalMetadata\(region,/);
+  assert.match(article, /path: `\/journal\//);
+  assert.match(metadata, /alternates: \{ canonical:/);
 });
 
 test("published articles expose working share destinations", async () => {

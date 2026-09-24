@@ -1,4 +1,10 @@
 export const deploymentRegions = {
+  latam: {
+    siteName: "Caudal",
+    intendedDomain: "caudal.hub",
+    presentation: "caudal-flow",
+    defaultLocale: "es",
+  },
   africa: {
     siteName: "Kudi Hub",
     intendedDomain: "kudihub.com",

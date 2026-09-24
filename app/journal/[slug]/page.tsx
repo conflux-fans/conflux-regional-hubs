@@ -4,27 +4,23 @@ import { Markdown } from "../../lib/markdown";
 import { ShareActions } from "../../components/share-actions";
 import { RegionalShell } from "../../components/regional-shell";
 import { getLocalArticle, getRegionalConfig } from "../../lib/content";
+import { regionalMetadata, siteOrigin } from "../../lib/page-metadata";
 import { resolveRegion } from "../../regional";
 
 export const dynamic = "force-dynamic";
-
-function siteOrigin() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://conflux-community-hub.christian-oertel.chatgpt.site").replace(/\/$/, "");
-}
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const region = await getRegionalConfig(resolveRegion(query.region));
   const article = await getLocalArticle(region.key, slug);
   if (!article) return { title: `Article not found — ${region.wordmark}` };
-  const url = `${siteOrigin()}/journal/${encodeURIComponent(slug)}?region=${region.key}`;
-  return {
+  return regionalMetadata(region, {
     title: `${article.title} — ${region.wordmark}`,
     description: article.excerpt,
-    alternates: { canonical: url },
-    openGraph: { title: article.title, description: article.excerpt, url, type: "article", publishedTime: new Date(article.publishedAt).toISOString(), siteName: region.wordmark },
-    twitter: { card: "summary_large_image", title: article.title, description: article.excerpt },
-  };
+    path: `/journal/${encodeURIComponent(slug)}?region=${region.key}`,
+    type: "article",
+    publishedTime: new Date(article.publishedAt).toISOString(),
+  });
 }
 
 export default async function ArticlePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -34,7 +30,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
 
   if (!article) return <RegionalShell region={region}><main className="article-page v2-wrap"><p className="v2-kicker">JOURNAL / {region.code}</p><h1>Article not found.</h1><Link href={`/journal?region=${region.key}`}>← Back to Journal</Link></main></RegionalShell>;
 
-  const canonicalUrl = `${siteOrigin()}/journal/${encodeURIComponent(slug)}?region=${region.key}`;
+  const canonicalUrl = `${siteOrigin(region)}/journal/${encodeURIComponent(slug)}?region=${region.key}`;
   return (
     <RegionalShell region={region}>
       <article className="article-page v2-wrap">

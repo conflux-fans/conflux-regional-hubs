@@ -1,0 +1,18 @@
+export const caudalCopy: Record<string,string> = {
+  "es.newsCta":"Explora la actualidad", "en.newsCta":"Explore the news",
+  "es.joinCta":"Únete a la comunidad", "en.joinCta":"Join the community",
+  "es.flowTitle":"Una región que fluye.", "en.flowTitle":"A region in flow.",
+  "es.flowIntro":"Comunidad, desarrolladores, usuarios y empresas de Web3 en Latinoamérica.", "en.flowIntro":"Web3 communities, developers, users and businesses across Latin America.",
+  "es.newsIntro":"Noticias y perspectivas de la comunidad regional.", "en.newsIntro":"News and perspectives from the regional community.",
+  "es.stakeIntro":"Conoce cómo participar en la red Conflux.", "en.stakeIntro":"Understand how to participate in the Conflux network.",
+  "es.communityIntro":"Conecta con quienes construyen en Latinoamérica.", "en.communityIntro":"Connect with the people building in Latin America.",
+  "es.allNews":"Toda la actualidad", "en.allNews":"All news",
+  "es.communityEyebrow":"PERSONAS + IDEAS + OPORTUNIDADES", "en.communityEyebrow":"PEOPLE + IDEAS + OPPORTUNITIES",
+  "es.communityTitle":"Más que tecnología. Más LatAm.", "en.communityTitle":"More than technology. More Latin America.",
+  "es.joinConversation":"Únete a la conversación", "en.joinConversation":"Join the conversation",
+  "es.teamTitle":"Personas que mueven la región.", "en.teamTitle":"People who keep the region moving.",
+  "es.teamIntro":"Conoce al equipo de Conflux LATAM.", "en.teamIntro":"Meet the Conflux LATAM team. Profiles are provided in Spanish.",
+  "en.headline":"Conflux for Latin America.", "en.intro":"Conflux news, resources, community and opportunities, all in one place.",
+  "en.heroEyebrow":"LATIN AMERICA IN MOTION", "en.journalLabel":"News", "en.journalTitle":"Local ideas. Regional impact.", "en.journalEyebrow":"NEWS / CONFLUX LATAM",
+  "en.stakeLabel":"Staking", "en.stakeEyebrow":"PARTICIPATE IN CONFLUX", "en.stakeHeading":"Your participation. A stronger network.", "en.stakingDescription":"Stake CFX with wallet confirmation, visible lock periods, and chain-verified transaction status.", "en.footerText":"Conflux for Latin America", "en.communityLabel":"Community",
+};

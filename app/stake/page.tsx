@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { RegionalShell } from "../components/regional-shell";
 import { getRegionalConfig } from "../lib/content";
+import { regionalMetadata } from "../lib/page-metadata";
+import { stakeCopy } from "../lib/staking/copy";
 import { getStakingConfig } from "../lib/staking/config";
 import { resolveRegion } from "../regional";
 import { StakeClient } from "./stake-client";
@@ -9,9 +12,56 @@ function shortAddress(address: string) {
   return `${address.slice(0, 8)}…${address.slice(-6)}`;
 }
 
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const params = await searchParams;
+  const region = await getRegionalConfig(resolveRegion(params.region));
+  return regionalMetadata(region, {
+    title: `${region.stakeLabel} — ${region.wordmark}`,
+    description: region.stakeIntro,
+    path: `/stake?region=${region.key}`,
+  });
+}
+
 export default async function StakePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const region = await getRegionalConfig(resolveRegion(params.region));
+
+  if (region.key === "latam") {
+    const locale = region.locale === "en" ? "en" : "es";
+    const copy = stakeCopy(locale).page;
+    const staking = getStakingConfig();
+    return (
+      <RegionalShell region={region}>
+        <main className="v2-stake-page stake-app">
+          <section className="v2-stake-hero v2-wrap">
+            <div>
+              <p className="caudal-eyebrow">CONFLUX / CFX</p>
+              <h1>{region.stakeLabel}</h1>
+              <p>{region.stakeIntro}</p>
+              <Link href="/?region=latam">← {locale === "en" ? "Home" : "Inicio"}</Link>
+            </div>
+            <div className="v2-wallet-card">
+              {staking.enabled ? (
+                <>
+                  <strong>{copy.network}</strong>
+                  <span>{copy.contract(shortAddress(staking.contractAddress))}</span>
+                  <p>{copy.disclaimer}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{copy.disabledTitle}</strong>
+                  <p>{copy.disabledBody}</p>
+                  <button type="button" className="caudal-primary" disabled>{copy.disabledButton}</button>
+                </>
+              )}
+            </div>
+          </section>
+          {staking.enabled && <StakeClient rpcUrl={staking.rpcUrl} contractAddress={staking.contractAddress} poolFallbackName="Conflux Latinoamérica PoS Pool" locale={locale} />}
+        </main>
+      </RegionalShell>
+    );
+  }
+
   const staking = getStakingConfig();
   return (
     <RegionalShell region={region}>

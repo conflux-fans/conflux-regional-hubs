@@ -1,11 +1,19 @@
 import Link from "next/link";
+import { CaudalHome } from "./components/caudal-home";
 import { ArticleFeed } from "./components/article-feed";
 import { RegionalShell } from "./components/regional-shell";
 import { Contributors } from "./components/contributors";
 import { SocialFeed } from "./components/social-feed";
 import { getRegionalArticles } from "./lib/articles";
 import { getRegionalConfig, getRegionalContributors, getRegionalModules, type RegionalContributor, type RegionalModule } from "./lib/content";
+import { siteMetadata } from "./lib/page-metadata";
 import { resolveRegion } from "./regional";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const region = await getRegionalConfig(resolveRegion(params.region));
+  return siteMetadata(region);
+}
 
 function OptionalModules({ modules }: { modules: RegionalModule[] }) {
   const optional = modules.filter((module) => module.enabled && !["journal", "stake", "contributors", "instagram", "twitter", "youtube"].includes(module.moduleKey));
@@ -63,7 +71,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <RegionalShell region={region}>
-      {region.key === "africa" ? <AfricaHome region={region} articles={articles} suffix={suffix} modules={modules} contributors={contributors} /> :
+      {region.key === "latam" ? <CaudalHome region={region} articles={articles} modules={modules} contributors={contributors} /> : region.key === "africa" ? <AfricaHome region={region} articles={articles} suffix={suffix} modules={modules} contributors={contributors} /> :
       <main>
         <section className="v2-hero v2-wrap">
           <div className="v2-hero-copy">
