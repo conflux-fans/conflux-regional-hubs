@@ -129,8 +129,13 @@ function profileFallback(module: RegionalModule, platform: SocialPlatform, siteN
   const url = socialProfileUrl(platform, module.source);
   if (!url) return [];
   const label = platform === "twitter" ? "X" : platform[0].toUpperCase() + platform.slice(1);
-  const title = locale === "es" ? `Sigue a ${siteName} en ${label}` : `Follow ${siteName} on ${label}`;
-  const excerpt = module.subtitle || (locale === "es" ? `Abre el perfil oficial de ${label}` : `Open the official ${label} profile`);
+  // On the Spanish presentation the module subtitle is the account display name
+  // (e.g. "Conflux en español"), which names the platform on its own; the English
+  // presentation keeps the site wordmark plus the platform suffix.
+  const followsSubtitle = locale === "es" && Boolean(module.subtitle);
+  const title = followsSubtitle ? `Sigue a ${module.subtitle}` : locale === "es" ? `Sigue a ${siteName} en ${label}` : `Follow ${siteName} on ${label}`;
+  const genericExcerpt = locale === "es" ? `Abre el perfil oficial de ${label}` : `Open the official ${label} profile`;
+  const excerpt = followsSubtitle ? genericExcerpt : (module.subtitle || genericExcerpt);
   return [{ id: `${platform}-profile`, platform, title, excerpt, url, isProfileFallback: true }];
 }
 
