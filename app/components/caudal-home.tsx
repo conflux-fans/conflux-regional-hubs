@@ -17,7 +17,7 @@ export function CaudalHome({region,articles,modules,contributors}:{region:Region
     <section className="caudal-news" id="journal"><div className="caudal-section-title"><div><p className="caudal-eyebrow">{region.journalEyebrow}</p><h2>{region.journalTitle}</h2></div><Link href={`/journal${suffix}`}>{t("allNews")} ↗</Link></div><ArticleFeed articles={articles} region={region}/></section>
     <section className="caudal-staking"><div><p className="caudal-eyebrow">{region.stakeEyebrow}</p><h2>{region.stakeHeading}</h2></div><div><p>{region.stakeIntro}</p><Link className="caudal-secondary" href={`/stake${suffix}`}>{region.stakeLabel} ↗</Link></div></section>
     <section className="caudal-community" id="community"><div><p className="caudal-eyebrow">{t("communityEyebrow")}</p><h2>{t("communityTitle")}</h2></div><div className="caudal-community-links">{region.communityLinks.map(link=><a key={link.url} href={link.url} target="_blank" rel="noreferrer"><strong>{link.label}</strong><span>{t("joinConversation")} ↗</span></a>)}</div></section>
-    <SocialFeed modules={modules} locale={en?"en":"es"}/>
+    <SocialFeed modules={modules} locale={en?"en":"es"} siteName={region.wordmark}/>
     {modules.find(m=>m.moduleKey==="contributors")?.enabled && <Contributors contributors={contributors} title={t("teamTitle")} subtitle={t("teamIntro")} locale={en?"en":"es"}/>} 
   </main>;
 }

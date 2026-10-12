@@ -49,7 +49,7 @@ function AfricaHome({ region, articles, suffix, modules, contributors }: { regio
         <ArticleFeed articles={articles} region={region} />
       </section>
       <OptionalModules modules={modules} />
-      <SocialFeed modules={modules} />
+      <SocialFeed modules={modules} siteName={region.wordmark} />
 
       <section className="v2-stake pupu-stake-panel v2-wrap" id="stake">
         <div><p className="v2-kicker v2-kicker-light">{region.stakeEyebrow}</p><h2>{region.stakeHeading}</h2></div>

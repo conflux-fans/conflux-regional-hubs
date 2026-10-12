@@ -8,10 +8,10 @@ function SocialIcon({ platform }: { platform: SocialPlatform }) {
   return <span aria-hidden="true">{platform.slice(0, 2).toUpperCase()}</span>;
 }
 
-export async function SocialFeed({ modules, locale = "en" }: { modules: RegionalModule[]; locale?: "en" | "es" }) {
+export async function SocialFeed({ modules, locale = "en", siteName }: { modules: RegionalModule[]; locale?: "en" | "es"; siteName: string }) {
   const connections = modules.filter((module) => module.enabled && ["instagram", "twitter", "youtube"].includes(module.moduleKey));
   if (!connections.length) return null;
-  const feeds = await Promise.all(connections.map(async (module) => ({ module, items: await getSocialFeed(module) })));
+  const feeds = await Promise.all(connections.map(async (module) => ({ module, items: await getSocialFeed(module, { siteName, locale }) })));
 
   return (
     <section className="social-hub v2-wrap" aria-labelledby="social-hub-title">
