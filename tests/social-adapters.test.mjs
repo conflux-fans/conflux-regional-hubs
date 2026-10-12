@@ -21,3 +21,16 @@ test("parses official X and Instagram API responses", () => {
   assert.equal(instagram[0].title, "Builder update");
   assert.equal(instagram[0].url, "https://www.instagram.com/p/example/");
 });
+
+test("profile fallback cards use the Spanish account name and keep English regions on the site name", async () => {
+  delete process.env.X_BEARER_TOKEN;
+  const { getSocialFeed } = await import("../app/lib/social.ts");
+  const latamTwitter = { moduleKey: "twitter", enabled: true, position: 4, title: "Twitter (X)", subtitle: "Conflux en español", source: "https://x.com/conflux_espanol", layout: "list" };
+  const spanish = await getSocialFeed(latamTwitter, { siteName: "Caudal", locale: "es" });
+  assert.equal(spanish[0].title, "Sigue a Conflux en español");
+  const english = await getSocialFeed(latamTwitter, { siteName: "Caudal", locale: "en" });
+  assert.equal(english[0].title, "Follow Caudal on X");
+  const africa = await getSocialFeed({ ...latamTwitter, subtitle: "Latest Conflux Africa updates", source: "https://x.com/confluxafrica" }, { siteName: "Kudi Hub" });
+  assert.equal(africa[0].title, "Follow Kudi Hub on X");
+  assert.equal(africa[0].excerpt, "Latest Conflux Africa updates");
+});

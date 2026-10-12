@@ -125,20 +125,29 @@ async function instagramFeed() {
   return response.ok ? parseInstagramFeed(await response.json()) : [];
 }
 
-function profileFallback(module: RegionalModule, platform: SocialPlatform): SocialFeedItem[] {
+function profileFallback(module: RegionalModule, platform: SocialPlatform, siteName: string, locale: "en" | "es"): SocialFeedItem[] {
   const url = socialProfileUrl(platform, module.source);
   if (!url) return [];
   const label = platform === "twitter" ? "X" : platform[0].toUpperCase() + platform.slice(1);
-  return [{ id: `${platform}-profile`, platform, title: `Follow Kudi Hub on ${label}`, excerpt: module.subtitle || `Open the official ${label} profile`, url, isProfileFallback: true }];
+  // On the Spanish presentation the module subtitle is the account display name
+  // (e.g. "Conflux en español"), which names the platform on its own; the English
+  // presentation keeps the site wordmark plus the platform suffix.
+  const followsSubtitle = locale === "es" && Boolean(module.subtitle);
+  const title = followsSubtitle ? `Sigue a ${module.subtitle}` : locale === "es" ? `Sigue a ${siteName} en ${label}` : `Follow ${siteName} on ${label}`;
+  const genericExcerpt = locale === "es" ? `Abre el perfil oficial de ${label}` : `Open the official ${label} profile`;
+  const excerpt = followsSubtitle ? genericExcerpt : (module.subtitle || genericExcerpt);
+  return [{ id: `${platform}-profile`, platform, title, excerpt, url, isProfileFallback: true }];
 }
 
-export async function getSocialFeed(module: RegionalModule): Promise<SocialFeedItem[]> {
+export async function getSocialFeed(module: RegionalModule, options: { siteName: string; locale?: "en" | "es" }): Promise<SocialFeedItem[]> {
   if (!module.enabled || !module.source || !["instagram", "twitter", "youtube"].includes(module.moduleKey)) return [];
   const platform = module.moduleKey as SocialPlatform;
+  const siteName = options.siteName || "Conflux";
+  const locale = options.locale ?? "en";
   try {
     const items = platform === "instagram" ? await instagramFeed() : platform === "twitter" ? await xFeed(module.source) : await youtubeFeed(module.source);
-    return items.length ? items : profileFallback(module, platform);
+    return items.length ? items : profileFallback(module, platform, siteName, locale);
   } catch {
-    return profileFallback(module, platform);
+    return profileFallback(module, platform, siteName, locale);
   }
 }

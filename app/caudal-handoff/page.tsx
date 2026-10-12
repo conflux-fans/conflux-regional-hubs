@@ -15,7 +15,7 @@ export default function CaudalHandoff() {
       <h2>Routes</h2>
       <ul>
         <li><Link href="/?region=latam">Caudal home</Link></li>
-        <li><Link href="/journal?region=latam">Actualidad</Link></li>
+        <li><Link href="/journal?region=latam">Artículos</Link></li>
         <li><Link href="/stake?region=latam">Staking — bilingual ES/EN, same audited PoS pool integration as Africa</Link></li>
         <li><Link href="/studio?region=latam">Protected manager studio</Link></li>
         <li><Link href="/?region=africa">Kudi Hub reference</Link></li>

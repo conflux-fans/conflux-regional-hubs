@@ -103,7 +103,7 @@ function defaultModules(key: RegionKey): RegionalModule[] {
     { moduleKey: "stake", enabled: true, position: 1, title: region.stakeHeading, subtitle: region.stakeIntro, source: "", layout: "grid" },
     { moduleKey: "contributors", enabled: true, position: 2, title: "Meet the contributors", subtitle: "The people building this regional hub", source: "", layout: "grid" },
     { moduleKey: "instagram", enabled: key === "africa", position: 3, title: "Instagram", subtitle: "From the wider Conflux community", source: key === "africa" ? "https://www.instagram.com/confluxnetwork" : "", layout: "grid" },
-    { moduleKey: "twitter", enabled: key === "africa" || key === "latam", position: 4, title: "X / Twitter", subtitle: key === "latam" ? "Conflux en español" : "Latest Conflux Africa updates", source: key === "latam" ? "https://x.com/conflux_espanol" : key === "africa" ? "https://x.com/confluxafrica" : "", layout: "list" },
+    { moduleKey: "twitter", enabled: key === "africa" || key === "latam", position: 4, title: key === "latam" ? "Twitter (X)" : "X / Twitter", subtitle: key === "latam" ? "Conflux en español" : "Latest Conflux Africa updates", source: key === "latam" ? "https://x.com/conflux_espanol" : key === "africa" ? "https://x.com/confluxafrica" : "", layout: "list" },
     { moduleKey: "youtube", enabled: false, position: 5, title: "YouTube", subtitle: "Latest regional videos", source: "", layout: "grid" },
     { moduleKey: "events", enabled: false, position: 6, title: "Events", subtitle: "Meet the community", source: "", layout: "list" },
     { moduleKey: "newsletter", enabled: false, position: 7, title: "Newsletter", subtitle: "Get regional updates", source: "", layout: "list" },

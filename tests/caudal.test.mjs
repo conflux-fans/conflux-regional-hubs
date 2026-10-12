@@ -7,7 +7,8 @@ test("LATAM is isolated in the shared regional registry", async () => {
   assert.equal(resolveRegion("latam"), "latam");
   assert.equal(resolveRegion("africa"), "africa");
   assert.equal(regions.latam.wordmark, "Caudal");
-  assert.equal(regions.latam.headline, "Conflux para Latinoamérica.");
+  assert.equal(regions.latam.headline, "Tu punto de encuentro con Conflux en Latinoamérica.");
+  assert.equal(regions.latam.journalLabel, "Artículos");
   assert.equal(regions.latam.contributors.length, 2);
   assert.equal(regions.africa.wordmark, "Kudi Hub");
 });
