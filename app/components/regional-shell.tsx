@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { RegionalConfig } from "../regional";
 import { KudiLogo } from "./kudi-logo";
 import { CaudalLocale } from "./caudal-locale";
-import { SlovoMark } from "./slovo-mark";
 import { SlovoLocale } from "./slovo-locale";
 
 export function RegionalShell({ region, children }: { region: RegionalConfig; children: ReactNode }) {
@@ -55,8 +54,9 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
         <header className="slovo-header">
           <Link href={`/${suffix}`} aria-label="SLOVO">
             <span className="slovo-brand">
-              <SlovoMark />
-              <strong>SLOVO</strong>
+              {/* The lockup is the designed brand-board asset extracted from the brief; a standard img keeps transparency intact. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/slovo/logo-lockup.png" alt="SLOVO" />
             </span>
           </Link>
           <nav aria-label={uk ? "Основна навігація" : "Основная навигация"}>
