@@ -5,8 +5,8 @@ import "./globals.css";
 import "./caudal.css";
 import "./slovo.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin", "cyrillic", "cyrillic-ext"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin", "cyrillic", "cyrillic-ext"] });
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const slovoSerif = Literata({ variable: "--font-slovo-serif", subsets: ["latin", "cyrillic", "cyrillic-ext"] });
 const slovoSans = Manrope({ variable: "--font-slovo-sans", subsets: ["latin", "cyrillic", "cyrillic-ext"] });
 const slovoMono = JetBrains_Mono({ variable: "--font-slovo-mono", subsets: ["latin", "cyrillic", "cyrillic-ext"] });

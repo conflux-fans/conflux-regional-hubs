@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { RegionalConfig } from "../regional";
-import type { RegionalArticle, RegionalContributor } from "../lib/content";
+import type { RegionalArticle } from "../lib/articles";
+import type { RegionalContributor } from "../lib/content";
 import { ArticleFeed } from "./article-feed";
 import { Contributors } from "./contributors";
 import { slovoCopy } from "../slovo-copy";
