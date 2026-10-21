@@ -38,7 +38,7 @@ export default function CaudalHandoff() {
       </ul>
 
       <h2>Content and assets</h2>
-      <p>Logo SVGs, PNGs, the hero reference and moodboard live under <code>public/brand/caudal</code>. The hero artwork is displayed as a CSS crop of the supplied mockup; request a clean illustration export before final design sign-off. Spanish is the default language and English interface copy is available through the language toggle; supplied contributor biographies and articles remain in their original language — publication translation is not automatic.</p>
+      <p>Logo SVGs, PNGs, the hero illustrations and moodboard live under <code>public/brand/caudal</code>. The hero uses the supplied illustration exports — square for desktop, portrait for mobile, switched at the 800px breakpoint — served as WebP with the original PNGs kept as master copies. Spanish is the default language and English interface copy is available through the language toggle; supplied contributor biographies and articles remain in their original language — publication translation is not automatic.</p>
 
       <h2>Approval before launch</h2>
       <p>Check desktop and mobile widths, both languages, contributor dialogs (Escape and focus return), manager permissions, and the save/publish/reopen article flow. Verify that the Africa and Korea presentations are unchanged. Do not interpret adapter unit tests as proof that external services are connected.</p>
