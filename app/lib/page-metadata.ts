@@ -4,6 +4,7 @@ import { regions, resolveRegion, type RegionalConfig } from "../regional.ts";
 const shareImages: Partial<Record<RegionalConfig["key"], string>> = {
   africa: "/brand/kudi-hub/kudi-hub-symbol-1024.png",
   latam: "/brand/caudal/logo-blue.png",
+  slovo: "/brand/slovo/logo-og.png",
 };
 
 const htmlLanguages: Partial<Record<RegionalConfig["key"], string>> = {
@@ -17,6 +18,7 @@ export function regionShareImage(region: RegionalConfig) {
 }
 
 export function regionHtmlLang(region: RegionalConfig) {
+  if (region.key === "slovo") return region.locale === "uk" ? "uk" : "ru";
   return htmlLanguages[region.key] ?? "en";
 }
 

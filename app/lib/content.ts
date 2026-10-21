@@ -1,6 +1,7 @@
 import { getDatabase } from "../../db/index.ts";
 import { regions, type RegionKey, type RegionalConfig } from "../regional.ts";
 import { loadCaudalCopy } from "./caudal-copy.ts";
+import { loadSlovoCopy } from "./slovo-copy.ts";
 
 type SettingRow = {
   wordmark: string;
@@ -78,7 +79,7 @@ export async function getRegionalContent(key: RegionKey): Promise<EditableRegion
 }
 
 export async function getRegionalConfig(key: RegionKey): Promise<RegionalConfig> {
-  const config: RegionalConfig = { ...regions[key], ...(await getRegionalContent(key)), ...(key === "latam" ? { uiCopy: await loadCaudalCopy() } : {}) };
+  const config: RegionalConfig = { ...regions[key], ...(await getRegionalContent(key)), ...(key === "latam" ? { uiCopy: await loadCaudalCopy() } : key === "slovo" ? { uiCopy: await loadSlovoCopy() } : {}) };
   if (key === "latam") {
     // Imported lazily so this module also loads under plain Node (tests and scripts), where "next/headers" does not resolve.
     const { cookies } = await import("next/headers");
@@ -90,6 +91,19 @@ export async function getRegionalConfig(key: RegionKey): Promise<RegionalConfig>
         language: "English",
         ...Object.fromEntries(["headline", "intro", "heroEyebrow", "journalLabel", "journalTitle", "journalEyebrow", "stakeLabel", "stakeEyebrow", "stakeHeading", "footerText", "communityLabel"].map((field) => [field, copy[`en.${field}`]])),
         stakeIntro: copy["en.stakingDescription"],
+      };
+    }
+  }
+  if (key === "slovo") {
+    const { cookies } = await import("next/headers");
+    if ((await cookies()).get("slovo-locale")?.value === "uk") {
+      const copy = config.uiCopy!;
+      return {
+        ...config,
+        locale: "uk",
+        language: "Українська",
+        ...Object.fromEntries(["headline", "intro", "heroEyebrow", "journalLabel", "journalTitle", "journalEyebrow", "stakeLabel", "stakeEyebrow", "stakeHeading", "footerText", "communityLabel", "localModuleEyebrow", "localModuleTitle", "localModuleText"].map((field) => [field, copy[`uk.${field}`]])),
+        stakeIntro: copy["uk.stakingDescription"],
       };
     }
   }

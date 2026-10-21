@@ -7,6 +7,13 @@ function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CFX";
 }
 
+const localeStrings = {
+  en: { kicker: "THE PEOPLE / REGIONAL HUB", view: "View profile", close: "Close contributor profile", modalKicker: "REGIONAL CONTRIBUTOR" },
+  es: { kicker: "EL EQUIPO / CONFLUX LATAM", view: "Ver perfil", close: "Cerrar perfil", modalKicker: "COLABORADOR REGIONAL" },
+  ru: { kicker: "КОМАНДА / CONFLUX SLOVO", view: "Открыть профиль", close: "Закрыть профиль", modalKicker: "УЧАСТНИК СООБЩЕСТВА" },
+  uk: { kicker: "КОМАНДА / CONFLUX SLOVO", view: "Відкрити профіль", close: "Закрити профіль", modalKicker: "УЧАСНИК СПІЛЬНОТИ" },
+} as const;
+
 function Portrait({ contributor, large = false }: { contributor: RegionalContributor; large?: boolean }) {
   return <span className={`contributor-portrait ${large ? "large" : ""}`}>
     {contributor.photoUrl ? <>
@@ -17,7 +24,7 @@ function Portrait({ contributor, large = false }: { contributor: RegionalContrib
   </span>;
 }
 
-export function Contributors({ contributors, title, subtitle, locale = "en" }: { contributors: RegionalContributor[]; title: string; subtitle: string; locale?: "en" | "es" }) {
+export function Contributors({ contributors, title, subtitle, locale = "en" }: { contributors: RegionalContributor[]; title: string; subtitle: string; locale?: "en" | "es" | "ru" | "uk" }) {
   const visible = contributors.filter((item) => item.isVisible);
   const [active, setActive] = useState<RegionalContributor | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
@@ -36,17 +43,18 @@ export function Contributors({ contributors, title, subtitle, locale = "en" }: {
   }, [active]);
 
   if (!visible.length) return null;
+  const s = localeStrings[locale];
   return <section className="contributors-section v2-wrap" id="contributors">
-    <div className="contributors-heading"><div><p className="v2-kicker">{locale === "es" ? "EL EQUIPO / CONFLUX LATAM" : "THE PEOPLE / REGIONAL HUB"}</p><h2>{title}</h2></div><p>{subtitle}</p></div>
+    <div className="contributors-heading"><div><p className="v2-kicker">{s.kicker}</p><h2>{title}</h2></div><p>{subtitle}</p></div>
     <div className="contributors-grid">{visible.map((contributor) => <button type="button" key={`${contributor.name}-${contributor.role}`} className="contributor-card" onClick={() => setActive(contributor)} aria-haspopup="dialog">
       <Portrait contributor={contributor} />
-      <span><small>{contributor.role}</small><strong>{contributor.name}</strong><p>{contributor.shortBio}</p><i>{locale === "es" ? "Ver perfil" : "View profile"} ↗</i></span>
+      <span><small>{contributor.role}</small><strong>{contributor.name}</strong><p>{contributor.shortBio}</p><i>{s.view} ↗</i></span>
     </button>)}</div>
     {active && <div className="contributor-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setActive(null); }}>
       <section ref={dialogRef} className="contributor-modal" role="dialog" aria-modal="true" aria-labelledby="contributor-modal-name" lang={locale}>
-        <button type="button" className="contributor-modal-close" onClick={() => setActive(null)} aria-label={locale === "es" ? "Cerrar perfil" : "Close contributor profile"}>×</button>
+        <button type="button" className="contributor-modal-close" onClick={() => setActive(null)} aria-label={s.close}>×</button>
         <Portrait contributor={active} large />
-        <div><p className="v2-kicker">{locale === "es" ? "COLABORADOR REGIONAL" : "REGIONAL CONTRIBUTOR"}</p><h2 id="contributor-modal-name">{active.name}</h2><strong>{active.role}</strong><p>{active.fullBio}</p></div>
+        <div><p className="v2-kicker">{s.modalKicker}</p><h2 id="contributor-modal-name">{active.name}</h2><strong>{active.role}</strong><p>{active.fullBio}</p></div>
       </section>
     </div>}
   </section>;

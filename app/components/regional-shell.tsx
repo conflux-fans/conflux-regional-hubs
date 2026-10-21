@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { RegionalConfig } from "../regional";
 import { KudiLogo } from "./kudi-logo";
 import { CaudalLocale } from "./caudal-locale";
+import { SlovoMark } from "./slovo-mark";
+import { SlovoLocale } from "./slovo-locale";
 
 export function RegionalShell({ region, children }: { region: RegionalConfig; children: ReactNode }) {
   const style = {
@@ -44,6 +46,37 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
       </footer>
     </div>
   );
+
+  if (region.key === "slovo") {
+    const uk = region.locale === "uk";
+    return (
+      <div className="regional-site region-slovo" style={style} lang={uk ? "uk" : "ru"}>
+        <a className="slovo-skip" href="#slovo-main">{uk ? "Перейти до змісту" : "Перейти к содержимому"}</a>
+        <header className="slovo-header">
+          <Link href={`/${suffix}`} aria-label="SLOVO">
+            <span className="slovo-brand">
+              <SlovoMark />
+              <strong>SLOVO</strong>
+            </span>
+          </Link>
+          <nav aria-label={uk ? "Основна навігація" : "Основная навигация"}>
+            <Link href={`/journal${suffix}`}>{region.journalLabel}</Link>
+            <Link href={`/stake${suffix}`}>{region.stakeLabel}</Link>
+            <Link href={`/${suffix}#community`}>{region.communityLabel}</Link>
+          </nav>
+          <SlovoLocale locale={region.locale || "ru"} />
+        </header>
+        <div id="slovo-main">{children}</div>
+        <footer className="slovo-footer">
+          <div><strong>SLOVO</strong><p>{region.footerText}</p></div>
+          <nav>
+            <Link href={`/studio${suffix}`}>{uk ? "Вхід для команди" : "Вход для команды"}</Link>
+          </nav>
+          <small>{uk ? "Транзакції стейкінгу не включені." : "Транзакции стейкинга не включены."}</small>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className={`regional-site region-${region.key} layout-${region.layout}`} style={style}>

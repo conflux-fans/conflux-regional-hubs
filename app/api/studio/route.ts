@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const required = [input.submitterName, input.submitterEmail, input.projectName, input.domain, input.primaryLanguage, input.logoDirection, input.primaryColor, input.secondaryColor, input.personality, input.backgroundConcept, input.localSymbols, input.audience, input.homepagePriority, input.heroHeadline, input.heroIntro, input.journalName, input.stakingName];
     if (required.some((value) => !value)) return NextResponse.json({ error: "Complete the required questions before generating the brief." }, { status: 400 });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.submitterEmail)) return NextResponse.json({ error: "Enter a valid email address so the submission can be identified." }, { status: 400 });
-    const generatedPrompt = createVibePrompt(region === "korea" ? "Korea" : "Africa", input);
+    const generatedPrompt = createVibePrompt(region === "korea" ? "Korea" : region === "slovo" ? "SLOVO (Russian and Ukrainian)" : region === "latam" ? "Latin America" : "Africa", input);
     const briefId = await saveRegionalBrief(region, input, generatedPrompt);
     return NextResponse.json({ ok: true, briefId, prompt: editor ? generatedPrompt : undefined });
   }

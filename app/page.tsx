@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CaudalHome } from "./components/caudal-home";
+import { SlovoHome } from "./components/slovo-home";
 import { ArticleFeed } from "./components/article-feed";
 import { RegionalShell } from "./components/regional-shell";
 import { Contributors } from "./components/contributors";
@@ -71,7 +72,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <RegionalShell region={region}>
-      {region.key === "latam" ? <CaudalHome region={region} articles={articles} modules={modules} contributors={contributors} /> : region.key === "africa" ? <AfricaHome region={region} articles={articles} suffix={suffix} modules={modules} contributors={contributors} /> :
+      {region.key === "latam" ? <CaudalHome region={region} articles={articles} modules={modules} contributors={contributors} /> : region.key === "africa" ? <AfricaHome region={region} articles={articles} suffix={suffix} modules={modules} contributors={contributors} /> : region.key === "slovo" ? <SlovoHome region={region} articles={articles} contributors={contributors} /> :
       <main>
         <section className="v2-hero v2-wrap">
           <div className="v2-hero-copy">
