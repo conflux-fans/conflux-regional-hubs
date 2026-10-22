@@ -59,7 +59,7 @@ test("SLOVO locale switching is wired through config, shell, and fonts", async (
 });
 
 test("SLOVO assets and deployment registry are present", async () => {
-  for (const asset of ["logo-lockup.png", "logo-lockup-dark.png", "logo-og.png"]) {
+  for (const asset of ["logo-mark.svg", "logo-og.png"]) {
     assert.ok((await readFile(new URL(`../public/brand/slovo/${asset}`, import.meta.url))).length > 100);
   }
   const { deploymentRegions } = await import("../config/regions.ts");

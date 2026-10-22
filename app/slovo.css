@@ -11,8 +11,9 @@
 .slovo-skip:focus{top:10px;left:10px;z-index:99;background:#1C1B33;color:#BFE8D9;padding:14px 18px;border-radius:10px}
 
 .slovo-header{max-width:1440px;margin:auto;padding:18px 5%;display:flex;align-items:center;gap:28px;border-bottom:2px solid #1C1B33}
-.slovo-brand{display:inline-flex;align-items:center;color:#1C1B33}
-.slovo-brand img{height:58px;width:auto;display:block}
+.slovo-brand{display:inline-flex;align-items:center;gap:12px;color:#1C1B33}
+.slovo-brand svg{width:44px;height:30px;display:block}
+.slovo-brand strong{font-family:var(--font-slovo-serif),Georgia,serif;font-size:1.5rem;letter-spacing:.02em}
 .slovo-header nav{display:flex;gap:26px;margin-left:auto;font-weight:600}
 .slovo-header nav a{text-decoration:none;border-bottom:2px solid transparent;padding-bottom:2px}
 .slovo-header nav a:hover{color:#0D6E60;border-bottom-color:#0D6E60}
