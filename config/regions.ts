@@ -17,6 +17,12 @@ export const deploymentRegions = {
     presentation: "korea-poster",
     defaultLocale: "ko",
   },
+  slovo: {
+    siteName: "Slovo",
+    intendedDomain: "slovohub.xyz",
+    presentation: "slovo-literary",
+    defaultLocale: "ru",
+  },
 } as const;
 
 export type DeploymentRegionSlug = keyof typeof deploymentRegions;

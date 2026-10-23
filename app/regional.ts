@@ -1,4 +1,4 @@
-export type RegionKey = "africa" | "korea" | "latam";
+export type RegionKey = "africa" | "korea" | "latam" | "slovo";
 
 export type RegionalArticleSource = {
   format: "json" | "rss";
@@ -14,7 +14,7 @@ export type RegionalContributorProfile = {
 };
 
 export type RegionalConfig = {
-  locale?: "es" | "en";
+  locale?: "es" | "en" | "ru" | "uk";
   uiCopy?: Record<string, string>;
   seo: { title: string; description: string };
   key: RegionKey;
@@ -211,9 +211,66 @@ export const regions: Record<RegionKey, RegionalConfig> = {
     communityLinks: [],
     contributors: [],
   },
+  slovo: {
+    key: "slovo",
+    seo: {
+      title: "SLOVO — сообщество Conflux на русском и украинском",
+      description: "SLOVO — пространство Web3-сообщества Conflux. Новости, идеи, истории участников и возможности экосистемы Conflux — в одном месте.",
+    },
+    code: "SLOVO",
+    name: "SLOVO",
+    wordmark: "Slovo",
+    logoStyle: "monogram",
+    domain: "slovohub.xyz",
+    language: "Русский",
+    locale: "ru",
+    accent: "#0D6E60",
+    secondary: "#BFE8D9",
+    tertiary: "#C9C4F2",
+    onAccent: "#ffffff",
+    surface: "#F4EFE6",
+    headline: "Слово, которое держат.",
+    intro: "SLOVO — пространство Web3-сообщества Conflux. Новости, идеи, истории участников и возможности экосистемы Conflux — в одном месте.",
+    heroEyebrow: "СООБЩЕСТВО CONFLUX · RU / UA",
+    journalLabel: "Истории",
+    journalTitle: "Истории сообщества: люди, идеи, технологии.",
+    journalEyebrow: "ИСТОРИИ / CONFLUX SLOVO",
+    stakeLabel: "Стейкинг CFX",
+    stakeEyebrow: "УЧАСТИЕ В CONFLUX",
+    stakeHeading: "Участвуй в стейкинге CFX.",
+    stakeIntro: "Узнайте, как застейкать CFX и участвовать в безопасности сети Conflux.",
+    footerText: "SLOVO: независимое пространство сообщества Conflux. Делимся знаниями, обсуждаем технологии и знакомимся с возможностями Web3. Создано сообществом для сообщества.",
+    communityLabel: "Сообщество",
+    localModuleEyebrow: "ЛЮДИ + ИДЕИ + ВОЗМОЖНОСТИ",
+    localModuleTitle: "Сообщество, объединённое словом.",
+    localModuleText: "SLOVO объединяет читателей на русском и украинском, где бы они ни жили: Web3, блокчейн, экосистема Conflux и стейкинг CFX.",
+    motif: "grid",
+    layout: "editorial",
+    articleSource: { format: "json", url: "" },
+    communityLinks: [
+      { label: "Telegram · Ульяна", url: "https://t.me/ulianakob" },
+      { label: "Telegram · Марина", url: "https://t.me/umarisha12" },
+    ],
+    contributors: [
+      {
+        name: "Ульяна",
+        role: "Руководитель сообщества Conflux",
+        shortBio: "Мне нравится налаживать новые связи между людьми, и я стремлюсь сделать Web3 более доступным и понятным. В рамках SLOVO развиваю сообщество Conflux с помощью интересного контента, обмена знаниями и инициатив, основанных на участии сообщества.",
+        fullBio: "Мне нравится объединять людей с помощью технологий, общения и общих идей. В рамках моей работы с Conflux Network я участвую в развитии сообщества, занимаюсь коммуникациями и создаю контент, который помогает сделать Web3 более доступным и понятным для широкой аудитории. Я верю, что сильное сообщество начинается с содержательного диалога и возможности для каждого учиться, делиться своими идеями и чувствовать себя частью общего дела. Моя цель в рамках SLOVO — создать открытое и дружелюбное пространство, где люди смогут изучать Web3 на родном языке, обмениваться мнениями и налаживать связи с более широкой экосистемой Conflux. Связаться со мной: тг @ulianakob",
+        photoUrl: "",
+      },
+      {
+        name: "Марина",
+        role: "Руководитель регионального сообщества Conflux",
+        shortBio: "Уже пять лет являюсь амбассадором Conflux. Представляю Conflux на международных мероприятиях и вовлекаю людей в общение через AMA-сессии и подкасты. В рамках SLOVO помогаю нашему сообществу оставаться на связи с экосистемой Conflux.",
+        fullBio: "Я уже пять лет являюсь амбассадором Conflux. Значительная часть моей работы заключается в том, чтобы доносить новости, анонсы и идеи команды Conflux до нашего сообщества — простым и понятным языком, которым люди действительно пользуются в повседневном общении. Именно в этом, на мой взгляд, и заключается суть SLOVO. Слово имеет значение только тогда, когда оно находит отклик у людей. Мне нравится представлять Conflux на мероприятиях по всему миру, а также проводить AMA-сессии и подкасты с разработчиками и участниками сообщества. Именно в таких разговорах люди задают действительно важные вопросы, и я хочу, чтобы SLOVO стал пространством, где они смогут получать честные и понятные ответы. Связаться со мной: ТГ @umarisha12",
+        photoUrl: "/brand/slovo/maryna.webp",
+      },
+    ],
+  },
 };
 
 export function resolveRegion(value: string | string[] | undefined): RegionKey {
   const candidate = Array.isArray(value) ? value[0] : value || process.env.NEXT_PUBLIC_REGION_SLUG;
-  return candidate === "korea" || candidate === "latam" ? candidate : "africa";
+  return candidate === "korea" || candidate === "latam" || candidate === "slovo" ? candidate : "africa";
 }

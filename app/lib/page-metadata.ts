@@ -4,6 +4,7 @@ import { regions, resolveRegion, type RegionalConfig } from "../regional.ts";
 const shareImages: Partial<Record<RegionalConfig["key"], string>> = {
   africa: "/brand/kudi-hub/kudi-hub-symbol-1024.png",
   latam: "/brand/caudal/logo-blue.png",
+  slovo: "/brand/slovo/logo-og.png",
 };
 
 const htmlLanguages: Partial<Record<RegionalConfig["key"], string>> = {
@@ -17,6 +18,7 @@ export function regionShareImage(region: RegionalConfig) {
 }
 
 export function regionHtmlLang(region: RegionalConfig) {
+  if (region.key === "slovo") return region.locale === "uk" ? "uk" : "ru";
   return htmlLanguages[region.key] ?? "en";
 }
 
@@ -37,6 +39,13 @@ type PageMetadataInput = {
   publishedTime?: string;
 };
 
+/** Per-region favicon, resolved per request by page metadata so one deployment can preview other regions safely. */
+function regionIcons(region: RegionalConfig) {
+  return region.key === "slovo"
+    ? { icon: "/brand/slovo/mark-32.png", shortcut: "/brand/slovo/mark-32.png", apple: "/brand/slovo/mark-128.png" }
+    : { icon: "/favicon.svg", shortcut: "/favicon.svg" };
+}
+
 export function regionalMetadata(region: RegionalConfig, { title, description, path = "/", type = "website", publishedTime }: PageMetadataInput): Metadata {
   const image = regionShareImage(region);
   const url = `${siteOrigin(region)}${path}`;
@@ -45,6 +54,7 @@ export function regionalMetadata(region: RegionalConfig, { title, description, p
     title,
     description,
     alternates: { canonical: url },
+    icons: regionIcons(region),
     openGraph: { title, description, url, type, siteName: region.wordmark, images: [{ url: image }], ...(publishedTime ? { publishedTime } : {}) },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };

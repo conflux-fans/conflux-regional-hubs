@@ -8,6 +8,8 @@ export function ArticleFeed({ articles, region }: { articles: RegionalArticle[];
         <span>FEED / {region.code}</span>
         {region.key === "latam"
           ? <div><h3>{region.locale === "en" ? "The next story starts here." : "La próxima historia empieza aquí."}</h3><p>{region.locale === "en" ? "Regional articles will appear here when the team publishes them." : "Los artículos de la región aparecerán aquí cuando el equipo los publique."}</p></div>
+          : region.key === "slovo"
+          ? <div><h3>{region.locale === "uk" ? "Наступна історія починається тут." : "Следующая история начинается здесь."}</h3><p>{region.locale === "uk" ? "Історії з'являться тут, коли команда їх опублікує." : "Истории появятся здесь, когда команда их опубликует."}</p></div>
           : <div><h3>No regional feed connected.</h3><p>Add this region’s blog feed and published articles will appear here automatically.</p></div>}
       </div>
     );

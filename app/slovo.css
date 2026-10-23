@@ -1,0 +1,129 @@
+/* SLOVO — literary editorial presentation. Russian and Ukrainian as equal languages;
+   language-defined community, so wording and imagery stay country-neutral by design. */
+.region-slovo{background:#F4EFE6;color:#1C1B33;font-family:var(--font-slovo-sans),Arial,sans-serif;--region-on-accent:#fff;--muted:#5C5A66;--slovo-ink:#1C1B33;--slovo-paper:#F4EFE6;--slovo-card:#FBF8F1;--slovo-teal:#0D6E60;--slovo-mint:#BFE8D9;--slovo-lilac:#C9C4F2}
+.region-slovo *{box-sizing:border-box}
+.region-slovo h1,.region-slovo h2,.region-slovo h3{font-family:var(--font-slovo-serif),Georgia,serif;color:inherit;letter-spacing:-.02em;line-height:1.08;font-weight:600}
+.region-slovo p{line-height:1.65}
+.region-slovo a{color:inherit}
+.region-slovo a:focus-visible,.region-slovo button:focus-visible{outline:3px solid #0D6E60;outline-offset:4px}
+.slovo-eyebrow{font-family:var(--font-slovo-mono),monospace;font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;color:#0D6E60;font-weight:600}
+.slovo-skip{position:fixed;top:-100px}
+.slovo-skip:focus{top:10px;left:10px;z-index:99;background:#1C1B33;color:#BFE8D9;padding:14px 18px;border-radius:10px}
+
+.slovo-header{max-width:1440px;margin:auto;padding:18px 5%;display:flex;align-items:center;gap:28px;border-bottom:2px solid #1C1B33}
+.slovo-brand{display:inline-flex;align-items:center;gap:12px;color:#1C1B33}
+.slovo-brand img{width:44px;height:30px;display:block}
+.slovo-brand strong{font-family:var(--font-slovo-serif),Georgia,serif;font-size:1.5rem;letter-spacing:.02em}
+.slovo-header nav{display:flex;gap:26px;margin-left:auto;font-weight:600}
+.slovo-header nav a{text-decoration:none;border-bottom:2px solid transparent;padding-bottom:2px}
+.slovo-header nav a:hover{color:#0D6E60;border-bottom-color:#0D6E60}
+.slovo-language{display:flex;gap:4px;font-family:var(--font-slovo-mono),monospace}
+.slovo-language button{background:transparent;border:1.5px solid #1C1B33;border-radius:10px;padding:7px 12px;font-size:.8rem;font-weight:700;cursor:pointer;letter-spacing:.08em;color:#1C1B33;transition:background-color .25s,color .25s}
+.slovo-language button[aria-pressed=true]{background:#1C1B33;color:#BFE8D9}
+
+.slovo-hero{padding:90px 5% 80px;max-width:1200px;margin:auto}
+.slovo-hero h1{font-size:clamp(2.8rem,6.4vw,5.4rem);max-width:920px;margin:26px 0 30px}
+.slovo-hero .slovo-quote{color:#0D6E60}
+.slovo-hero-intro{font-size:1.35rem;max-width:560px;color:#5C5A66}
+.slovo-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.slovo-button{display:inline-flex;align-items:center;gap:10px;background:#0D6E60;color:#fff;border:2px solid #0D6E60;border-radius:12px;padding:15px 22px;font-weight:700;text-decoration:none;font-size:1rem;transition:transform .25s,box-shadow .25s,background-color .25s,color .25s}
+.slovo-button:hover{transform:translateY(-2px);box-shadow:0 14px 30px -14px rgba(13,110,96,.55)}
+.slovo-button-ghost{background:transparent;color:#1C1B33;border-color:#1C1B33}
+.slovo-button-ghost:hover{background:#1C1B33;color:#F4EFE6;box-shadow:none}
+.slovo-button-mint{background:#BFE8D9;border-color:#BFE8D9;color:#1C1B33}
+.slovo-button-mint:hover{box-shadow:0 14px 30px -14px rgba(28,27,51,.4)}
+.slovo-hero-meta{display:flex;align-items:center;gap:14px;margin-top:46px;font-family:var(--font-slovo-mono),monospace;font-size:.75rem;letter-spacing:.16em;color:#5C5A66;flex-wrap:wrap}
+.slovo-hero-meta i{width:5px;height:5px;background:#C9C4F2;transform:rotate(45deg);display:inline-block}
+
+.slovo-intro{max-width:1200px;margin:auto;padding:80px 5%;border-top:1px solid rgba(28,27,51,.18)}
+.slovo-intro h2{font-size:clamp(2.2rem,4vw,3.6rem);max-width:680px;margin:18px 0}
+.slovo-intro-text{max-width:560px;color:#5C5A66;font-size:1.15rem}
+.slovo-paths{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.slovo-paths>a{display:block;padding:28px;border:2px solid #1C1B33;border-radius:18px;text-decoration:none;position:relative;transition:transform .3s,box-shadow .3s,background-color .3s}
+.slovo-paths>a:nth-child(2){background:#C9C4F2}
+.slovo-paths>a:nth-child(3){background:#BFE8D9}
+.slovo-paths>a:hover,.slovo-paths>a:focus-visible{transform:translateY(-4px);box-shadow:8px 8px 0 #1C1B33}
+.slovo-path-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.slovo-path-num{font-family:var(--font-slovo-mono),monospace;font-size:.8rem;border:1.5px solid #1C1B33;border-radius:999px;padding:4px 11px;letter-spacing:.14em}
+.slovo-path-diamond{width:14px;height:14px;background:#0D6E60;transform:rotate(45deg);display:inline-block}
+.slovo-paths h3{font-size:1.7rem;margin:0 0 12px}
+.slovo-paths p{color:#3E3C49;font-size:.98rem}
+.slovo-paths b{display:block;margin-top:22px;font-size:1.35rem;color:#0D6E60}
+
+.slovo-journal{max-width:1200px;margin:auto;padding:80px 5%}
+.slovo-section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:34px}
+.slovo-section-head h2{font-size:clamp(2rem,3.6vw,3.2rem);margin:16px 0 0}
+.slovo-section-head>a{color:#0D6E60;font-weight:700;white-space:nowrap}
+
+.region-slovo .feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.region-slovo .feed-card{border:2px solid #1C1B33;border-radius:18px;padding:24px;text-decoration:none;display:flex;flex-direction:column;gap:12px;background:#FBF8F1;min-height:220px;transition:transform .3s,box-shadow .3s}
+.region-slovo .feed-card:hover{transform:translateY(-4px);box-shadow:8px 8px 0 #C9C4F2}
+.region-slovo .feed-card-featured{grid-column:span 2}
+.region-slovo .feed-card>span{font-family:var(--font-slovo-mono),monospace;font-size:.75rem;color:#0D6E60;letter-spacing:.14em}
+.region-slovo .feed-card h3{font-size:1.35rem;margin:0}
+.region-slovo .feed-card p{color:#5C5A66;font-size:.95rem;margin:0}
+.region-slovo .feed-card b{margin-top:auto;color:#0D6E60;font-size:1.2rem}
+.region-slovo .feed-empty{border:2px dashed #1C1B33;border-radius:18px;padding:40px;background:#FBF8F1}
+.region-slovo .feed-empty span{font-family:var(--font-slovo-mono),monospace;letter-spacing:.18em;font-size:.75rem;color:#0D6E60}
+.region-slovo .feed-empty h3{font-size:1.6rem}
+.region-slovo .feed-empty p{color:#5C5A66}
+
+.slovo-staking{background:#1C1B33;color:#F4EFE6;padding:85px 5%}
+.slovo-staking-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:55px;align-items:center}
+.slovo-staking .slovo-eyebrow{color:#BFE8D9}
+.slovo-staking h2{font-size:clamp(2.3rem,4.2vw,4rem);margin:18px 0}
+.slovo-staking p{color:#CFCBDD;font-size:1.1rem}
+.slovo-staking .slovo-button-mint{margin-top:26px}
+
+.slovo-community{max-width:1200px;margin:auto;padding:85px 5%}
+.slovo-community h2{font-size:clamp(2rem,3.6vw,3.2rem);margin:16px 0 34px;max-width:640px}
+.slovo-community-links{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.slovo-community-links a{border:2px solid #1C1B33;border-radius:18px;padding:26px;display:flex;flex-direction:column;gap:10px;text-decoration:none;transition:transform .3s,box-shadow .3s}
+.slovo-community-links a:hover{transform:translateY(-4px);box-shadow:8px 8px 0 #BFE8D9}
+.slovo-community-links strong{font-family:var(--font-slovo-serif),Georgia,serif;font-size:1.4rem}
+.slovo-community-links span{color:#0D6E60;font-weight:700}
+
+.region-slovo .contributors-section{max-width:1200px;padding:20px 5% 90px}
+.region-slovo .contributors-heading h2{font-size:clamp(2rem,3.6vw,3.2rem)}
+.region-slovo .contributor-card{border:2px solid #1C1B33;border-radius:18px;background:#FBF8F1;color:#1C1B33;transition:transform .3s,box-shadow .3s}
+.region-slovo .contributor-card:hover{transform:translateY(-4px);box-shadow:8px 8px 0 #C9C4F2}
+.region-slovo .contributor-portrait{background:#BFE8D9}
+.region-slovo .contributor-portrait b{color:#1C1B33}
+.region-slovo .contributor-card p,.region-slovo .contributor-card small{color:#5C5A66}
+.region-slovo .contributor-modal{background:#F4EFE6;color:#1C1B33;border:2px solid #1C1B33;border-radius:22px;max-height:85vh;overflow:auto}
+
+.slovo-footer{border-top:2px solid #1C1B33;padding:46px 6%;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px;max-width:1440px;margin:auto}
+.slovo-footer strong{font-family:var(--font-slovo-serif),Georgia,serif;font-size:2rem}
+.slovo-footer p{max-width:520px;color:#5C5A66;margin:6px 0 0}
+.slovo-footer nav{display:flex;gap:22px}
+.slovo-footer nav a{color:#0D6E60;font-weight:600}
+.slovo-footer small{flex-basis:100%;color:#5C5A66;font-size:.8rem}
+
+/* Shared v2 subpages (journal list, stake dashboard) recolored for the paper/ink system. */
+.region-slovo .v2-kicker{font-family:var(--font-slovo-mono),monospace;color:#0D6E60}
+.region-slovo .v2-subhead h1{font-family:var(--font-slovo-serif),Georgia,serif}
+.region-slovo .v2-subhead a{color:#0D6E60}
+.region-slovo .stake-app{background:#F4EFE6;color:#1C1B33;padding-bottom:90px}
+.region-slovo .stake-heading aside{border-color:#1C1B33;background:#FBF8F1}
+.region-slovo .stake-disabled{border-color:#1C1B33;background:#FBF8F1}
+.region-slovo .v2-button-accent{background:#0D6E60}
+.region-slovo .stake-pool,.region-slovo .stake-user,.region-slovo .stake-metrics,.region-slovo .stake-assets,.region-slovo .stake-actions,.region-slovo .stake-queue,.region-slovo .stake-risks{border-color:#1C1B33;border-radius:18px;overflow:hidden}
+.region-slovo .stake-metrics article,.region-slovo .stake-assets article,.region-slovo .stake-actions>article,.region-slovo .stake-queue-list,.region-slovo .stake-queue .stake-empty{border-color:rgba(28,27,51,.18)}
+.region-slovo .stake-pool>div:first-child>span,.region-slovo .stake-section-heading>span,.region-slovo .stake-risks>span,.region-slovo .stake-actions article>span,.region-slovo .stake-assets span,.region-slovo .stake-metrics span{color:#0D6E60}
+.region-slovo .stake-app button:focus-visible,.region-slovo .stake-app input:focus-visible,.region-slovo .stake-app a:focus-visible{outline-color:#0D6E60}
+
+@media(max-width:800px){
+  .slovo-header{gap:12px;flex-wrap:wrap}
+  .slovo-header nav{order:3;flex-basis:100%;justify-content:space-between;margin:0;padding:10px 0;font-size:1rem}
+  .slovo-language{margin-left:auto}
+  .slovo-hero{padding:55px 6% 50px}
+  .slovo-hero h1{font-size:clamp(2.4rem,10vw,4rem)}
+  .slovo-hero-intro{font-size:1.1rem}
+  .slovo-intro,.slovo-journal,.slovo-community{padding:55px 6%}
+  .slovo-staking{padding:55px 6%}
+  .slovo-staking-grid{grid-template-columns:1fr;gap:26px}
+  .slovo-paths,.region-slovo .feed-grid,.slovo-community-links,.region-slovo .contributors-grid{grid-template-columns:1fr}
+  .region-slovo .feed-card-featured{grid-column:auto}
+  .slovo-section-head{display:block}
+  .slovo-footer nav{flex-wrap:wrap}
+}
