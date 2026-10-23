@@ -39,6 +39,13 @@ type PageMetadataInput = {
   publishedTime?: string;
 };
 
+/** Per-region favicon, resolved per request by page metadata so one deployment can preview other regions safely. */
+function regionIcons(region: RegionalConfig) {
+  return region.key === "slovo"
+    ? { icon: "/brand/slovo/mark-32.png", shortcut: "/brand/slovo/mark-32.png", apple: "/brand/slovo/mark-128.png" }
+    : { icon: "/favicon.svg", shortcut: "/favicon.svg" };
+}
+
 export function regionalMetadata(region: RegionalConfig, { title, description, path = "/", type = "website", publishedTime }: PageMetadataInput): Metadata {
   const image = regionShareImage(region);
   const url = `${siteOrigin(region)}${path}`;
@@ -47,6 +54,7 @@ export function regionalMetadata(region: RegionalConfig, { title, description, p
     title,
     description,
     alternates: { canonical: url },
+    icons: regionIcons(region),
     openGraph: { title, description, url, type, siteName: region.wordmark, images: [{ url: image }], ...(publishedTime ? { publishedTime } : {}) },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };

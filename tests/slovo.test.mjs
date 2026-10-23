@@ -59,9 +59,17 @@ test("SLOVO locale switching is wired through config, shell, and fonts", async (
 });
 
 test("SLOVO assets and deployment registry are present", async () => {
-  for (const asset of ["logo-mark.svg", "logo-og.png"]) {
+  for (const asset of ["mark-32.png", "mark-128.png", "mark-256.png", "mark-white-256.png", "logo-og.png"]) {
     assert.ok((await readFile(new URL(`../public/brand/slovo/${asset}`, import.meta.url))).length > 100);
   }
+  const mark = await readFile(new URL("../app/components/slovo-mark.tsx", import.meta.url), "utf8");
+  assert.match(mark, /mark-128\.png/);
+  // favicon switching must be per-request region, not deployment-wide: root layout stays global
+  const layout = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  assert.ok(!layout.includes("/brand/slovo/"));
+  const meta = await readFile(new URL("../app/lib/page-metadata.ts", import.meta.url), "utf8");
+  assert.match(meta, /region\.key === "slovo"[\s\S]*?mark-32\.png/);
+  assert.match(meta, /icon: "\/favicon\.svg", shortcut: "\/favicon\.svg"/);
   const { deploymentRegions } = await import("../config/regions.ts");
   assert.equal(deploymentRegions.slovo.siteName, "Slovo");
   assert.equal(deploymentRegions.slovo.intendedDomain, "slovohub.xyz");
