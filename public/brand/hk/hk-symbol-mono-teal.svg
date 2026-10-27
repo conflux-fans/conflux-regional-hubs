@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Conflux HongKong Community symbol, monochrome teal</title>
+  <desc id="desc">Single-color version of the harbor mark for stamps, engraving, and one-color print.</desc>
+  <g fill="none" stroke="#087e8b" stroke-linecap="round">
+    <path stroke-width="8.5" d="M33.09 11.28A20.75 20.75 0 1 0 52.72 30.91"/>
+    <path stroke-width="5.5" d="M21.4 34Q32 24.5 42.6 34"/>
+    <path stroke-width="4.5" d="M25.5 41Q32 36.4 38.5 41"/>
+  </g>
+  <circle cx="46.67" cy="17.33" r="4.4" fill="#087e8b"/>
+</svg>
