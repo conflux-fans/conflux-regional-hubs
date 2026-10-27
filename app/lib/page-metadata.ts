@@ -5,12 +5,14 @@ const shareImages: Partial<Record<RegionalConfig["key"], string>> = {
   africa: "/brand/kudi-hub/kudi-hub-symbol-1024.png",
   latam: "/brand/caudal/logo-blue.png",
   slovo: "/brand/slovo/logo-og.png",
+  hk: "/brand/hk/hk-logo-og.png",
 };
 
 const htmlLanguages: Partial<Record<RegionalConfig["key"], string>> = {
   africa: "en",
   korea: "ko",
   latam: "es",
+  hk: "zh-Hant",
 };
 
 export function regionShareImage(region: RegionalConfig) {
@@ -41,9 +43,11 @@ type PageMetadataInput = {
 
 /** Per-region favicon, resolved per request by page metadata so one deployment can preview other regions safely. */
 function regionIcons(region: RegionalConfig) {
-  return region.key === "slovo"
-    ? { icon: "/brand/slovo/mark-32.png", shortcut: "/brand/slovo/mark-32.png", apple: "/brand/slovo/mark-128.png" }
-    : { icon: "/favicon.svg", shortcut: "/favicon.svg" };
+  if (region.key === "slovo")
+    return { icon: "/brand/slovo/mark-32.png", shortcut: "/brand/slovo/mark-32.png", apple: "/brand/slovo/mark-128.png" };
+  if (region.key === "hk")
+    return { icon: "/brand/hk/hk-mark-32.png", shortcut: "/brand/hk/hk-mark-32.png", apple: "/brand/hk/hk-mark-180.png" };
+  return { icon: "/favicon.svg", shortcut: "/favicon.svg" };
 }
 
 export function regionalMetadata(region: RegionalConfig, { title, description, path = "/", type = "website", publishedTime }: PageMetadataInput): Metadata {

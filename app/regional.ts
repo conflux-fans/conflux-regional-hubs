@@ -1,4 +1,4 @@
-export type RegionKey = "africa" | "korea" | "latam" | "slovo";
+export type RegionKey = "africa" | "hk" | "korea" | "latam" | "slovo";
 
 export type RegionalArticleSource = {
   format: "json" | "rss";
@@ -14,7 +14,7 @@ export type RegionalContributorProfile = {
 };
 
 export type RegionalConfig = {
-  locale?: "es" | "en" | "ru" | "uk";
+  locale?: "es" | "en" | "ru" | "uk" | "zh-Hant";
   uiCopy?: Record<string, string>;
   seo: { title: string; description: string };
   key: RegionKey;
@@ -268,9 +268,48 @@ export const regions: Record<RegionKey, RegionalConfig> = {
       },
     ],
   },
+  hk: {
+    key: "hk",
+    seo: {
+      title: "Conflux HongKong Community — 香港的 Conflux 社群",
+      description: "香港的 Conflux 社群樞紐:文章、社群與 CFX 質押,一站式掌握。",
+    },
+    code: "HK",
+    name: "Hong Kong",
+    wordmark: "Conflux HongKong Community",
+    logoStyle: "monogram",
+    domain: "confluxhk.hk",
+    language: "繁體中文",
+    locale: "zh-Hant",
+    accent: "#087e8b",
+    secondary: "#b8f2e6",
+    tertiary: "#ff9f68",
+    onAccent: "#ffffff",
+    surface: "#eef7f4",
+    headline: "維港兩岸,共建 Conflux。",
+    intro: "Conflux HongKong Community 是香港的 Conflux 社群樞紐:在這裏閱讀 Conflux 文章、參與社群,並瞭解如何透過質押 CFX 參與網絡。",
+    heroEyebrow: "CONFLUX HONGKONG COMMUNITY · HK",
+    journalLabel: "文章",
+    journalTitle: "來自香港社群的 Conflux 觀點",
+    journalEyebrow: "文章 / CONFLUX HK",
+    stakeLabel: "質押 CFX",
+    stakeEyebrow: "社群質押",
+    stakeHeading: "質押 CFX,支持 Conflux 網絡。",
+    stakeIntro: "瞭解如何質押 CFX,與香港社群一起參與 Conflux 網絡。",
+    footerText: "Conflux HongKong Community — 社群自發維護,非 Conflux 官方項目。",
+    communityLabel: "社群",
+    localModuleEyebrow: "維港 × 網絡 × 社群",
+    localModuleTitle: "一座港口,一個網絡。",
+    localModuleText: "香港的 Conflux 社群:開發者、節點營運者與用戶,一起學習、建設與質押。",
+    motif: "grid",
+    layout: "editorial",
+    articleSource: { format: "json", url: "" },
+    communityLinks: [],
+    contributors: [],
+  },
 };
 
 export function resolveRegion(value: string | string[] | undefined): RegionKey {
   const candidate = Array.isArray(value) ? value[0] : value || process.env.NEXT_PUBLIC_REGION_SLUG;
-  return candidate === "korea" || candidate === "latam" || candidate === "slovo" ? candidate : "africa";
+  return candidate === "korea" || candidate === "latam" || candidate === "slovo" || candidate === "hk" ? candidate : "africa";
 }

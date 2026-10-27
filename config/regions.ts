@@ -23,6 +23,12 @@ export const deploymentRegions = {
     presentation: "slovo-literary",
     defaultLocale: "ru",
   },
+  hk: {
+    siteName: "Conflux HongKong Community",
+    intendedDomain: "confluxhk.hk",
+    presentation: "hk-harbor",
+    defaultLocale: "zh-Hant",
+  },
 } as const;
 
 export type DeploymentRegionSlug = keyof typeof deploymentRegions;

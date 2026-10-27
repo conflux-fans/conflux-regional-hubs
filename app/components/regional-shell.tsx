@@ -80,12 +80,11 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
 
   return (
     <div className={`regional-site region-${region.key} layout-${region.layout}`} style={style}>
-      <div className="regional-demo-bar"><div className="v2-wrap"><span>KUDI HUB / AFRICA REGIONAL WEBSITE</span><b>{region.domain}</b></div></div>
       <header className="v2-header">
         <div className="v2-wrap v2-header-inner">
           <Link href={`/${suffix}`} className="v2-brand" aria-label={`${region.wordmark} home`}>
             {region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}
-            <span><strong>{region.wordmark}</strong><small>CONFLUX AFRICA COMMUNITY</small></span>
+            <span><strong>{region.wordmark}</strong><small>{region.key === "africa" ? "CONFLUX AFRICA COMMUNITY" : `CONFLUX ${region.wordmark.replace(/^Conflux /i, "").toUpperCase()} COMMUNITY`}</small></span>
           </Link>
           <nav aria-label="Main navigation">
             <Link href={`/journal${suffix}`}>{region.journalLabel}</Link>
@@ -97,7 +96,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
       </header>
       {children}
       <footer className="v2-footer">
-        <div className="v2-wrap"><div className="v2-footer-brand">{region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}<strong>{region.wordmark}</strong></div><p>{region.domain} · {region.footerText}</p><small>© 2026 · Kudi Hub</small></div>
+        <div className="v2-wrap"><div className="v2-footer-brand">{region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}<strong>{region.wordmark}</strong></div><p>{region.domain} · {region.footerText}</p><small>© 2026 · {region.wordmark}</small></div>
       </footer>
     </div>
   );

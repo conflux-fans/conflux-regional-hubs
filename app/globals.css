@@ -11,10 +11,6 @@ button, input { font: inherit; }
 .v2-kicker { margin: 0 0 22px; font: 700 9px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
 .v2-kicker-light { color: var(--region-accent); }
 .regional-site { min-height: 100vh; background: var(--region-surface); }
-.regional-demo-bar { border-bottom: 1px solid var(--ink); background: var(--region-secondary); }
-.regional-demo-bar > div { min-height: 31px; display: flex; align-items: center; gap: 18px; font: 7px var(--font-mono); letter-spacing: .12em; }
-.regional-demo-bar b { font-weight: 750; }
-.regional-demo-bar a { margin-left: auto; padding-bottom: 2px; border-bottom: 1px solid currentColor; }
 
 .v2-header { position: relative; z-index: 20; border-bottom: 1px solid var(--ink); }
 .v2-header-inner { height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
@@ -86,7 +82,7 @@ button, input { font: inherit; }
 .regional-signature-sun { background: var(--region-secondary); border-radius: 210px 0 0 0; }
 .regional-signature-sun:after { content: ""; position: absolute; right: 7%; top: 45px; width: 170px; height: 170px; border: 28px double var(--region-tertiary); border-radius: 50%; opacity: .65; }
 .regional-signature-grid { background-color: var(--white); background-image: linear-gradient(rgba(17,22,23,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(17,22,23,.1) 1px, transparent 1px); background-size: 34px 34px; }
-.regional-signature-grid:after { content: "서울"; position: absolute; right: 7%; top: 38px; padding: 13px 18px; background: var(--region-accent); border: 1px solid var(--ink); font-size: 28px; font-weight: 800; }
+.region-korea .regional-signature-grid:after { content: "서울"; position: absolute; right: 7%; top: 38px; padding: 13px 18px; background: var(--region-accent); border: 1px solid var(--ink); font-size: 28px; font-weight: 800; }
 .region-korea .v2-hero { gap: 2vw; }
 .region-korea .v2-hero-copy h1 { max-width: 620px; font-weight: 720; letter-spacing: -.055em; line-height: .94; }
 .region-korea .v2-pillar { border-radius: 0; }
@@ -96,7 +92,6 @@ button, input { font: inherit; }
 
 /* PUPURice: a code-owned regional expression built from the Africa brief. */
 .region-africa { --pupu-night: #071211; --pupu-bronze: #c78b46; background: #0a1514; }
-.region-africa .regional-demo-bar { background: var(--region-secondary); color: var(--ink); }
 .region-africa .v2-header { background: var(--pupu-night); color: var(--white); border-color: rgba(255,255,255,.24); }
 .region-africa .v2-header .v2-mark { color: var(--ink); border-color: var(--region-secondary); background: var(--region-secondary); box-shadow: 0 0 0 5px rgba(201,255,99,.12); }
 .region-africa .region-picker summary { border-color: rgba(255,255,255,.55); }
@@ -749,8 +744,6 @@ button, input { font: inherit; }
   .v2-wrap { width: min(100% - 28px, 1280px); }
   .v2-header-inner { height: 68px; grid-template-columns: 1fr auto; }
   .v2-header nav { display: none; }
-  .regional-demo-bar > div { min-height: 38px; }
-  .regional-demo-bar b { display: none; }
   .v2-hero { min-height: auto; gap: 0; }
   .v2-hero-copy { min-height: 480px; padding-block: 70px 55px; }
   .v2-hero-copy h1 { font-size: 64px; }
