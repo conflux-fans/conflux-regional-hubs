@@ -47,3 +47,5 @@ next-env.d.ts
 admin-account.txt
 how-to-deploy.txt
 .workbuddy
+# Uploaded article media (served via /api/media)
+/data/uploads/

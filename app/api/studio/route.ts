@@ -3,6 +3,7 @@ import { articleValidationError } from "../../lib/article-validation";
 import { caudalCopy } from "../../caudal-copy";
 import { getAuthorizedEditor } from "../../lib/editor-auth";
 import { saveCaudalCopy } from "../../lib/caudal-copy";
+import { saveUploadedImage } from "../../lib/media-storage";
 import { createVibePrompt, deleteLocalArticle, saveLocalArticle, saveRegionalBrief, saveRegionalContent, saveRegionalContributors, saveRegionalModules, type EditableRegionalContent, type RegionalBriefInput, type RegionalContributor, type RegionalModule } from "../../lib/content";
 import { resolveRegion } from "../../regional";
 
@@ -12,6 +13,21 @@ function text(value: unknown, max: number) {
 
 export async function POST(request: Request) {
   const editor = await getAuthorizedEditor();
+
+  if ((request.headers.get("content-type") ?? "").includes("multipart/form-data")) {
+    const form = await request.formData();
+    if (form.get("action") !== "upload-image") {
+      return NextResponse.json({ error: "Unknown action." }, { status: 400 });
+    }
+    const file = form.get("file");
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "Choose an image file to upload." }, { status: 400 });
+    }
+    const stored = await saveUploadedImage(file);
+    if ("error" in stored) return NextResponse.json({ error: stored.error }, { status: 400 });
+    return NextResponse.json({ url: stored.url });
+  }
+
   const payload = await request.json() as Record<string, unknown>;
   const region = resolveRegion(typeof payload.region === "string" ? payload.region : undefined);
 
