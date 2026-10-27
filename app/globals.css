@@ -82,7 +82,7 @@ button, input { font: inherit; }
 .regional-signature-sun { background: var(--region-secondary); border-radius: 210px 0 0 0; }
 .regional-signature-sun:after { content: ""; position: absolute; right: 7%; top: 45px; width: 170px; height: 170px; border: 28px double var(--region-tertiary); border-radius: 50%; opacity: .65; }
 .regional-signature-grid { background-color: var(--white); background-image: linear-gradient(rgba(17,22,23,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(17,22,23,.1) 1px, transparent 1px); background-size: 34px 34px; }
-.regional-signature-grid:after { content: "서울"; position: absolute; right: 7%; top: 38px; padding: 13px 18px; background: var(--region-accent); border: 1px solid var(--ink); font-size: 28px; font-weight: 800; }
+.region-korea .regional-signature-grid:after { content: "서울"; position: absolute; right: 7%; top: 38px; padding: 13px 18px; background: var(--region-accent); border: 1px solid var(--ink); font-size: 28px; font-weight: 800; }
 .region-korea .v2-hero { gap: 2vw; }
 .region-korea .v2-hero-copy h1 { max-width: 620px; font-weight: 720; letter-spacing: -.055em; line-height: .94; }
 .region-korea .v2-pillar { border-radius: 0; }

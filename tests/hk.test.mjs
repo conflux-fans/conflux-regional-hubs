@@ -41,6 +41,12 @@ test("HK metadata, favicon, share image, and studio prompt are wired", async () 
   assert.equal(deploymentRegions.hk.defaultLocale, "zh-Hant");
 });
 
+test("HK does not inherit Korea-only decorations", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const seoul = css.split("\n").find((line) => line.includes("서울"));
+  assert.ok(seoul && seoul.trim().startsWith(".region-korea"), "the Seoul stamp must stay scoped to .region-korea");
+});
+
 test("HK stays isolated: africa, latam, and slovo configs are untouched", async () => {
   const { regions, resolveRegion } = await import("../app/regional.ts");
   assert.equal(resolveRegion("africa"), "africa");
