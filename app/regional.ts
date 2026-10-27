@@ -229,7 +229,7 @@ export const regions: Record<RegionKey, RegionalConfig> = {
     tertiary: "#C9C4F2",
     onAccent: "#ffffff",
     surface: "#F4EFE6",
-    headline: "Слово, которое держат.",
+    headline: "Слово, которое держат",
     intro: "SLOVO — пространство Web3-сообщества Conflux. Новости, идеи, истории участников и возможности экосистемы Conflux — в одном месте.",
     heroEyebrow: "СООБЩЕСТВО CONFLUX · RU / UA",
     journalLabel: "Истории",

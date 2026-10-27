@@ -10,7 +10,7 @@ test("SLOVO is registered in the shared regional registry", async () => {
   assert.equal(regions.slovo.wordmark, "Slovo");
   assert.equal(regions.slovo.domain, "slovohub.xyz");
   assert.equal(regions.slovo.locale, "ru");
-  assert.equal(regions.slovo.headline, "Слово, которое держат.");
+  assert.equal(regions.slovo.headline, "Слово, которое держат");
   assert.equal(regions.slovo.journalLabel, "Истории");
   assert.equal(regions.slovo.stakeLabel, "Стейкинг CFX");
   assert.equal(regions.slovo.contributors.length, 2);
@@ -20,7 +20,7 @@ test("SLOVO is registered in the shared regional registry", async () => {
 
 test("SLOVO copy carries Ukrainian as an equal language", async () => {
   const { slovoCopy } = await import("../app/slovo-copy.ts");
-  assert.equal(slovoCopy["uk.headline"], "Слово, яке тримають.");
+  assert.equal(slovoCopy["uk.headline"], "Слово, яке тримають");
   assert.equal(slovoCopy["uk.journalLabel"], "Історії");
   assert.equal(slovoCopy["uk.stakeLabel"], "Стейкінг CFX");
   for (const field of ["headline", "intro", "footerText", "communityLabel", "c1Name", "c1Full", "c2Name", "c2Full"]) {

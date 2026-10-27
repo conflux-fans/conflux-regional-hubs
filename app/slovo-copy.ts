@@ -12,7 +12,7 @@ export const slovoCopy: Record<string,string> = {
   "ru.teamTitle":"Люди, которые держат слово.", "uk.teamTitle":"Люди, які тримають слово.",
   "ru.teamIntro":"Команда сообщества SLOVO.", "uk.teamIntro":"Команда спільноти SLOVO.",
   // Ukrainian overrides applied when the slovo-locale cookie selects UA.
-  "uk.headline":"Слово, яке тримають.",
+  "uk.headline":"Слово, яке тримають",
   "uk.intro":"SLOVO — простір Web3-спільноти Conflux. Новини, ідеї, історії учасників і можливості екосистеми Conflux — в одному місці.",
   "uk.heroEyebrow":"СПІЛЬНОТА CONFLUX · RU / UA",
   "uk.journalLabel":"Історії",
