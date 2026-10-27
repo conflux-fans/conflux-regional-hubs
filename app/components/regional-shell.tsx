@@ -80,7 +80,6 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
 
   return (
     <div className={`regional-site region-${region.key} layout-${region.layout}`} style={style}>
-      <div className="regional-demo-bar"><div className="v2-wrap"><span>KUDI HUB / AFRICA REGIONAL WEBSITE</span><b>{region.domain}</b></div></div>
       <header className="v2-header">
         <div className="v2-wrap v2-header-inner">
           <Link href={`/${suffix}`} className="v2-brand" aria-label={`${region.wordmark} home`}>

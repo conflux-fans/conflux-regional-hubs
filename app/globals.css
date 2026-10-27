@@ -11,10 +11,6 @@ button, input { font: inherit; }
 .v2-kicker { margin: 0 0 22px; font: 700 9px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
 .v2-kicker-light { color: var(--region-accent); }
 .regional-site { min-height: 100vh; background: var(--region-surface); }
-.regional-demo-bar { border-bottom: 1px solid var(--ink); background: var(--region-secondary); }
-.regional-demo-bar > div { min-height: 31px; display: flex; align-items: center; gap: 18px; font: 7px var(--font-mono); letter-spacing: .12em; }
-.regional-demo-bar b { font-weight: 750; }
-.regional-demo-bar a { margin-left: auto; padding-bottom: 2px; border-bottom: 1px solid currentColor; }
 
 .v2-header { position: relative; z-index: 20; border-bottom: 1px solid var(--ink); }
 .v2-header-inner { height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
@@ -96,7 +92,6 @@ button, input { font: inherit; }
 
 /* PUPURice: a code-owned regional expression built from the Africa brief. */
 .region-africa { --pupu-night: #071211; --pupu-bronze: #c78b46; background: #0a1514; }
-.region-africa .regional-demo-bar { background: var(--region-secondary); color: var(--ink); }
 .region-africa .v2-header { background: var(--pupu-night); color: var(--white); border-color: rgba(255,255,255,.24); }
 .region-africa .v2-header .v2-mark { color: var(--ink); border-color: var(--region-secondary); background: var(--region-secondary); box-shadow: 0 0 0 5px rgba(201,255,99,.12); }
 .region-africa .region-picker summary { border-color: rgba(255,255,255,.55); }
@@ -749,8 +744,6 @@ button, input { font: inherit; }
   .v2-wrap { width: min(100% - 28px, 1280px); }
   .v2-header-inner { height: 68px; grid-template-columns: 1fr auto; }
   .v2-header nav { display: none; }
-  .regional-demo-bar > div { min-height: 38px; }
-  .regional-demo-bar b { display: none; }
   .v2-hero { min-height: auto; gap: 0; }
   .v2-hero-copy { min-height: 480px; padding-block: 70px 55px; }
   .v2-hero-copy h1 { font-size: 64px; }
