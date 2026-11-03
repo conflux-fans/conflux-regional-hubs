@@ -20,6 +20,25 @@ test("Caudal assets and handoff are present", async () => {
   assert.match(await readFile(new URL("../app/caudal-handoff/page.tsx", import.meta.url), "utf8"), /Production connections/);
 });
 
+test("Caudal footer keeps the developer handoff out of visitor navigation", async () => {
+  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
+  const latamShell = shell.slice(shell.indexOf('region.key === "latam"'), shell.indexOf('region.key === "slovo"'));
+  const footer = latamShell.slice(latamShell.indexOf("caudal-footer"));
+  assert.match(footer, /CAUDAL/);
+  assert.match(footer, /\/studio/, "manager login stays in the footer as the team entrance");
+  assert.doesNotMatch(footer, /caudal-handoff/, "developer handoff must stay out of the footer");
+});
+
+test("Caudal social fallback card stays readable on its accent background", async () => {
+  const css = await readFile(new URL("../app/caudal.css", import.meta.url), "utf8");
+  const muted = css.indexOf(".region-latam .social-item small{color:#555}");
+  const fallbackSmall = css.indexOf(".region-latam .social-profile-fallback small{color:rgba(255,255,255,.86)}");
+  const fallbackTag = css.indexOf(".region-latam .social-profile-fallback>span{color:#fadbe5}");
+  assert.ok(muted > -1, "muted social item text rule should exist");
+  assert.ok(fallbackSmall > muted, "fallback small text must come after the muted rule to win the specificity tie");
+  assert.ok(fallbackTag > -1, "fallback platform tag must be readable on the accent background");
+});
+
 test("LATAM module defaults exclude events and newsletter and preserve social connection boundaries", async () => {
   const { regions } = await import("../app/regional.ts");
   const source = await readFile(new URL("../app/lib/content.ts", import.meta.url), "utf8");
