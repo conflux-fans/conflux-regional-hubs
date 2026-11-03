@@ -29,6 +29,16 @@ test("Caudal footer keeps internal entrances out of visitor navigation", async (
   assert.doesNotMatch(footer, /caudal-handoff/, "developer handoff must stay out of the footer");
 });
 
+test("Caudal social fallback card stays readable on its accent background", async () => {
+  const css = await readFile(new URL("../app/caudal.css", import.meta.url), "utf8");
+  const muted = css.indexOf(".region-latam .social-item small{color:#555}");
+  const fallbackSmall = css.indexOf(".region-latam .social-profile-fallback small{color:rgba(255,255,255,.86)}");
+  const fallbackTag = css.indexOf(".region-latam .social-profile-fallback>span{color:#fadbe5}");
+  assert.ok(muted > -1, "muted social item text rule should exist");
+  assert.ok(fallbackSmall > muted, "fallback small text must come after the muted rule to win the specificity tie");
+  assert.ok(fallbackTag > -1, "fallback platform tag must be readable on the accent background");
+});
+
 test("LATAM module defaults exclude events and newsletter and preserve social connection boundaries", async () => {
   const { regions } = await import("../app/regional.ts");
   const source = await readFile(new URL("../app/lib/content.ts", import.meta.url), "utf8");
