@@ -38,7 +38,10 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
       <div id="caudal-main">{children}</div>
       <footer className="caudal-footer">
         <div><strong>CAUDAL</strong><p>{region.footerText}</p></div>
-        {/* Manager and developer entrances stay URL-only: the footer is visitor-facing. */}
+        <nav>
+          <Link href={`/studio${suffix}`}>{region.locale === "en" ? "Manager login" : "Acceso de gestión"}</Link>
+        </nav>
+        {/* The developer handoff guide stays URL-only: it is not visitor-facing. */}
         <small>{region.locale === "en" ? "Staking transactions are not enabled." : "Las transacciones de staking no están habilitadas."}</small>
       </footer>
     </div>

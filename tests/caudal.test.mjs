@@ -20,12 +20,12 @@ test("Caudal assets and handoff are present", async () => {
   assert.match(await readFile(new URL("../app/caudal-handoff/page.tsx", import.meta.url), "utf8"), /Production connections/);
 });
 
-test("Caudal footer keeps internal entrances out of visitor navigation", async () => {
+test("Caudal footer keeps the developer handoff out of visitor navigation", async () => {
   const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
   const latamShell = shell.slice(shell.indexOf('region.key === "latam"'), shell.indexOf('region.key === "slovo"'));
   const footer = latamShell.slice(latamShell.indexOf("caudal-footer"));
   assert.match(footer, /CAUDAL/);
-  assert.doesNotMatch(footer, /\/studio/, "manager login must stay out of the footer");
+  assert.match(footer, /\/studio/, "manager login stays in the footer as the team entrance");
   assert.doesNotMatch(footer, /caudal-handoff/, "developer handoff must stay out of the footer");
 });
 
