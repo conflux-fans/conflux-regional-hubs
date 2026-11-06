@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Markdown } from "../lib/markdown";
 import type { LocalArticle } from "../lib/content";
 import type { RegionKey } from "../regional";
+import { VideoModal } from "./video-modal";
 
 type DraftState = { id?: number; slug?: string; title: string; excerpt: string; body: string; status: "draft" | "published" };
 type Notice = { message: string; tone: "ok" | "error"; url?: string };
@@ -16,7 +17,9 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
   const [view, setView] = useState<"list" | "editor">("list");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [preview, setPreview] = useState(true);
+  const [videoModal, setVideoModal] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function startArticle() {
     setDraft(blank);
@@ -39,6 +42,33 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
     const next = `${draft.body.slice(0, start)}${before}${selected}${after}${draft.body.slice(end)}`;
     setDraft((current) => ({ ...current, body: next }));
     requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + before.length, start + before.length + selected.length); });
+  }
+
+  function insertText(value: string) {
+    const field = bodyRef.current;
+    if (!field) { setDraft((current) => ({ ...current, body: current.body + value })); return; }
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    setDraft((current) => ({ ...current, body: `${current.body.slice(0, start)}${value}${current.body.slice(end)}` }));
+    requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + value.length, start + value.length); });
+  }
+
+  async function uploadImage(file: File) {
+    if (file.size > 2 * 1024 * 1024) { setNotice({ message: "Images must be 2 MB or smaller.", tone: "error" }); return; }
+    setNotice({ message: "Uploading image…", tone: "ok" });
+    try {
+      const form = new FormData();
+      form.set("action", "upload-image");
+      form.set("file", file);
+      const response = await fetch("/api/studio", { method: "POST", body: form });
+      const data = await response.json() as { error?: string; url?: string };
+      if (!response.ok || !data.url) { setNotice({ message: data.error || "Could not upload the image.", tone: "error" }); return; }
+      const alt = file.name.replace(/\.[^.]+$/, "").replace(/[[\]]/g, "").slice(0, 80) || "image";
+      insertText(`\n\n![${alt}](${data.url})\n\n`);
+      setNotice({ message: "Image added to the article body.", tone: "ok" });
+    } catch {
+      setNotice({ message: "Could not upload the image. Check your connection and try again.", tone: "error" });
+    }
   }
 
   async function save(nextStatus: "draft" | "published") {
@@ -105,12 +135,16 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
         <button type="button" onClick={() => insert("[", "](https://example.com)", "link text")}>Link</button>
         <button type="button" onClick={() => insert("- ", "", "list item")}>• List</button>
         <button type="button" onClick={() => insert("> ", "", "quote")}>Quote</button>
+        <button type="button" onClick={() => fileRef.current?.click()}>Image ↑</button>
+        <button type="button" onClick={() => setVideoModal(true)}>Video ▶</button>
         <button type="button" className={preview ? "active" : ""} onClick={() => setPreview((value) => !value)}>{preview ? "Hide preview" : "Show preview"}</button>
       </div>
-      <label className="setup-field"><span>Article body (Markdown)</span><textarea ref={bodyRef} className="studio-body markdown-source" value={draft.body} onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))} placeholder={"Start writing…\n\n## Add a heading\nUse **bold**, *italic*, and [links](https://example.com)."} rows={16} /></label>
+      <label className="setup-field"><span>Article body (Markdown)</span><textarea ref={bodyRef} className="studio-body markdown-source" value={draft.body} onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))} placeholder={"Start writing…\n\n## Add a heading\nUse **bold**, *italic*, and [links](https://example.com).\nUpload images with the Image button, or paste a video link (YouTube, Vimeo, Bilibili, RuTube, VK) on its own line to embed it."} rows={16} /></label>
+      <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} />
       {preview && <section className="markdown-preview"><span>LIVE PREVIEW</span><div className="article-body">{draft.body ? <Markdown source={draft.body} /> : <p>Your formatted article preview appears here.</p>}</div></section>}
       <div className={`journal-editor-actions ${draft.status === "published" ? "published" : ""}`}>{draft.status === "draft" && <button type="button" onClick={() => save("draft")}>Save draft</button>}<button className="v2-button v2-button-accent" type="button" onClick={() => save("published")}>{draft.status === "published" ? "Update published article" : "Publish to Crypto news"} <span>↗</span></button></div>
       {notice && <output className={`studio-status ${notice.tone}`}>{notice.message}{notice.url && <> <Link href={notice.url}>View article ↗</Link></>}</output>}
+      {videoModal && <VideoModal onClose={() => setVideoModal(false)} onInsert={(url) => insertText(`\n\n${url}\n\n`)} />}
     </section>
   </div>;
 }
