@@ -17,3 +17,10 @@
 .region-latam .stake-risks p{color:#dfe6f7}
 .region-latam .v2-wallet-card span{color:#2051eb;font:700 10px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
 .region-latam .stake-queues{margin-top:24px}
+.region-latam .video-modal{border-radius:22px;border-color:#e7e7e3;box-shadow:0 20px 42px -20px rgba(32,81,235,.4)}
+.region-latam .video-modal > header{border-bottom-color:#e7e7e3}
+.region-latam .video-modal > header > button{border-radius:50%;border-color:#d9d9d5;background:#f4f5f8}
+.region-latam .video-modal .setup-field input{border-radius:12px;border-color:#d9d9d5}
+.region-latam .video-modal .video-modal-status{border-radius:12px}
+.region-latam .video-modal-actions > button:first-child{border-radius:12px;border-color:#d9d9d5;background:#f4f5f8}
+.region-latam .video-modal .v2-button{border-radius:14px;border-color:transparent}

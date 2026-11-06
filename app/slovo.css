@@ -127,3 +127,10 @@
   .slovo-section-head{display:block}
   .slovo-footer nav{flex-wrap:wrap}
 }
+.region-slovo .video-modal{border-radius:18px;border:2px solid var(--slovo-ink,#1C1B33)}
+.region-slovo .video-modal h2{font-family:var(--font-slovo-serif),Georgia,serif;font-weight:600}
+.region-slovo .video-modal > header{border-bottom:2px solid var(--slovo-ink,#1C1B33)}
+.region-slovo .video-modal .setup-field input{border-radius:12px;border-color:#1C1B33;background:#FBF8F1}
+.region-slovo .video-modal .video-modal-status{border-radius:10px}
+.region-slovo .video-modal-actions > button:first-child{border-radius:10px;background:#FBF8F1}
+.region-slovo .video-modal .v2-button{border-radius:12px;border-color:#1C1B33}

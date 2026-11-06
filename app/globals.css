@@ -1416,10 +1416,10 @@ button, input { font: inherit; }
 .wallet-modal-empty p { margin: 7px 0 0; color: #596263; font-size: 12px; line-height: 1.55; }
 .wallet-modal-error { display: block; margin: 0 24px 24px; padding: 13px 15px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; font-size: 12px; line-height: 1.5; }
 .wallet-modal button:focus-visible { outline: 3px solid #2444c8; outline-offset: 3px; }
-.video-modal { position: fixed; inset: 0; margin: auto; width: min(100% - 32px, 560px); max-height: min(760px, calc(100dvh - 32px)); padding: 0; overflow: auto; background: #fff; border: 1px solid var(--ink); border-radius: 0; color: var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
+.video-modal { position: fixed; inset: 0; margin: auto; width: min(100% - 32px, 560px); max-height: min(760px, calc(100dvh - 32px)); padding: 0; overflow: auto; background: var(--region-surface, #fff); border: 1px solid var(--ink); border-radius: 0; color: var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
 .video-modal::backdrop { background: rgba(8, 14, 14, .74); }
 .video-modal > header { padding: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--ink); }
-.video-modal > header span { color: #2444c8; font: 750 10px var(--font-mono); letter-spacing: .13em; }
+.video-modal > header span { color: var(--region-accent); font: 750 10px var(--font-mono); letter-spacing: .13em; }
 .video-modal h2 { margin: 9px 0 0; font-size: 34px; line-height: 1; }
 .video-modal > header > button { width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-size: 27px; line-height: 1; cursor: pointer; }
 .video-modal-body { padding: 20px 24px 24px; display: grid; gap: 16px; }
@@ -1432,7 +1432,7 @@ button, input { font: inherit; }
 .video-modal-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 .video-modal-actions > button:first-child { min-height: 44px; padding: 0 16px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font: 700 12px var(--font-sans); cursor: pointer; }
 .video-modal-actions .v2-button:disabled { cursor: not-allowed; opacity: .45; }
-.video-modal button:focus-visible { outline: 3px solid #2444c8; outline-offset: 3px; }
+.video-modal button:focus-visible { outline: 3px solid var(--region-accent); outline-offset: 3px; }
 .stake-network-warning { padding: 24px; background: #fff0ed; border: 1px solid #9c2f20; color: #742116; }
 .stake-network-warning b { font-size: 18px; }
 .stake-network-warning p { margin: 7px 0 0; font-size: 13px; line-height: 1.55; }
