@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Markdown } from "../lib/markdown";
 import type { LocalArticle } from "../lib/content";
 import type { RegionKey } from "../regional";
+import { VideoModal } from "./video-modal";
 
 type DraftState = { id?: number; slug?: string; title: string; excerpt: string; body: string; status: "draft" | "published" };
 type Notice = { message: string; tone: "ok" | "error"; url?: string };
@@ -16,6 +17,7 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
   const [view, setView] = useState<"list" | "editor">("list");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [preview, setPreview] = useState(true);
+  const [videoModal, setVideoModal] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -134,7 +136,7 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
         <button type="button" onClick={() => insert("- ", "", "list item")}>• List</button>
         <button type="button" onClick={() => insert("> ", "", "quote")}>Quote</button>
         <button type="button" onClick={() => fileRef.current?.click()}>Image ↑</button>
-        <button type="button" onClick={() => insertText("\n\nhttps://www.youtube.com/watch?v=\n\n")}>Video ▶</button>
+        <button type="button" onClick={() => setVideoModal(true)}>Video ▶</button>
         <button type="button" className={preview ? "active" : ""} onClick={() => setPreview((value) => !value)}>{preview ? "Hide preview" : "Show preview"}</button>
       </div>
       <label className="setup-field"><span>Article body (Markdown)</span><textarea ref={bodyRef} className="studio-body markdown-source" value={draft.body} onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))} placeholder={"Start writing…\n\n## Add a heading\nUse **bold**, *italic*, and [links](https://example.com).\nUpload images with the Image button, or paste a video link (YouTube, Vimeo, Bilibili, RuTube, VK) on its own line to embed it."} rows={16} /></label>
@@ -142,6 +144,7 @@ export function ArticleEditor({ region, initialArticles }: { region: RegionKey; 
       {preview && <section className="markdown-preview"><span>LIVE PREVIEW</span><div className="article-body">{draft.body ? <Markdown source={draft.body} /> : <p>Your formatted article preview appears here.</p>}</div></section>}
       <div className={`journal-editor-actions ${draft.status === "published" ? "published" : ""}`}>{draft.status === "draft" && <button type="button" onClick={() => save("draft")}>Save draft</button>}<button className="v2-button v2-button-accent" type="button" onClick={() => save("published")}>{draft.status === "published" ? "Update published article" : "Publish to Crypto news"} <span>↗</span></button></div>
       {notice && <output className={`studio-status ${notice.tone}`}>{notice.message}{notice.url && <> <Link href={notice.url}>View article ↗</Link></>}</output>}
+      {videoModal && <VideoModal onClose={() => setVideoModal(false)} onInsert={(url) => insertText(`\n\n${url}\n\n`)} />}
     </section>
   </div>;
 }
