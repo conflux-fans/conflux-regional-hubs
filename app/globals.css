@@ -1391,7 +1391,7 @@ button, input { font: inherit; }
 .stake-wallet-bar button { cursor: pointer; }
 .stake-wallet-bar .stake-connect-button { min-width: 160px; margin-left: auto; background: var(--ink); color: #fff; }
 .stake-wallet-bar output { width: 100%; color: #742116; font-size: 12px; }
-.wallet-modal { width: min(100% - 32px, 520px); max-height: min(720px, calc(100dvh - 32px)); padding: 0; overflow: auto; background: #fff; border: 1px solid var(--ink); border-radius: 0; color: var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
+.wallet-modal { position: fixed; inset: 0; margin: auto; width: min(100% - 32px, 520px); max-height: min(720px, calc(100dvh - 32px)); padding: 0; overflow: auto; background: #fff; border: 1px solid var(--ink); border-radius: 0; color: var(--ink); box-shadow: 12px 12px 0 var(--region-secondary); }
 .wallet-modal::backdrop { background: rgba(8, 14, 14, .74); }
 .wallet-modal > header { padding: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--ink); }
 .wallet-modal > header span { color: #2444c8; font: 750 10px var(--font-mono); letter-spacing: .13em; }
