@@ -17,6 +17,18 @@ test("HK is registered in the shared regional registry", async () => {
   assert.ok(Object.values(regions.hk).join(" ").includes("Conflux HongKong Community"));
 });
 
+test("HK header strapline says COMMUNITY once, not twice", async () => {
+  const { regions, brandStrapline } = await import("../app/regional.ts");
+  // The HK wordmark already ends in "Community"; composing "CONFLUX <WORDMARK> COMMUNITY"
+  // naively rendered "CONFLUX HONGKONG COMMUNITY COMMUNITY" in the shell header.
+  assert.equal(brandStrapline(regions.hk), "CONFLUX HONGKONG COMMUNITY");
+  assert.equal(brandStrapline(regions.latam), "CONFLUX CAUDAL COMMUNITY");
+  assert.equal(brandStrapline(regions.slovo), "CONFLUX SLOVO COMMUNITY");
+  assert.equal(brandStrapline(regions.africa), "CONFLUX AFRICA COMMUNITY");
+  const shell = await readFile(new URL("../app/components/regional-shell.tsx", import.meta.url), "utf8");
+  assert.ok(shell.includes("brandStrapline(region)"), "the generic shell must render the strapline via brandStrapline");
+});
+
 test("HK uses the shared generic v2 home: no presentation branch was added for it", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.ok(!page.includes('"hk"'));
