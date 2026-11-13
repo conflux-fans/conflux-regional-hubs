@@ -60,6 +60,28 @@ function fromRss(xml: string, limit?: number): RegionalArticle[] {
   });
 }
 
+export const JOURNAL_PAGE_SIZE = 9;
+
+/** Server-side pagination for the journal route: clamps ?page= into range and slices out one page. */
+export function journalPagination<T>(items: T[], requested: string | string[] | undefined) {
+  const pageCount = Math.max(1, Math.ceil(items.length / JOURNAL_PAGE_SIZE));
+  const raw = Number.parseInt(Array.isArray(requested) ? requested[0] ?? "" : requested ?? "", 10);
+  const page = Math.min(Number.isNaN(raw) || raw < 1 ? 1 : raw, pageCount);
+  return { page, pageCount, articles: items.slice((page - 1) * JOURNAL_PAGE_SIZE, page * JOURNAL_PAGE_SIZE) };
+}
+
+/** Page numbers to offer in the pager: all of them while few, otherwise a window around the current page. */
+export function pageNumbers(page: number, pageCount: number): Array<number | "gap"> {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  const middle = [page - 1, page, page + 1].filter((n) => n > 1 && n < pageCount);
+  const numbers: Array<number | "gap"> = [1];
+  if ((middle[0] ?? 1) > 2) numbers.push("gap");
+  numbers.push(...middle);
+  if ((middle[middle.length - 1] ?? pageCount) < pageCount - 1) numbers.push("gap");
+  numbers.push(pageCount);
+  return numbers;
+}
+
 export async function getRegionalArticles(region: RegionalConfig, limit?: number): Promise<RegionalArticle[]> {
   const local = (await getLocalArticles(region.key, limit)).map((article) => ({
     title: article.title,

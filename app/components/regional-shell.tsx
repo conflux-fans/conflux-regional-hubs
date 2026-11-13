@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import type { RegionalConfig } from "../regional";
+import { brandStrapline, type RegionalConfig } from "../regional";
 import { KudiLogo } from "./kudi-logo";
 import { CaudalLocale } from "./caudal-locale";
 import { SlovoMark } from "./slovo-mark";
@@ -84,7 +84,7 @@ export function RegionalShell({ region, children }: { region: RegionalConfig; ch
         <div className="v2-wrap v2-header-inner">
           <Link href={`/${suffix}`} className="v2-brand" aria-label={`${region.wordmark} home`}>
             {region.key === "africa" ? <KudiLogo /> : <span className={`v2-mark v2-mark-${region.logoStyle}`} data-mark={mark} aria-hidden="true"><i /><i /><i /></span>}
-            <span><strong>{region.wordmark}</strong><small>{region.key === "africa" ? "CONFLUX AFRICA COMMUNITY" : `CONFLUX ${region.wordmark.replace(/^Conflux /i, "").toUpperCase()} COMMUNITY`}</small></span>
+            <span><strong>{region.wordmark}</strong><small>{brandStrapline(region)}</small></span>
           </Link>
           <nav aria-label="Main navigation">
             <Link href={`/journal${suffix}`}>{region.journalLabel}</Link>

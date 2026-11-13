@@ -309,6 +309,15 @@ export const regions: Record<RegionKey, RegionalConfig> = {
   },
 };
 
+/** Strapline under the wordmark in the generic shell header: "CONFLUX <NAME> COMMUNITY".
+ *  Wordmarks that already carry the Conflux/Community framing (only HK today) have it
+ *  stripped first, so the composed line never repeats COMMUNITY. */
+export function brandStrapline(region: RegionalConfig): string {
+  if (region.key === "africa") return "CONFLUX AFRICA COMMUNITY";
+  const base = region.wordmark.replace(/^Conflux /i, "").replace(/ Community$/i, "");
+  return `CONFLUX ${base.toUpperCase()} COMMUNITY`;
+}
+
 export function resolveRegion(value: string | string[] | undefined): RegionKey {
   const candidate = Array.isArray(value) ? value[0] : value || process.env.NEXT_PUBLIC_REGION_SLUG;
   return candidate === "korea" || candidate === "latam" || candidate === "slovo" || candidate === "hk" ? candidate : "africa";
