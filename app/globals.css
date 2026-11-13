@@ -164,6 +164,11 @@ button, input { font: inherit; }
 .feed-card p { max-width: 520px; margin: 0; color: #596061; font-size: 12px; line-height: 1.65; }
 .feed-card b { position: absolute; right: 24px; bottom: 22px; font-size: 13px; }
 .feed-card:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+.feed-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 36px 0 12px; }
+.feed-pagination a, .feed-pagination span[aria-hidden] { min-width: 44px; padding: 13px 15px; border: 1px solid var(--ink); font: 700 12px var(--font-mono); text-transform: uppercase; text-decoration: none; text-align: center; }
+.feed-pagination a:hover { background: rgba(255,255,255,.55); }
+.feed-pagination a[aria-current="page"] { background: var(--region-accent); border-color: var(--region-accent); color: var(--region-on-accent); }
+.feed-pagination span[aria-hidden] { border: 0; min-width: 20px; padding-inline: 0; }
 
 .regional-modules { padding-block: 110px 125px; border-top: 1px solid currentColor; }
 .regional-modules .v2-section-head > span { color: #6d7475; font: 8px var(--font-mono); letter-spacing: .1em; }
