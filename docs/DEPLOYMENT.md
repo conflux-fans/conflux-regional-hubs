@@ -32,6 +32,14 @@ Use one deployment per regional domain and keep this single upstream repository.
 
 Give every regional deployment its own SQLite file and persistent volume. A SQLite file must not be mounted concurrently by multiple hosts or copied onto an ephemeral filesystem. If horizontal scaling or multiple writer instances become necessary, replace the database adapter with a client/server database before scaling out.
 
+## Africa website analytics
+
+GA4 measurement ID `G-1CYWE8YPL2` is reserved for the Africa community. The Google tag loads only in production Africa deployments (`NEXT_PUBLIC_REGION_SLUG=africa`) and only on the exact origin `https://kudihub.xyz`. Set `NEXT_PUBLIC_SITE_URL=https://kudihub.xyz` for that deployment. Other regional deployments, other domains, and preview/local hosts do not load this tag.
+
+Keep **Enhanced measurement enabled** in the GA4 web stream, including Page views → Show advanced settings → Page changes based on browser history events. The standard Google tag records the initial page view and Enhanced measurement records Next.js navigations automatically. The application sends no manual page-view events, avoiding duplicate counts. All pages on the Africa domain use the same tag. No custom wallet, account, or transaction events are sent; Google signals and advertising personalization are disabled.
+
+After deploying, visit the homepage and navigate to Journal and an article; confirm the visits in GA4 Realtime (standard reports can take 24–48 hours). Check the browser Network panel for `g/collect` requests with `tid=G-1CYWE8YPL2`. A fresh visit to another regional domain or localhost must not load `gtag/js` for this ID.
+
 ## Environment variables
 
 Copy `.env.example` into the deployment environment. Set `SQLITE_PATH` to the mounted persistent-disk path. Generate authentication values with `npm run auth:setup`. Supply credential hashes, the session secret, and provider credentials through the platform's secret manager, never committed files.
