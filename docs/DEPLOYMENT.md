@@ -32,6 +32,16 @@ Use one deployment per regional domain and keep this single upstream repository.
 
 Give every regional deployment its own SQLite file and persistent volume. A SQLite file must not be mounted concurrently by multiple hosts or copied onto an ephemeral filesystem. If horizontal scaling or multiple writer instances become necessary, replace the database adapter with a client/server database before scaling out.
 
+## Africa website analytics
+
+GA4 property `G-1CYWE8YPL2` is reserved for the Africa community. The tracker runs only in production Africa deployments (`NEXT_PUBLIC_REGION_SLUG=africa`) and only on the exact origin `https://kudihub.xyz`. Set `NEXT_PUBLIC_SITE_URL=https://kudihub.xyz` for that deployment. Other regional deployments and preview/local domains do not load the Google tag. Links with another `?region=` value are excluded too.
+
+The tracker sends one explicit `page_view` on the initial visit and each Next.js navigation to `/`, `/journal`, `/journal/*`, `/insights`, or `/stake`. Management, login, demo, questionnaire, and handoff pages are excluded. It keeps campaign and pagination parameters, drops other query parameters and fragments, and sends no custom wallet, account, or transaction events. Advertising personalization and Google signals are disabled.
+
+In GA4, open Admin → Data streams → the `kudihub.xyz` web stream → Enhanced measurement and turn **Enhanced measurement off**. The application handles page views itself; automatic browser-history page views would duplicate navigation counts and bypass regional filtering. The Google tag still provides the basic traffic, acquisition, device, and geographic reports.
+
+After deploying, visit the homepage and navigate to Journal and an article; confirm the visits in GA4 Realtime (standard reports can take 24–48 hours). Check the browser Network panel for `g/collect` requests with `tid=G-1CYWE8YPL2`. A fresh visit to another regional domain, localhost, or `https://kudihub.xyz/?region=latam` must not load `gtag/js` for this ID.
+
 ## Environment variables
 
 Copy `.env.example` into the deployment environment. Set `SQLITE_PATH` to the mounted persistent-disk path. Generate authentication values with `npm run auth:setup`. Supply credential hashes, the session secret, and provider credentials through the platform's secret manager, never committed files.

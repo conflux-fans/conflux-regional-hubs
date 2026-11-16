@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Literata, Manrope, JetBrains_Mono } from "next/font/google";
+import { AfricaAnalytics } from "./components/africa-analytics";
 import { deploymentRegion, regionHtmlLang, siteMetadata } from "./lib/page-metadata";
 import "./globals.css";
 import "./caudal.css";
@@ -21,5 +23,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang={regionHtmlLang(region)}><body className={bodyFonts}>{children}</body></html>;
+  return <html lang={regionHtmlLang(region)}><body className={bodyFonts}>{children}{process.env.NODE_ENV === "production" && region.key === "africa" && <Suspense fallback={null}><AfricaAnalytics /></Suspense>}</body></html>;
 }
