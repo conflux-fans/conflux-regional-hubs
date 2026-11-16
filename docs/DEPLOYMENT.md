@@ -34,13 +34,11 @@ Give every regional deployment its own SQLite file and persistent volume. A SQLi
 
 ## Africa website analytics
 
-GA4 property `G-1CYWE8YPL2` is reserved for the Africa community. The tracker runs only in production Africa deployments (`NEXT_PUBLIC_REGION_SLUG=africa`) and only on the exact origin `https://kudihub.xyz`. Set `NEXT_PUBLIC_SITE_URL=https://kudihub.xyz` for that deployment. Other regional deployments and preview/local domains do not load the Google tag. Links with another `?region=` value are excluded too.
+GA4 measurement ID `G-1CYWE8YPL2` is reserved for the Africa community. The Google tag loads only in production Africa deployments (`NEXT_PUBLIC_REGION_SLUG=africa`) and only on the exact origin `https://kudihub.xyz`. Set `NEXT_PUBLIC_SITE_URL=https://kudihub.xyz` for that deployment. Other regional deployments, other domains, and preview/local hosts do not load this tag.
 
-The tracker sends one explicit `page_view` on the initial visit and each Next.js navigation to `/`, `/journal`, `/journal/*`, `/insights`, or `/stake`. Management, login, demo, questionnaire, and handoff pages are excluded. It keeps campaign and pagination parameters, drops other query parameters and fragments, and sends no custom wallet, account, or transaction events. Advertising personalization and Google signals are disabled.
+Keep **Enhanced measurement enabled** in the GA4 web stream, including Page views → Show advanced settings → Page changes based on browser history events. The standard Google tag records the initial page view and Enhanced measurement records Next.js navigations automatically. The application sends no manual page-view events, avoiding duplicate counts. All pages on the Africa domain use the same tag. No custom wallet, account, or transaction events are sent; Google signals and advertising personalization are disabled.
 
-In GA4, open Admin → Data streams → the `kudihub.xyz` web stream → Enhanced measurement and turn **Enhanced measurement off**. The application handles page views itself; automatic browser-history page views would duplicate navigation counts and bypass regional filtering. The Google tag still provides the basic traffic, acquisition, device, and geographic reports.
-
-After deploying, visit the homepage and navigate to Journal and an article; confirm the visits in GA4 Realtime (standard reports can take 24–48 hours). Check the browser Network panel for `g/collect` requests with `tid=G-1CYWE8YPL2`. A fresh visit to another regional domain, localhost, or `https://kudihub.xyz/?region=latam` must not load `gtag/js` for this ID.
+After deploying, visit the homepage and navigate to Journal and an article; confirm the visits in GA4 Realtime (standard reports can take 24–48 hours). Check the browser Network panel for `g/collect` requests with `tid=G-1CYWE8YPL2`. A fresh visit to another regional domain or localhost must not load `gtag/js` for this ID.
 
 ## Environment variables
 
